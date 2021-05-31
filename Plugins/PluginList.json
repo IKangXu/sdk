@@ -1,0 +1,79 @@
+[
+   {
+  "id": "531df2ff-2e87-4c7e-b742-693a69b24668",
+  "title": "卷帘分析",
+  "name": "LayerSplict",
+  "type": "tool",
+  "js": "LayerSplict",
+  "time": "2018/8/23",
+  "author": "zhuwz",
+  "version": "V1.0",
+  "description": "卷帘分析",
+  "active": false,
+  "url": "http://localhost:9090/Plugins/LayerSplict/"
+}, {
+  "id": "a9aa46f6-3723-4d4f-bbe4-45",
+  "title": "影像调色",
+  "name": "ImageAdjust",
+  "type": "tool",
+  "js": "ImageAdjust", 
+  "time": "2018/8/23",
+  "author": "zhuwz",
+  "version": "V1.0",
+  "description": "影像调色",
+  "active": false,
+  "url": "http://localhost:9090/Plugins/ImageAdjust/"
+   
+} , {
+  "id": "a9aa46f6-3723-4d4f-bbe4-45",
+  "title": "显示帧率",
+  "name": "FrameRate",
+  "type": "tool",
+  "js": "FrameRate", 
+  "time": "2018/8/23",
+  "author": "zhuwz",
+  "version": "V1.0",
+  "description": "工具描述",
+  "active": false,
+  "url": "http://localhost:9090/Plugins/FrameRate/"
+   
+},{
+  "id": "a9aa46f6-3723-4d4f-bbe4-7eeb71b8a626",
+  "title": "显示帧率",
+  "name": "FrameRateWidget",
+  "type": "widget",
+  "js": "FrameRateWidget", 
+  "time": "2018/8/23",
+  "author": "zhuwz",
+  "version": "V1.0",
+  "description": "工具描述",
+  "active": false,
+  "url": "http://localhost:9090/Plugins/FrameRateWidget/"
+   
+}, {
+  "id": "a9aa46f6-3723-4d4f-bbe4-7eeb71b8a626",
+  "title": "影像调色",
+  "name": "ImageAdjustWidget",
+  "type": "widget",
+  "js": "ImageAdjustWidget", 
+  "time": "2018/8/23",
+  "author": "zhuwz",
+  "version": "V1.0",
+  "description": "影像调色",
+  "active": false,
+  "url": "http://localhost:9090/Plugins/ImageAdjustWidget/"
+   
+}, {
+  "id": "a9aa46f6-3-7eeb71b8a626",
+  "title": "剖面分析",
+  "name": "Profile",
+  "type": "tool",
+  "js": "Profile", 
+  "time": "2018/8/23",
+  "author": "zhuwz",
+  "version": "V1.0",
+  "description": "剖面分析",
+  "active": false,
+  "url": "http://localhost:9090/Plugins/Profile/"
+   
+}]

@@ -1,0 +1,185 @@
+#tooPanel {
+	background: rgb(62, 62, 62);
+	border-radius: 4px;
+	position: absolute;
+	width: 450px;
+	height: 320px;
+	font-family: '微软雅黑';
+	/* padding-bottom: 30px; */
+	right: 30px;
+	/* margin: -185px; */
+	bottom: 30px;
+	display: block !important;
+}
+
+
+#tooPanel table {
+	width: 100%;
+	height: 235px;
+	background: rgb(53, 53, 53);
+	padding: 10px;
+}
+
+#tooPanel .range {
+	/* width: 100%; */
+	height: 6px;
+	margin: 16px 0;
+	background-color: #e4e7ed;
+	border-radius: 25px;
+	position: relative;
+	cursor: pointer;
+	vertical-align: middle;
+	background-color: #ebeff4; 
+	height: 2px;
+	padding: 0;
+	border: none;
+	vertical-align: middle;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	-webkit-appearance: none;
+
+
+}
+#tooPanel .range::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	/*去除默认样式*/
+	/* cursor: default; */
+	top: 0;
+	height: 20px;
+	width: 20px;
+	transform: translateY(0px);
+	background: none repeat scroll 0 0 #5891f5;
+	background: #fff;
+	border-radius: 15px;
+	border: 4px solid #006eb3;
+	/* -webkit-box-shadow: 0 -1px 1px #fc7701 inset; */
+}
+ 
+
+
+#tooPanel .header {
+	height: 40px;
+	width: 100%;
+	font-size: 16px;
+	line-height: 40px;
+	border-bottom: 1px solid rgb(101, 101, 101);
+	background: rgb(62, 62, 62);
+	display: flex;
+
+}
+.header .title {
+	color: #fff;
+}
+.header>span:nth-child(1) {
+	float: left;
+	margin-left: 15px;
+	color: #fff;
+	font-weight: bold;
+}
+
+
+.header>span:nth-child(2):hover {
+	color: white
+}
+
+.header>span:nth-child(2)::before {
+	mainContent: "\2716";
+}
+
+#tooPanel .reset {
+	text-align: center;
+	line-height: 30px;
+	cursor: pointer;
+	font-size: 14px;
+	color: #fff;
+	width: 59px;
+	height: 30px;
+	border-radius: 2px;
+	background-color: #3a9cff;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto;
+}
+
+#tooPanel .reset:hover {
+	background: rgb(64, 158, 254)
+}
+
+.bottom {
+	/* width: 100%; */
+	height: 45px;
+	background: rgb(62, 62, 62);
+	position: relative;
+	/* top: 35px; */
+}
+
+#tooPanel .bottom>div:nth-child(2) {
+	margin-right: 20px;
+}
+
+.mainContent {
+	width: 100%;
+	height: 235px;
+	background: rgb(53, 53, 53)
+}
+
+.mainContent>div {
+	height: 40px;
+	width: 100%;
+	position: relative;
+	line-height: 40px;
+}
+
+.propImg {
+	vertical-align: middle;
+	margin: 0 10px;
+	width: 20px;
+}
+
+.propName {
+	display: inline-block;
+	width: 48px;
+	text-align: right;
+	color: #e8e8e8;
+	font-size: 12px;
+	font-family: '微软雅黑';
+	height: 40px;
+	line-height: 40px;
+}
+
+.mainContent .propValue1 {
+	display: inline-block;
+	width: 200px;
+	/* margin-top: 15px; */
+	/* top: 10px; */
+	position: relative;
+	top: 14px;
+	margin: 0 16px;
+}
+
+.mainContent .propValue2 {
+	display: inline-block;
+	width: 90px;
+}
+
+.propValue2>span {
+	background: rgb(62, 62, 62);
+	color: white;
+	border-right: 1px;
+	top: 1px;
+	border-left: 1px;
+}
+
+.propValue2>div>input {
+	background: rgb(52, 52, 52);
+	border: 1px solid #777;
+	color: white;
+}
+
+#closeImgAjust:hover {
+	cursor: pointer;
+
+}

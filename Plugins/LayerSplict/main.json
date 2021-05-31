@@ -1,0 +1,17 @@
+﻿{
+  "id": "1582c13a-58f3-4351-8cd9-53411534074c",
+  "title": "卷帘",
+  "name": "LayerSplict",
+  "type": "tool",
+  "js": "LayerSplict",
+  "icon": {
+    "color": "#f1f1f1",
+    "name": "iconfont icon-duibi"
+  },
+  "time": "2018/8/23",
+  "author": "zhuwz",
+  "version": "V1.0",
+  "description": "工具描述",
+  "checked": true,
+  "active": false
+}
