@@ -9,5 +9,5 @@ if(scope.CTMap) {
     scope['CTMap'] = CTMap;
 }
 
-scope['Cesium'] = CTMap;
+// scope['Cesium'] = CTMap;
  

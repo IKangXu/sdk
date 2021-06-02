@@ -96,7 +96,7 @@
     "doc": "node ./config/jsdoc.js",
     "start": "webpack --config ./config/webpack.debug.config.js && node server.js",
     "test": "karma start",
-    "release": "webpack --config ./config/webpack.config.js ",
+    "release": "webpack --config ./config/webpack.config.js && node server.js",
     "build": "webpack --config ./config/webpack.debug.config.js"
   }
 }

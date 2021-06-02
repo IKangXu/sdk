@@ -10,7 +10,7 @@ module.exports = {
     ],
     output: {
         path: path.join(__dirname, '../dist/'),
-        filename: 'CTMapb.js',
+        filename: 'CTMap.min.js',
         publicPath: '/dist/'
     },
     module: {
