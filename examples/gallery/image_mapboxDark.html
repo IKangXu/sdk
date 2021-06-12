@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>mapBox地图</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var mapbox_street = new CTMap.MapboxImageryProvider({
+                mapId: 'mapbox.dark',
+                accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA'
+            });
+            viewer.scene.globe.enableLighting = false
+            var layers= viewer.scene.imageryLayers;
+            layers.addImageryProvider(mapbox_street);
+            Sandcastle.finishedLoading();
+        }
+
+//Sandcastle_End
+    </script>
+</body>

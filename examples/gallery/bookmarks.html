@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+	<title>飞行浏览</title>
+	<link href="../../dist/Widgets/widgets.css" rel="stylesheet">
+
+	<script type="text/javascript" src="./js/require.min1.js" data-main="./js/main1"></script>
+	<script type="text/javascript" src="./js/Sandbox1.js"></script>
+	<style>
+		html,
+		body,
+		#spaceContainer {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+
+		#toolbar {
+			margin: 5px;
+			padding: 2px 5px;
+			position: absolute;
+			left: 0px;
+			top: 0px;
+		}
+
+		#bkList {
+			margin: 5px;
+			padding: 2px 5px;
+			position: absolute;
+			left: 10px;
+			top: 60px;
+			width: 350px;
+			height: 100%;
+			background: #000000a6;
+			color: white;
+			overflow: auto;
+		}
+
+		pre {
+			outline: 1px solid #ccc;
+			padding: 5px;
+			margin: 5px;
+		}
+		.capture{
+			position: absolute;
+			height: 300px;
+			width: 400px;
+			right: 20px;
+			bottom: 50px;
+			border: 1px solid #ece8e8;
+		}
+ 
+	</style>
+</head>
+
+<body>
+	<div id="spaceContainer"></div>
+	<div id="toolbar"></div>
+
+	<pre id="bkList">
+	</pre>
+
+	 
+
+	<script>
+		//Sandbox_Begin
+		function onload() {
+
+			var googleMapUrl = "http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}";
+            var baseLayer = new CTMap.UrlTemplateImageryProvider({
+                url: googleMapUrl
+			});
+			var terrainProvider = new Cesium.CesiumTerrainProvider({
+				url :`${terrainUrl}`
+			});
+ 
+            var earth = new CTMap.Viewer('spaceContainer', {
+				imageryProvider: baseLayer,
+				terrainProvider: terrainProvider
+            });
+			
+
+			let bookMarkMgr = earth.project.bookmarkManager;
+			bookMarkMgr.relayTime = 0;
+
+			let itemindex = 0;
+			let currentGroup, currentItem;
+
+			function updateList(){
+				document.getElementById("bkList").innerText= JSON.stringify(bookMarkMgr.itemList, null, 2);
+			}
+
+			Sandbox.addDefaultToolbarButton('添加书签组', function () {
+				currentGroup = bookMarkMgr.addGroup(`默认书签组`);
+				updateList();
+			});
+
+
+			Sandbox.addDefaultToolbarButton('添加书签', function () {
+				currentItem = bookMarkMgr.addItem(currentGroup.id, `书签${itemindex}`);
+				itemindex++;
+				updateList();
+			});
+			Sandbox.addDefaultToolbarButton('删除书签', function () {
+				bookMarkMgr.removeItem(currentGroup.id, currentItem.id);
+				updateList();
+			});
+			Sandbox.addDefaultToolbarButton('飞行定位', function () {
+				bookMarkMgr.flyToItem(currentItem);
+			});
+			Sandbox.addDefaultToolbarButton('清空书签', function () {
+				bookMarkMgr.removeAll();
+				updateList();
+			});
+
+			Sandbox.addDefaultToolbarButton('开始飞行', function () {
+				bookMarkMgr.playGroup(currentGroup.id);
+			});
+
+			Sandbox.addDefaultToolbarButton('停止飞行', function () {
+				bookMarkMgr.stopPlay();
+			});
+
+			Sandbox.addDefaultToolbarButton('导出图片', function () {				
+				var image = earth.exportImage();
+				console.log(image);
+				document.getElementById("capture").src = image;
+			});
+ 
+
+		}
+
+		//Sandbox_End
+	</script>
+</body>

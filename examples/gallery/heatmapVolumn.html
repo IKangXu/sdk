@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+       
+        <script src="../thirdParty/turf.min.js" ></script>       
+        <script src="../thirdParty/jquery.min.js" ></script> 
+        <script src="../thirdParty/heatmap.min.js" ></script>  
+         <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+        
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+
+       
+    </head>
+ 
+
+    <body  >
+
+        <!-- <div id="mask" class="signmask" onclick="removeMask()"></div> -->
+
+        <div id="earthContainer" class="cesium-container"></div>
+
+         <div class="heatmap" style="overflow:hidden;width:840px;height:400px;display:none">
+            <div class="heatmap-canvas" width="800" height="400"></div>
+        </div> 
+
+        <script>
+
+        function onload() {
+                initMap();
+
+                Sandcastle.finishedLoading();
+        }
+            function removeMask() {
+                $("#mask").remove()
+            }
+            var viewer;
+           
+		   function initMap() {
+            var esri = new Cesium.ArcGisMapServerImageryProvider({
+                url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+            });
+			 
+				var baseLayer = new Cesium.UrlTemplateImageryProvider({
+					url: esri
+				});
+				
+	 
+				viewer= new Cesium.Viewer('earthContainer', {
+					imageryProvider: baseLayer 
+				});
+				
+				
+				viewer.camera.flyTo({
+					destination : Cesium.Cartesian3.fromDegrees(117.235343, 31.794428, 2351.0),
+					orientation : {
+						heading : Cesium.Math.toRadians(1.6),
+						pitch : Cesium.Math.toRadians(-28.8),
+						roll : 0.0
+					}
+				
+				});
+				     
+				 initWork();
+            }
+           
+		   function getRandomPoints(e, t) {
+                for (var a = [], n = turf.randomPoint(e, {
+                    bbox: t
+                }).features, i = 0; i < n.length; i++) {
+                    var r = n[i].geometry.coordinates
+                      , o = Math.floor(50000 * Math.random());
+                    a.push({
+                        x: r[0],
+                        y: r[1],
+                        value: o
+                    })
+                }
+                return a
+            }
+           
+		   function initWork() {
+                var a = [];
+                $("#chkUnderground").change(function() {
+                    for (var e = $(this).is(":checked"), t = 0; t < a.length; t++) {
+                        a[t].show = e
+                    }
+                });
+                var e = 117.226189
+                  , t = 117.245831
+                  , n = 31.828858
+                  , i = 31.842967
+                  , r = getRandomPoints(1000, [e, n, t, i])
+                  , o = Cesium.Rectangle.fromDegrees(e, n, t, i)
+                  , s = turf.radiansToLength(o.width, "metres")
+                  , c = turf.radiansToLength(o.height, "metres")
+                  , m = document.body.clientWidth / s;
+                s = document.body.clientWidth,
+                c *= m,
+                $(".heatmap").css({
+                    width: s + "px",
+                    height: c + "px"
+                }),
+                $(".heatmap-canvas").css({
+                    width: s + "px",
+                    height: c + "px"
+                });
+                for (var u = [], l = 0, p = 0; p < r.length; p++) {
+                    var d = r[p]
+                      , g = Cesium.Math.toRadians(d.x - e)
+                      , h = Cesium.Math.toRadians(i - d.y);
+                    g = Math.round(turf.radiansToLength(g, "metres") * m),
+                    h = Math.round(turf.radiansToLength(h, "metres") * m),
+                    u.push({
+                        x: g,
+                        y: h,
+                        value: d.value
+                    }),
+                    l = Math.max(l, d.value),
+                    a.push(viewer.entities.add({
+                        name: "点" + p,
+                        position: Cesium.Cartesian3.fromDegrees(d.x, d.y),
+                        point: {
+                            color: new Cesium.Color.fromCssColorString("#ffff00"),
+                            pixelSize: 6,
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                        },
+                        data: d,
+                        show: !1
+                    }))
+                }
+                var v = {
+                    max: l,
+                    data: u
+                };
+                h337.create({
+                    container: document.querySelector(".heatmap"),
+                    radius: 50,
+                    blur: .85,
+                    gradient: {
+                        .25: "rgb(0,0,255)",
+                        .55: "rgb(0,255,0)",
+                        .85: "yellow",
+                        1: "rgb(255,0,0)"
+                    }
+                }).setData(v);
+                var f = document.getElementsByClassName("heatmap-canvas")[1].toDataURL("image/png");
+                h337.create({
+                    container: document.querySelector(".heatmap"),
+                    radius: 80,
+                    blur: 1,
+                    gradient: {
+                        .25: "rgb(0,0,0)",
+                        .55: "rgb(140,140,140)",
+                        .85: "rgb(216,216,216)",
+                        1: "rgb(255,255,255)"
+                    }
+                }).setData(v);
+                var C = document.getElementsByClassName("heatmap-canvas")[2].toDataURL("image/png")
+                  , b = Cesium.RenderState.fromCache({
+                    cull: {
+                        enabled: !0
+                    },
+                    depthTest: {
+                        enabled: !0
+                    },
+                    stencilTest: {
+                        enabled: !0,
+                        frontFunction: Cesium.StencilFunction.ALWAYS,
+                        frontOperation: {
+                            fail: Cesium.StencilOperation.KEEP,
+                            zFail: Cesium.StencilOperation.KEEP,
+                            zPass: Cesium.StencilOperation.REPLACE
+                        },
+                        backFunction: Cesium.StencilFunction.ALWAYS,
+                        backOperation: {
+                            fail: Cesium.StencilOperation.KEEP,
+                            zFail: Cesium.StencilOperation.KEEP,
+                            zPass: Cesium.StencilOperation.REPLACE
+                        },
+                        reference: 2,
+                        mask: 2
+                    },
+                    blending: Cesium.BlendingState.ALPHA_BLEND
+                });
+                viewer.scene.primitives.add(new Cesium.Primitive({
+                    geometryInstances: new Cesium.GeometryInstance({
+                        geometry: new Cesium.RectangleGeometry({
+                            rectangle: o,
+                            vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
+                            height: 20,
+                            granularity: Math.PI / 36e5,
+                            outlineColor: Cesium.Color.RED,
+                            rotation: 0
+                        })
+                    }),
+                    appearance: new Cesium.EllipsoidSurfaceAppearance({
+                        aboveGround: !0,
+                        renderState: b,
+                        material: new Cesium.Material({
+                            fabric: {
+                                uniforms: {
+                                    image: f,
+                                    repeat: new Cesium.Cartesian2(1,1),
+                                    color: new Cesium.Color(1,1,1,1),
+                                    bumpMap: C
+                                },
+                                components: {
+                                    diffuse: "texture2D(image, fract(repeat * materialInput.st)).rgb * color.rgb",
+                                    alpha: "texture2D(image, fract(repeat * materialInput.st)).a * color.a"
+                                }
+                            },
+                            translucent: function(e) {
+                                return e.uniforms.color.alpha < 1
+                            }
+                        }),
+                        vertexShaderSource: "attribute vec3 position3DHigh;\n                       attribute vec3 position3DLow;\n                       attribute vec2 st;\n                       attribute float batchId;\n                       uniform sampler2D bumpMap_3;\n                       varying vec3 v_positionMC;\n                       varying vec3 v_positionEC;\n                       varying vec2 v_st;\n                       void main()\n                       {\n                           vec4 p = czm_computePosition();\n                           v_positionMC = position3DHigh + position3DLow;\n                           v_positionEC = (czm_modelViewRelativeToEye * p).xyz;\n                           v_st = st;\n                           vec4 color = texture2D(bumpMap_3, v_st);\n                           float centerBump = distance(vec3(0.0),color.rgb);\n                           vec3 upDir = normalize(v_positionMC.xyz);\n                           vec3 disPos = upDir * centerBump * 40.0;\n                           p +=vec4(disPos,0.0);\n                           gl_Position = czm_modelViewProjectionRelativeToEye * p;\n                       }"
+                    })
+                }))
+            }
+            
+        
+        
+        
+        
+        
+        </script>
+    </body>
+</html>

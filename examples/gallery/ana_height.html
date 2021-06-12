@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>城市模型</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'>
+            <tbody>
+                <tr>
+                    <td>高度:</td>
+                    <td>
+                        <input type="range" id="t_heightval"  min="1" max="400" step="0.5"
+                            value="400" style="width: 220px;vertical-align: middle;">
+                        <input type="text" id="t_heighttxt"  size="2" value="400">
+                    </td>
+                    <td>米</td>
+                </tr>
+            </tbody>
+    </div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+            let earth = viewer;
+
+
+            viewer.scene.globe.depthTestAgainstTerrain = true;
+            viewer.terrainProvider =  new CTMap.CesiumTerrainProvider({
+                url:dataUrls.baseTerrain
+            });
+            
+
+			var qxmoUrl = dataUrls.dataHome+"/building_texture/tileset.json";
+			var tileset = new CTMap.Cesium3DTileset({
+				url: qxmoUrl
+			});
+
+            
+			earth.scene.primitives.add(tileset);
+			earth.flyTo(tileset);
+            tileset.readyPromise.then(function (tileset) {
+                 var cartographic = CTMap.Cartographic.fromCartesian(tileset.boundingSphere.center);
+                    var surface = CTMap.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, 0.0);
+                    var offset = CTMap.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, 90);
+                    var translation = CTMap.Cartesian3.subtract(offset, surface, new CTMap.Cartesian3());
+                    tileset.modelMatrix = CTMap.Matrix4.fromTranslation(translation);
+               
+               
+               
+            }).otherwise(function (error) {
+                console.log(error)
+            })
+
+		 
+            let pointList1 = [
+                115.6015021460666,40.31828184126036,-90338.37694526803
+                ,115.52766136173027,39.47263312100463,-90221.67673961609
+                ,117.37517874101773,39.45474903155322,-90212.59458188602
+                ,117.1960292440533,40.33727736275472,-90423.42664143951
+                ,116.31960059005517,40.3363142003522,-90722.39157449824                 
+            ];
+             
+            let scene = earth.scene;
+
+            var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+            handler.setInputAction(function (event) {
+                var CarPosition = scene.pickPosition(event.position);
+                var cartographic = earth.scene.globe.ellipsoid.cartesianToCartographic(
+                    CarPosition
+                );
+                let lat = Cesium.Math.toDegrees(cartographic.latitude);
+                let lon = Cesium.Math.toDegrees(cartographic.longitude);
+                let height = cartographic.height;
+                console.log("(" + lon + "," + lat + "," + height + ")");
+                earth.entities.add({
+                    position: CarPosition,
+                    point: {
+                        color: Cesium.Color.YELLOW,
+                        pixelSize: 10
+                    }
+                });
+            }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+            function startAnalyze() {
+                heightAnalyze.setPolygon(pointList1);
+                return heightAnalyze.open();
+            }
+
+            function stopAnalyze() {
+                return heightAnalyze.close();
+            }
+
+            function setColor() {
+                heightAnalyze.color = "rgba(0,255,0,0.5)";
+            }
+
+            function setPolygon() {
+                heightAnalyze.setPolygon(pointList2);
+            }
+            Sandcastle.addToolbarButton('开始分析', startAnalyze);
+            Sandcastle.addToolbarButton('修改颜色', setColor);
+            Sandcastle.addToolbarButton('修改范围', setPolygon);
+			Sandcastle.addToolbarButton('结束分析', stopAnalyze);
+			
+
+
+   			let heightAnalyze = viewer.analysis.heightAnalyze;
+            window.heightAnalyze = heightAnalyze;
+            let height = heightAnalyze.height;
+
+
+            let heightval = document.getElementById("t_heightval");
+            let heighttxt = document.getElementById("t_heighttxt");
+            let self = this;
+
+
+            function changeHeight(newVal) {
+                let newHeight = Number(this.value);
+                heighttxt.value = newHeight;
+                heightval.value = newHeight;
+                heightAnalyze.height = newHeight;
+
+            }
+
+            heightval.onchange = changeHeight;
+            heighttxt.onchange = changeHeight;
+
+             
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

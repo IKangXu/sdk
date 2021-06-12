@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>三维电力场站信息可视化平台</title>
+    <script type="text/javascript" src="./js/thirdparty.js"></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+
+
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+
+
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            viewer.scene.globe.depthTestAgainstTerrain = true;
+            viewer.navigation.mousePosition.show = true;
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+            var baseUrl = "http://localhost/Data/tileData/";
+
+            var tileset = new Cesium.Cesium3DTileset({
+                url: 'http://localhost/Data/0401/52-53/tileset.json'
+            });
+            viewer.scene.primitives.add(tileset);
+
+            var mat1 = [0.9877085666562425, -0.1055715909068698, 0.11526676254351939, 0, 0.10369770590365857,
+                0.9943621651375488, 0.022151079731797307, 0, -0.11695543229876093, -0.009925912369076695,
+                0.9930875606508477, 0, -107934.29887908441, 2999480.79861001, -3553793.5533628524, 1
+            ];
+            tileset.readyPromise.then(function (tileset) {
+                tileset.modelMatrix = Cesium.Matrix4.unpack(mat1);
+                viewer.flyTo(tileset); 
+            });
+
+            Sandcastle.addToolbarButton('设置样式', function () {
+                tileset.maxVal=1020;
+            });
+
+
+            Sandcastle.finishedLoading();
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

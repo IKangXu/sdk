@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>倾斜模型单体化</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+
+            // 加载三维模型 
+            var tilesetModel = viewer.scene.primitives.add(new CTMap.Cesium3DTileset({
+                url: dataUrls.dataHome+'model_qx/tileosgb/tileset.json'
+            }))
+            viewer.zoomTo(tilesetModel);
+
+            var selected = {
+                feature: undefined,
+                originalColor: new CTMap.Color()
+            };
+
+            let baseHeight = 424;
+            let offset = 7.1;
+            let extent = [108.9591, 34.2195, 108.9598, 34.2201];
+            let originalColor = CTMap.Color.WHITE.withAlpha(0.01);
+            let highlightedColor = CTMap.Color.YELLOW.withAlpha(0.7);
+            // 数据
+            let nameObject = [{
+                    text: "七层是大雁塔的最高处，可向四周远眺，古城四方四景尽收眼底。七层的塔顶，刻有圣洁的莲花藻井，中央为一硕大莲花，花瓣上共有14个字，连环为诗句，可有数种念法",
+                    id: 'floor7',
+                    name: "大雁塔第七层"
+                },
+                {
+                    text: "六层悬挂有唐代五位诗人诗会佳作。天宝十一年（752年）晚秋，诗圣杜甫与岑参、高适、薛据、储光羲相约同登大雁塔，凭栏远眺触景生情，酒筹助兴赋诗述怀，个个才华横溢，诗句出神入化。每人赋五言长诗一首，流传千古不衰。",
+                    id: 'floor6',
+                    name: "大雁塔第六层"
+                },
+                {
+                    text: "陈列着一通释迦如来足迹碑，该碑是依据唐代玄奘法师晚年于铜川玉华寺请石匠李天诏所刻制的佛足造像复制而成。上有诸多佛教图案，内涵十分丰富，素有“见足如见佛，拜足如拜佛”之说法",
+                    id: 'floor5',
+                    name: "大雁塔第六层"
+                },
+                {
+                    text: "四层塔室内供奉着两片长约40厘米、宽约7厘米的贝叶经，上面刻写着密密麻麻的梵文，据说现今全世界认识该文字的学者不足10位，其珍贵神秘可见一斑",
+                    id: 'floor4',
+                    name: "大雁塔第六层"
+                },
+                {
+                    text: "三层塔室的正中，安置一木座。座上存有珍贵的佛舍利及大雁塔模型。有关舍利的由来有着一段故事，系印度玄奘寺住持悟谦法师所赠，属一乘佛宝。",
+                    id: 'floor3',
+                    name: "大雁塔第六层"
+                },
+                {
+                    text: "二层的塔室内，供奉着一尊铜质鎏金的佛祖释迦牟尼佛像，系明初宝贵文物，被视为“定塔之宝”。到此游览的游客争先礼拜瞻仰。",
+                    id: 'floor2',
+                    name: "大雁塔第二层"
+                },
+                {
+                    text: "一层塔内，还设有古塔常识及中国名塔照片展，展示了佛塔的起源与发展，佛塔的结构和分类。塔座登道的东侧墁砖处，平卧有一通“玄奘取经跬步足迹石”，所刻图案生动地反映了玄奘当年西天取经的传说故事，以及他万里征途、始于跬步的奋斗精神。",
+                    id: 'floor1',
+                    name: "大雁塔第一层"
+                },
+                {
+                    text: "底层南门洞两侧嵌置碑石，西龛是由右向左书写，唐太宗李世民亲自撰文",
+                    id: 'floor0',
+                    name: "大雁塔基座"
+                },
+            ]
+            let index = 0;
+
+            for (let item of nameObject) {
+                let height = baseHeight + index * offset;
+                let extrudedHeight = index == 7 ? height + offset * 2 : height + 100;
+                var rectangle = new CTMap.RectangleGeometry({
+                    ellipsoid: CTMap.Ellipsoid.WGS84,
+                    rectangle: CTMap.Rectangle.fromDegrees(extent[0], extent[1], extent[2], extent[3]),
+                    height: height,
+                    extrudedHeight: extrudedHeight
+                });
+                var geometry = CTMap.RectangleGeometry.createGeometry(rectangle);
+                addVector(geometry, item.id);
+
+                index++;
+            }
+
+            function addVector(geometry, id) {
+                viewer.scene.primitives.add(new CTMap.ClassificationPrimitive({
+                    geometryInstances: new CTMap.GeometryInstance({
+                        geometry: geometry,
+                        attributes: {
+                            color: Cesium.ColorGeometryInstanceAttribute.fromColor(originalColor),
+                            show: new CTMap.ShowGeometryInstanceAttribute(true)
+                        },
+                        id: id
+                    }),
+                    classificationType: CTMap.ClassificationType.CESIUM_3D_TILE
+                }));
+
+            }
+
+
+
+            // HTML 
+            // 鼠标移动显示的盒子
+            var nameOverlay = document.createElement('div');
+            viewer.container.appendChild(nameOverlay);
+
+            nameOverlay.style.display = 'none';
+            nameOverlay.style.position = 'absolute';
+            nameOverlay.style.bottom = '0';
+            nameOverlay.style.left = '0';
+            // nameOverlay.style['pointer-events'] = 'none';
+            // nameOverlay.style.padding = '4px';
+            // nameOverlay.style.backgroundColor = '#2592FC';
+            // nameOverlay.style.color = 'black';
+            var selectedEntity = new Cesium.Entity();
+            selectedEntity.show = false
+            var highlighted = {
+                feature: undefined,
+                originalColor: new Cesium.Color()
+            };
+            //鼠标点击选中显示的盒子
+            var nameOverlay1 = document.createElement('div');
+            viewer.container.appendChild(nameOverlay1);
+            nameOverlay1.style.display = 'none';
+            nameOverlay1.style.position = 'absolute';
+            nameOverlay1.style.bottom = '250' + 'px';
+            nameOverlay1.style.left = '250' + 'px';
+
+            let testGeo;
+
+
+            //鼠标移动事件
+            viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
+
+                // 取消高亮
+                if (Cesium.defined(highlighted.feature)) {
+                    highlighted.feature.color =Cesium.ColorGeometryInstanceAttribute.toValue(originalColor) ;
+                    highlighted.feature = undefined;
+                }
+                // 拾取要素
+                var pickedFeature = viewer.scene.pick(movement.endPosition);
+
+                if (!Cesium.defined(pickedFeature) || !Cesium.defined(pickedFeature.primitive)) {
+                    nameOverlay.style.display = 'none';
+                    nameOverlay1.style.display = 'none';
+                    return;
+                }
+                // 设置提示名称
+                let pickedGeo = pickedFeature.primitive.getGeometryInstanceAttributes(pickedFeature.id);
+                if (!pickedGeo) {
+                    nameOverlay.style.display = 'none';
+                    nameOverlay1.style.display = 'none';
+                    return;
+
+                }
+
+                let a = 4
+                nameOverlay.style.display = 'block';
+                nameOverlay.style.bottom = viewer.canvas.clientHeight - movement.endPosition.y + 'px';
+                nameOverlay.style.left = movement.endPosition.x + a + 'px';
+                 
+                for (let item of nameObject) {
+                    if (item.id === pickedFeature.id) {
+
+                        nameOverlay.innerHTML = `<div class="box">
+                            <span class="clearfix span1">${item.name} <i class="i clearfix"></i></span>
+                            <ul> 
+                                <li>
+                                    ${item.text}
+                                </li>
+                            </ul>
+                        </div>`  
+                    }
+                }
+                //高亮要素
+                if (pickedFeature !== selected.feature) {
+                    highlighted.feature = pickedGeo;
+                    Cesium.Color.clone(pickedFeature.color, highlighted.originalColor);
+                    pickedGeo.color = Cesium.ColorGeometryInstanceAttribute.toValue(highlightedColor);
+                    testGeo = pickedGeo;
+                }
+            }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+
+             Sandcastle.addToolbarButton('停止测量', function () {
+                testGeo = Cesium.ColorGeometryInstanceAttribute.toValue(originalColor);
+            });
+            Sandcastle.finishedLoading();
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

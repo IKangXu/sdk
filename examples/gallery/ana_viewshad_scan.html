@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>可视域分析</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+        #options {
+            background: #0000009c;
+            color: white;
+            border: 1px solid #444;
+            color: #edffff;
+            padding: 10px;
+            width: 268px;
+            margin: 10px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'>
+
+    </div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+
+
+
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer', {
+                shouldAnimate: true,
+            });
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+            viewer.scene.globe.depthTestAgainstTerrain = true;
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            var centerPos = [108.9594, 34.2195, 39.05];
+            var centerCar3 = CTMap.Cartesian3.fromDegrees(centerPos[0], centerPos[1], centerPos[2]);
+            var isInit =false;
+
+            // 加载三维模型灰模
+            var tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                url: dataUrls.dataHome+'model_qx/tileosgb/tileset.json'
+            }))
+
+            tileset.readyPromise.then(function (tileset) {
+                //调整位置 
+                var m = CTMap.Transforms.eastNorthUpToFixedFrame(centerCar3);
+                tileset._root.transform = m;
+
+            }).otherwise(function (error) {
+                console.log(error)
+            })
+            viewer.flyTo(tileset)
+
+            var viewshad = viewer.analysis.viewshedAnalyze;
+            //viewshad.showDome = false;
+            //viewshad.showDistance = false;
+
+            var start = Cesium.JulianDate.fromDate(new Date(2015, 2, 25, 16));
+            var stop = Cesium.JulianDate.addSeconds(start, 360, new Cesium.JulianDate());
+ 
+
+            function computeCirclularFlight(lon, lat, radius) {
+
+                var property = new Cesium.SampledPositionProperty();
+
+                property.setInterpolationOptions({
+                    interpolationDegree: 5,
+                    interpolationAlgorithm: Cesium.LagrangePolynomialApproximation
+                });
+                for (var i = 0; i <= 360; i += 45) {
+                    var radians = Cesium.Math.toRadians(i);
+                    var time = Cesium.JulianDate.addSeconds(start, i, new Cesium.JulianDate());
+                    var position = Cesium.Cartesian3.fromDegrees(lon + (radius * 1.5 * Math.cos(radians)), lat + (
+                        radius * Math.sin(radians)), 500 );
+                    property.addSample(time, position);
+
+                    //Also create a point for each sample we generate.
+                    viewer.entities.add({
+                        position: position,
+                        point: {
+                            pixelSize: 8,
+                            color: Cesium.Color.RED,
+                            outline:false
+                            //outlineColor: Cesium.Color.WHITE,
+                            //outlineWidth: 3
+                        }
+                    });
+                }
+                return property;
+            }
+
+
+            function addFlight() {
+                Cesium.Math.setRandomNumberSeed(3);
+
+                var position = computeCirclularFlight(centerPos[0], centerPos[1], 0.001);
+                var centerPt = CTMap.Cartesian3.fromDegrees(centerPos[0], centerPos[1], 480);
+
+                function getPosition(time){
+                    var p2 = position.getValue(time);  
+                    var cartographic=viewer.scene.globe.ellipsoid.cartesianToCartographic(p2);
+                    var lat=Cesium.Math.toDegrees(cartographic.latitude);
+                    var lng=Cesium.Math.toDegrees(cartographic.longitude);
+                    var alt=cartographic.height-3;
+                    var newPos = Cesium.Cartesian3.fromDegrees(lng,lat,alt);
+                    CTMap.Cartesian3.fromDegrees(centerPos[0], centerPos[1], centerPos[2]); 
+                    viewshad.setPosition(newPos,centerPt);
+                    return p2;
+                }
+ 
+
+                //设置时钟
+                viewer.clock.startTime = start.clone();
+                viewer.clock.stopTime = stop.clone();
+                viewer.clock.currentTime = start.clone();
+                viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
+                viewer.clock.multiplier = 10;
+
+                var availability =  new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({
+                        start: start,
+                        stop: stop
+                    })]);
+                    
+                //飞机
+                viewer.entities.add({
+                    availability:  availability,
+                    position: new Cesium.CallbackProperty(getPosition,false),
+                    orientation: new Cesium.VelocityOrientationProperty(position),
+                    model: {
+                        uri: dataUrls.dataHome+'model_gltf/Cesium_Air.glb',
+                        minimumPixelSize: 64
+                    } 
+                });
+                //飞行路径
+                viewer.entities.add({
+                    availability:  availability,
+                    position: position,                  
+                    path: {
+                        resolution: 1,
+                        material:  Cesium.Color.LIME,
+                        width: 5
+                    }
+                });
+
+                //中心点
+                viewer.entities.add({                   
+                    position: centerPt,                  
+                    point: {
+                            pixelSize: 8,
+                            color: Cesium.Color.RED,
+                            outline:false
+                        }
+                });
+
+                isInit = true;
+            }
+
+
+            Sandcastle.addToolbarButton('飞行模拟', function () {
+                viewer.entities.removeAll();
+                addFlight();
+                viewer.clock.shouldAnimate = true;
+            });
+
+            
+            Sandcastle.addToolbarButton('暂停/开始模拟', function () {
+                viewer.clock.shouldAnimate = !viewer.clock.shouldAnimate;
+            });
+
+            Sandcastle.addToolbarButton('停止模拟', function () {
+                viewer.clock.shouldAnimate = false;
+                viewer.entities.removeAll();
+                viewshad.close();
+            });
+
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

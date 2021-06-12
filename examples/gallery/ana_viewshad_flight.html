@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>可视域分析</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+        #options {
+            background: #0000009c;
+            color: white;
+            border: 1px solid #444;
+            color: #edffff;
+            padding: 10px;
+            width: 268px;
+            margin: 10px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'>
+
+    </div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+ 
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer', {
+                shouldAnimate: true,
+            });
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            // 加载三维模型灰模
+            var tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                url: dataUrls.dataHome+'building_texture/tileset.json'
+            }))
+
+            tileset.readyPromise.then(function (tileset) {
+                viewer.scene.primitives.add(tileset);
+                var pos = new CTMap.Cartesian3(-2175282.798096478, 4393329.870820272, 4066564.16690707);
+                viewer.camera.flyTo({
+                    destination: pos,
+                    orientation: {
+                        heading: 5.048700612650428,
+                        pitch: -0.17453292365134399,
+                        roll: 6.280018983393266
+                    }
+                });
+
+            }).otherwise(function (error) {
+                console.log(error)
+            })
+
+            var viewshad = viewer.analysis.visibilityAnalyze;
+            var modelEntity, samplePos;
+            //viewshad.showDome = false;
+            var distance = 150;
+            var lineData = [-2178472.1503996626, 4388396.919359643, 4070039.53913032, -2180011.073904667,
+                4387602.954760594, 4070071.321063655, -2179440.854375407, 4386613.513164643, 4071433.807960764, -
+                2178773.4901897986, 4386949.880810984, 4071428.609613223, -2179078.391324606, 4387497.079082163,
+                4070680.764899191, -2178608.6310215886, 4387735.471589396, 4070675.288243887, -2178571.546629965,
+                4387755.052690153, 4070674.038453772, -2178263.9897818053, 4387202.126741017, 4071429.423785422
+            ];
+
+
+            let pointList = CTMap.Cartesian3.unpackArray(lineData, []);
+            let lonlats = [];
+            for(let item of pointList){
+                var ellipsoid=viewer.scene.globe.ellipsoid; 
+                var cartographic=ellipsoid.cartesianToCartographic(item);
+                var lat=Cesium.Math.toDegrees(cartographic.latitude);
+                var lng=Cesium.Math.toDegrees(cartographic.longitude);
+
+                lonlats.push([lng,lat]);
+            }
+
+            console.log(lonlats);
+           
+            
+ 
+
+
+            function setClock() {
+                let times = samplePos._property._times;
+                let start = times[0];
+                let end = times[times.length - 1];
+                viewer.clock.startTime = start;
+                viewer.clock.stopTime = end;
+                viewer.clock.currentTime = start;
+                viewer.clock.clockRange = CTMap.ClockRange.LOOP_STOP;
+                viewer.clock.multiplier = viewer.clock.multiplier / 6;
+                viewer.clock.shouldAnimate = true;
+            }
+
+            function loadTaskRout() {
+                let dt = new Date();
+                dt.setHours(12);
+                let start = CTMap.JulianDate.fromDate(dt);
+                samplePos = new CTMap.SampledPositionProperty();
+                samplePos.backwardExtrapolationDuration = 2;
+                samplePos.backwardExtrapolationType = CTMap.ExtrapolationType.HOLD;
+                samplePos.forwardExtrapolationType = CTMap.ExtrapolationType.HOLD;
+                let orientation = new CTMap.VelocityOrientationProperty(samplePos);
+                let result = [];
+                let pointList = CTMap.Cartesian3.unpackArray(lineData, result);
+
+
+                function getPosition(time) {
+                    var p2 = samplePos.getValue(time);
+                    var cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(p2);
+                    var lat = Cesium.Math.toDegrees(cartographic.latitude);
+                    var lng = Cesium.Math.toDegrees(cartographic.longitude);
+                    var alt = cartographic.height + 5;
+                    var newPos = Cesium.Cartesian3.fromDegrees(lng, lat, alt);
+
+                    viewshad.setPosition(newPos, distance);
+                    return p2;
+                }
+
+
+                for (let j = 0; j < pointList.length; j++) {
+                    let ctime = CTMap.JulianDate.addSeconds(
+                        start,
+                        8 + j * 3,
+                        new CTMap.JulianDate()
+                    );
+                    samplePos.addSample(ctime, pointList[j]);
+                }
+
+                modelEntity = viewer.entities.add({
+                    position: new Cesium.CallbackProperty(getPosition, false),
+                    orientation: orientation,
+                    model: {
+                        uri: dataUrls.dataHome+"model_gltf/消防车.gltf",
+                        minimumPixelSize: 16
+                    }
+                });
+                let offset = 0;
+
+                let animation = viewer.entities.add({
+                    position: samplePos,
+                    //show: false,
+                    orientation: orientation,
+                    corridor: {
+                        positions: pointList,
+                        width: 6.0,
+                        material: new CTMap.StripeMaterialProperty({
+                            evenColor: CTMap.Color.fromCssColorString("#FF0000").withAlpha(0.9),
+                            oddColor: CTMap.Color.fromCssColorString("#9FEE00").withAlpha(0.9),
+                            repeat: 40
+                        })
+                    }
+
+                });
+
+                setClock();
+                viewer.flyTo(viewer.entities);
+
+
+
+            }
+
+
+            Sandcastle.addToolbarButton('路径模拟', function () {
+                loadTaskRout();
+                viewer.clock.shouldAnimate = true;
+
+            });
+
+            Sandcastle.addToggleButton('视角跟踪', false, function (val) {
+                viewer.trackedEntity = val ? modelEntity : undefined;
+            });
+
+            Sandcastle.addToggleButton('范围显示/隐藏', true, function (val) {
+                viewshad.showDome = val;
+            });
+
+
+
+            Sandcastle.addToolbarButton('暂停/开始', function () {
+                viewer.clock.shouldAnimate = !viewer.clock.shouldAnimate;
+
+            });
+
+
+            Sandcastle.addToolbarButton('停止分析', function () {
+                viewer.entities.removeAll();
+                viewshad.close();
+            });
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

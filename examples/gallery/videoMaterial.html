@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>视频融合</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <video id="trailer" style="display:none" muted autoplay loop crossorigin controls>
+        <source src="../Data/video/lukou.mp4" type="video/mp4">
+    </video>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers = viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+
+            var p1 = [-1028890.3058570586, 5597473.749774697, 2869635.082199718, -1034480.7045579706, 5594795.942325873, 2872824.005417305, -1035101.7068787431, 5598442.732758443, 2865535.72987291, -1030090.7331224171, 5599510.601848435, 2865256.789448401];
+            var p2 = [-1715305.7237295008, 4993189.050194156, 3566607.621482603, -1715365.3602209715, 4993168.9182688985, 3566607.1273408667, -1715377.7298191653, 4993202.743110176, 3566554.1804121006, -1715314.5886861535, 4993221.972832842, 3566557.603471254, -1715307.046588258, 4993201.322829818, 3566589.9230091316];
+
+
+            var videoElement = document.getElementById("trailer");
+            var videoPolygon = viewer.entities.add({
+                polygon: {
+                    hierarchy: Cesium.Cartesian3.unpackArray(p1),
+                    material: videoElement,
+                    stRotation: Cesium.Math.toRadians(0),
+                    //perPositionHeight: !0,
+                    //outline: !1
+                }
+            });
+            var videoPolygon1 =viewer.entities.add({
+                polygon: {
+                    hierarchy: Cesium.Cartesian3.unpackArray(p2),
+                    material: videoElement,
+                    stRotation: Cesium.Math.toRadians(130),
+                    //perPositionHeight: !1,
+                    //outline: !1
+                }
+            })
+            videoElement.play();
+ 
+           var tileset1 = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                 url: dataUrls.dataHome+'model_qx/tileosgb/tileset.json'
+            }))
+  
+
+            viewer.flyTo(videoPolygon);
+            
+
+            Sandcastle.addToolbarButton('播放', function () {
+                videoElement.play();
+
+            });
+            Sandcastle.addToolbarButton('暂停', function () {
+                videoElement.pause();
+
+
+            });
+            Sandcastle.addToolbarButton('地形视频融合', function () {
+                viewer.flyTo(videoPolygon);
+
+            });
+          
+            
+            Sandcastle.addToolbarButton('倾斜模型视频融合', function () {
+                viewer.flyTo(tileset1);
+
+            });
+            Sandcastle.addToolbarButton('显示/隐藏', function () {
+                videoPolygon1.show = ! videoPolygon1.show;
+                videoPolygon.show = ! videoPolygon.show;
+
+            });
+          
+            Sandcastle.finishedLoading();
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

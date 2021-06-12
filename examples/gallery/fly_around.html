@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>环视</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers= viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            var esri = new Cesium.ArcGisMapServerImageryProvider({
+                url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            viewer.terrainProvider =  new CTMap.CesiumTerrainProvider({
+                url:dataUrls.baseTerrain
+            });
+           
+
+            viewer.camera.flyTo({
+                destination : new Cesium.Cartesian3(-1009373.2459224868,5605851.992480287,2880850.0868039546),
+                orientation : {
+                    heading : 6.101629882895379,
+                    pitch :-0.378981147966442,
+                    roll :6.282657945763344
+                }
+            });
+ 
+
+            //飞行定位 
+            Sandcastle.addToolbarButton('开始漫游', function () {				
+                viewer.navigation.flyAround();
+            });
+
+             Sandcastle.addToolbarButton('停止漫游', function () {				
+                viewer.navigation.stopFly();
+            });
+
+            
+            Sandcastle.finishedLoading();
+        }
+
+//Sandcastle_End
+    </script>
+</body>

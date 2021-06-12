@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>修改模型位置</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+        
+            let esri =  new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    })
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+            let transformer;
+
+            var tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                url: dataUrls.dataHome+'model_max1/tileset.json',
+                maximumScreenSpaceError:8
+
+            }))
+
+            tileset.readyPromise.then((tileset) => {
+                viewer.flyTo(tileset);
+                transformer = tileset.transformer;
+            });
+
+            Sandcastle.addToolbarButton('平移位置', (val) => {
+                let pos = transformer.position;
+                pos[0] += 0.001;
+                pos[1] += 0.001;
+                transformer.position = pos;
+            });
+
+            Sandcastle.addToolbarButton('旋转模型(X轴)', (val) => {
+                let rotation = transformer.rotate;
+                rotation[0] += 5; 
+                transformer.rotate = rotation;   
+            });
+
+            Sandcastle.addToolbarButton('旋转模型(Y轴)', (val) => {
+                let rotation = transformer.rotate;
+                rotation[1] += 5; 
+                transformer.rotate = rotation;   
+
+            });
+
+            Sandcastle.addToolbarButton('旋转模型(Z轴)', (val) => {
+                let rotation = transformer.rotate;
+                rotation[2] += 5; 
+                transformer.rotate = rotation;   
+
+            });
+
+            Sandcastle.addToolbarButton('修改比例', (val) => {
+                transformer.scale +=0.2;
+            });
+
+
+            let transformEditor = new CTMap.transformEditor(viewer.scene);
+            Sandcastle.addToolbarButton('交互编辑', function () {
+                transformEditor.tileset = tileset;
+                transformEditor.start();
+            });
+
+            Sandcastle.addToolbarButton('停止编辑', function () {
+                transformEditor.stop();
+            });
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

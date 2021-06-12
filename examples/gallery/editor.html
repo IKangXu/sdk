@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+
+<head>
+    <title> CTMap Explorer SDK</title>
+    <link rel="shortcut icon" type="image/x-icon" href="../../web/favicon.ico" />
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/ionicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../fonts/iconfont/iconfont.css">
+    <link href="../css/uninphoFrame.min.css" rel="stylesheet">
+    <link href="../css/skin-blue.min.css" rel="stylesheet">
+    <link href="../css/blue.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/sideBar.css">
+    <link rel="stylesheet" href="../css/editor.css">
+    <link rel="stylesheet" href="../css/theme_uninpho.css">
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+     <script type="text/javascript" src="../js/ace/ace.js"></script>
+
+    <!--[if lt IE 9]>
+    <script src="http://cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+    <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini sidebar-collapse">
+    <div class="wrapper"></div>
+    <script type="text/javascript" src="../js/jquery.scrollTo.min.js"></script>
+    <script type="text/javascript" src="../js/app.min.js"></script>
+    <script>
+        $('.wrapper').load('../editor.html', function () {
+            var header = $('.nav-header');
+            header.load('../header.html');
+            var body = $('body');
+            body.append("<script type='text/javascript' src='./config.js'><\/script>");
+            body.append("<script type='text/javascript' src='../sidebar.js'><\/script>");
+            body.append("<script type='text/javascript' src='../editor.js'><\/script>"); 
+
+        });
+    </script>
+</body>
+
+</html>

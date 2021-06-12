@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>三维电力场站信息可视化平台</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <link rel="stylesheet" href="./js/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="./js/ztree/js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="./js/ztree/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./js/ztree/js/jquery.ztree.excheck.js"></script>
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+        #bkTree {
+            margin: 5px;
+            padding: 15px;
+            position: absolute;
+            left: 0px;
+            top: 100px;
+            background: #000000d1;
+            color: white;
+        }
+
+        .ztree li {
+            margin: 5px 0px;
+        }
+
+        .ztree li a {
+            color: #efeded;
+        }
+
+        .ztree * {
+            font-size: 14px;
+            font-family: '微软雅黑';
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <div id="bkTree" class="ztree">
+        <script>
+            //Sandcastle_Begin
+            function onload() {
+                //初始化地球
+                var viewer = new CTMap.Viewer('earthContainer', {
+                    shouldAnimate: true
+                });
+                let dt = new Date();
+                dt.setHours(12);
+                viewer.clock.currentTime = CTMap.JulianDate.fromDate(dt);
+                viewer.postProcessStages.fxaa.enabled =true; 
+
+                var img_google = new CTMap.UrlTemplateImageryProvider({
+                    subdomains: ["1", "2", "3"],
+                    url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+                });
+
+                viewer.scene.globe.depthTestAgainstTerrain = true;
+                viewer.navigation.mousePosition.show = true;
+                var layers = viewer.scene.imageryLayers;
+                layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+                var baseUrl = "http://localhost/Data/tileData/";
+
+                var routData = [-2782826.7580550057, 4753645.411780413, 3204724.0587901426, -2782830.998390769,
+                    4753643.778623569, 3204722.8606003826, -2782966.422750366, 4753564.988725569,
+                    3204722.6465137643, -2782919.9139915416, 4753484.302215832, 3204882.1325518535, -
+                    2782762.5809734054, 4753574.626651325, 3204884.150811648, -2782725.8676084317,
+                    4753514.828543437, 3205004.314422501, -2782932.529988623, 4753394.625351237, 3205003.944373359
+                ];
+                var flyPath = [{
+                    "type": "gruop",
+                    "children": [{
+                        "view": {
+                            "position": [-2783037.3369709346, 4755412.022428456, 3204139.3466318916],
+                            "duration": 6,
+                            "orientation": [0.4640826873404684, -0.7297000027095981,
+                                0.001759861096089388
+                            ]
+                        },
+                        "id": "360fad44-cd7b-4c5b-87f1-171167e37485",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782725.37976821, 4754111.5870897565, 3204283.6706526773],
+                            "duration": 6,
+                            "orientation": [0.41837974325268235, -0.3853998078969194,
+                                0.0012834678776183495
+                            ]
+                        },
+                        "id": "9effb011-e4c6-4fa9-9435-f1d51650f325",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782732.5293752034, 4754014.478766028, 3204421.5342801902],
+                            "duration": 6,
+                            "orientation": [0.418379729603525, -0.3853997322284588,
+                                0.0012835041853662688
+                            ]
+                        },
+                        "id": "8ef051d3-085a-46da-beee-b3c796470191",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782593.13501867, 4754071.311914334, 3204569.674133116],
+                            "duration": 6,
+                            "orientation": [1.5105038946110536, -0.6436299004821646,
+                                0.0036495875081579143
+                            ]
+                        },
+                        "id": "67be8130-c749-4265-8432-1690283e6be8",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782605.5482462565, 4753907.00758473, 3204776.956533877],
+                            "duration": 3,
+                            "orientation": [2.6514368548310365, -0.5805072161833382,
+                                0.0016436553621881345
+                            ]
+                        },
+                        "id": "8ee33e9e-ec19-4673-b8cf-b248584f9375",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2784078.2394226044, 4754420.81042696, 3204886.0409247545],
+                            "duration": 3,
+                            "orientation": [5.386500868817386, -0.8845984262143487, 6.279571585045177]
+                        },
+                        "id": "7fb4b28c-3ace-466c-ba3b-7d43353837a9",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2783333.101134209, 4753721.3302044775, 3204795.6500896993],
+                            "duration": 3,
+                            "orientation": [5.553562684010473, -0.6722915849531512, 6.280689499087675]
+                        },
+                        "id": "539ee13e-8588-4517-bccb-c88343e9f655",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2783123.896174849, 4753539.0926451245, 3204913.385407233],
+                            "duration": 6,
+                            "orientation": [5.0262183026167, -0.6321227077836067, 6.279735122362455]
+                        },
+                        "id": "5f87e769-7569-4071-aa4f-753fe50420a6",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2783093.3556296774, 4753445.528484434, 3205039.738060849],
+                            "duration": 6,
+                            "orientation": [4.371306170363297, -0.5403090568744302, 6.279973236686704]
+                        },
+                        "id": "414258f0-3d8f-47fb-bfe7-7a5dbe0d6571",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782943.7945635943, 4753460.061093854, 3205144.468443922],
+                            "duration": 3,
+                            "orientation": [3.6414566768009493, -0.5345708124437039, 6.281558683692921]
+                        },
+                        "id": "2b99a27b-e2ba-49fb-b4b1-cf6ca97c9c8f",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782811.096370405, 4753495.301328028, 3205163.120078736],
+                            "duration": 3,
+                            "orientation": [3.0679321781651367, -0.4427563146106088,
+                                0.0002378802441587169
+                            ]
+                        },
+                        "id": "e3f17b14-931b-49ed-9c42-38eb051fa8e1",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782699.0382688646, 4753558.081022493, 3205119.6375237023],
+                            "duration": 3,
+                            "orientation": [2.4888388006203184, -0.33946456231175337,
+                                0.0018823407153636396
+                            ]
+                        },
+                        "id": "957b8244-230a-4232-933d-08de7ecd701b",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782715.3510837355, 4753578.082502226, 3204998.0328149223],
+                            "duration": 3,
+                            "orientation": [2.060265322109185, -0.31651066462984057,
+                                0.00271490343884917
+                            ]
+                        },
+                        "id": "b4a03a9d-5703-42c5-9a0a-9668de0ff09a",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782738.750612206, 4753563.031471172, 3204953.6369039374],
+                            "duration": 3,
+                            "orientation": [2.2110466016631136, -0.25912592715230565,
+                                0.002425247096398131
+                            ]
+                        },
+                        "id": "fc1ab452-2d43-4db8-a93b-bfee0112f888",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2782788.835096652, 4753579.439071834, 3204877.730881247],
+                            "duration": 3,
+                            "orientation": [0.6299703163622992, -0.23517377258700578,
+                                0.001772681638458451
+                            ]
+                        },
+                        "id": "6bf0839c-8754-4045-8547-703e76f96f50",
+                        "name": "书签"
+                    }, {
+                        "view": {
+                            "position": [-2783417.1615174254, 4754278.648859858, 3204682.315377697],
+                            "duration": 3,
+                            "orientation": [5.922320243405546, -0.7975360519837205, 6.281702875055931]
+                        },
+                        "id": "63593570-bed3-4aa9-a39f-9600ade8c286",
+                        "name": "书签"
+                    }],
+                    "id": "e0ed5493-3291-4fd7-8cde-875d5f7f3858",
+                    "name": "默认书签组"
+                }];
+
+                var dataURls = [{
+                    "name": "河姆变电站",
+                    "pos": [120.34, 30.38, 1],
+                    "children": [{
+                        "name": "地面",
+                        "checked": true,
+                        "center": [120.34598270182062, 30.360130415934584, 1],
+                        "level": 128,
+                        "turl": "./hemu/dm/tileset.json"
+                    }, {
+                        "name": "建筑物",
+                        "checked": false,
+                        "center": [120.34598270182062, 30.360130415934584, 6],
+                        "level": 128,
+                        "turl": "./hemu/jzw/tileset.json"
+                    }, {
+                        "name": "附属小品",
+                        "checked": true,
+                        "center": [120.34598270182062, 30.360130415934584, 1],
+                        "level": 256,
+                        "turl": "./hemu/xp/tileset.json"
+                    }, {
+                        "name": "台账设备",
+                        "checked": false,
+                        "center": [120.34598270182062, 30.360130415934584, 12.5],
+                        "level": 256,
+                        "turl": "./hemu/tz/tileset.json"
+                    }],
+
+                }, {
+                    "name": "河姆变电站2",
+                    "pos": [120.34, 30.39, 1],
+                    "children": [{
+                        "name": "地面",
+                        "center": [120.34295416187982, 30.35599861304627, 1],
+                        "checked": true,
+                        "level": 128,
+                        "turl": "./hemu/dm/tileset.json"
+                    }, {
+                        "name": "建筑物",
+                        "checked": false,
+                        "center": [120.34295416187982, 30.35599861304627, 6],
+                        "level": 128,
+                        "turl": "./hemu/jzw/tileset.json"
+                    }, {
+                        "name": "附属小品",
+                        "checked": true,
+                        "center": [120.34295416187982, 30.35599861304627, 1],
+                        "level": 256,
+                        "turl": "./hemu/xp/tileset.json"
+                    }, {
+                        "name": "台账设备",
+                        "checked": false,
+                        "center": [120.34295416187982, 30.35599861304627, 12.5],
+                        "level": 256,
+                        "turl": "./hemu/tz/tileset.json"
+                    }],
+
+                }, {
+                    "name": "春晓变电站",
+
+                    "children": [{
+                        "name": "地面",
+                        "checked": true,
+                        "level": 128,
+                        "center": [120.34, 30.36, 1],
+                        "turl": "./chunxiao/dm/tileset.json"
+                    }, {
+                        "name": "建筑物",
+                        "checked": false,
+                        "center": [120.34, 30.36, 1],
+                        "level": 64,
+                        "turl": "./chunxiao/jzw/tileset.json"
+                    }, {
+                        "name": "附属小品",
+                        "checked": true,
+                        "center": [120.34, 30.36, 1],
+                        "level": 256,
+                        "turl": "./chunxiao/xp/tileset.json"
+                    }]
+                }, {
+                    "name": "春晓变电站2",
+                    "pos": [120.35, 30.36, 1],
+                    "children": [{
+                        "name": "地面",
+                        "checked": true,
+                        "center": [120.34295416218747, 30.360002331986642, 1],
+                        "level": 128,
+                        "turl": "./chunxiao/dm/tileset.json"
+                    }, {
+                        "name": "建筑物",
+                        "checked": false,
+                        "center": [120.34295416218747, 30.360002331986642, 1],
+                        "level": 128,
+                        "turl": "./chunxiao/jzw/tileset.json"
+                    }, {
+                        "name": "附属小品",
+                        "checked": false,
+                        "center": [120.34295416218747, 30.360002331986642, 1],
+                        "level": 256,
+                        "turl": "./chunxiao/xp/tileset.json"
+                    }],
+
+                }, {
+                    "name": "春晓变电站3",
+                    "pos": [120.38, 30.37, 1],
+                    "children": [{
+                        "name": "地面",
+                        "checked": true,
+                        "level": 128,
+                        "center": [120.33990727137578, 30.355854594095995, 1],
+                        "turl": "./chunxiao/dm/tileset.json"
+                    }, {
+                        "name": "建筑物",
+                        "checked": false,
+                        "center": [120.33990727137578, 30.355854594095995, 1],
+                        "level": 128,
+                        "turl": "./chunxiao/jzw/tileset.json"
+                    }, {
+                        "name": "附属小品",
+                        "checked": false,
+                        "center": [120.33990727137578, 30.355854594095995, 1],
+                        "level": 256,
+                        "turl": "./chunxiao/xp/tileset.json"
+                    }],
+
+                }, ];
+
+                var treeObj;
+                var isEdit = false;
+                var layerList = [];
+                let currentLayer;
+                let modelEntity;
+                var scene = viewer.scene;
+
+                var setting = {
+                    view: {
+                        dblClickExpand: true,
+                        showLine: true,
+                        selectedMulti: false
+                    },
+                    key: {
+                        checked: "show",
+                        children: "children",
+                        name: "name",
+                    },
+                    check: {
+                        enable: true
+                    },
+                    callback: {
+                        onCheck: zTreeOnCheck,
+                        onDblClick: zTreeOnDblClick
+
+                    }
+                };
+
+
+                function zTreeOnDblClick(event, treeId, treeNode) {
+                    if (treeNode.level == 0) {
+
+                    } else {
+                        let layer = getSelectedLayer(treeNode.getParentNode().name, treeNode.name);
+                        if (layer)
+                            viewer.flyTo(layer);
+
+                    }
+                }
+
+                function getSelectedLayer(pname, name) {
+                    var result;
+                    for (let item of layerList) {
+                        if (item.name === pname) {
+                            for (let layer of item.children) {
+                                if (layer.name == name) {
+                                    result = layer.tileset;
+                                    break;
+                                }
+
+                            }
+                        }
+
+                    }
+                    return result;
+
+                }
+
+                function zTreeOnCheck(event, treeId, treeNode) {
+                    if (treeNode.level == 0) {
+
+                    } else {
+                        let layer = getSelectedLayer(treeNode.getParentNode().name, treeNode.name);
+                        if (layer)
+                            layer.show = treeNode.checked;
+
+                    }
+                }
+
+                function updateTree() {
+
+                    var t = $("#bkTree");
+                    t = $.fn.zTree.init(t, setting, dataURls);
+                    treeObj = $.fn.zTree.getZTreeObj("bkTree");
+                    treeObj.expandAll(true);
+                }
+
+                function loadData() {
+                    for (let station of dataURls) {
+
+                        var layers = [];
+                        for (let item of station.children) {
+                            var tileset = new CTMap.Cesium3DTileset({
+                                url: baseUrl + item.turl,
+                                maximumScreenSpaceError: item.level,
+                                show: item.checked,
+                                maximumNumberOfLoadedTiles: 1000
+                            });
+                            tileset.pos = item.center;
+                            tileset.tag = item.name;
+
+                            layers.push({
+                                name: item.name,
+                                tileset: tileset
+                            });
+                            viewer.scene.primitives.add(tileset);
+                            //调整位置			
+                            tileset.readyPromise.then(function (tileset) {
+
+
+                                var modelPos = CTMap.Cartesian3.fromDegrees(tileset.pos[0], tileset.pos[1],
+                                    tileset
+                                    .pos[2]);
+                                var m = CTMap.Transforms.eastNorthUpToFixedFrame(modelPos);
+                                var scaleM = CTMap.Matrix4.fromUniformScale(0.001);
+                                CTMap.Matrix4.multiply(m, scaleM, m);
+
+                                tileset._root.transform =
+                                    m; //CTMap.Matrix4.unpack(tileset.matrix,new CTMap.Matrix4());
+
+                            });
+                        }
+
+                        layerList.push({
+                            name: station.name,
+                            children: layers
+                        });
+                    }
+
+                }
+
+
+                function setClock() {
+                    let times = modelEntity.position._property._times;
+                    let start = times[0];
+                    let end = times[times.length - 1];
+                    viewer.clock.startTime = start;
+                    viewer.clock.stopTime = end;
+                    viewer.clock.currentTime = start;
+                    viewer.clock.clockRange = CTMap.ClockRange.LOOP_STOP;
+                    viewer.clock.multiplier = viewer.clock.multiplier / 2;
+                    viewer.trackedEntity = modelEntity;
+                    viewer.clock.shouldAnimate = true;
+                }
+
+                function loadTaskRout() {
+
+                    let dt = new Date();
+                    dt.setHours(12);
+
+                    let start = CTMap.JulianDate.fromDate(dt);
+                    var keyPos = new CTMap.SampledPositionProperty();
+                    keyPos.backwardExtrapolationDuration = 2;
+                    keyPos.backwardExtrapolationType = CTMap.ExtrapolationType.HOLD;
+                    keyPos.forwardExtrapolationType = CTMap.ExtrapolationType.HOLD;
+                    let orientation = new CTMap.VelocityOrientationProperty(keyPos);
+                    let result = [];
+                    let pointList = CTMap.Cartesian3.unpackArray(routData, result)
+
+                    for (let j = 0; j < pointList.length; j++) {
+                        let ctime = CTMap.JulianDate.addSeconds(
+                            start,
+                            8 + j * 3,
+                            new CTMap.JulianDate()
+                        );
+                        keyPos.addSample(ctime, pointList[j]);
+                    }
+
+                    modelEntity = viewer.entities.add({
+                        position: keyPos,
+                        //show: false,
+                        orientation: orientation,
+                        model: {
+                            uri: "../SampleData/model_gltf/消防车.gltf",
+                            minimumPixelSize: 64
+                        }
+                    });
+                    let offset = 0;
+
+                    let animation = viewer.entities.add({
+                        position: keyPos,
+                        //show: false,
+                        orientation: orientation,
+                        label: {
+                            text: "消防车",
+                            font: "16px 微软雅黑",
+                            fillColor: CTMap.Color.DEEPSKYBLUE,
+                            outlineColor: CTMap.Color.BLACK,
+                            outlineWidth: 1.0,
+                            showBackground: true,
+                            backgroundColor: CTMap.Color.BLACK.withAlpha(0.9),
+                            backgroundPadding: new CTMap.Cartesian2(2, 2),
+                            disableDepthTestDistance: Number.POSITIVE_INFINITY
+                        },
+                        corridor: {
+                            positions: pointList,
+                            width: 2.0,
+                            material: new CTMap.StripeMaterialProperty({
+                                evenColor: CTMap.Color.fromCssColorString("#FF0000").withAlpha(0.8),
+                                oddColor: CTMap.Color.fromCssColorString("#9FEE00").withAlpha(0.8),
+                                repeat: 40,
+                                orientation: CTMap.StripeOrientation.VERTICAL,
+                                offset: new CTMap.CallbackProperty(
+                                    (time) => {
+                                        return offset += 0.0008;
+
+                                    },
+                                    false
+                                )
+                            })
+                        },
+                        ellipse: {
+                            semiMajorAxis: 20,
+                            semiMinorAxis: 20,
+                            //material:CTMap.Color.RED.withAlpha(0.3),
+                            material: CTMap.Color.RED.withAlpha(0.65)
+                        }
+                        //   rectangle: {
+                        //     coordinates: new CTMap.CallbackProperty(this.getRectangle, false),
+                        //     material: CTMap.Color.RED.withAlpha(0.3),
+                        //     //rotation: new CTMap.CallbackProperty(this.getRotation, false),
+                        //     classificationType: CTMap.ClassificationType.BOTH
+                        // }
+                    });
+
+                    //添加polygon
+
+                }
+
+                var stTable = [];
+                var keyPoint = [
+                    [120.3471, 30.3585, 11],
+                    [120.3474, 30.3615, 11],
+                    [120.3450, 30.3600, 11],
+                    [120.3450, 30.3584, 11],
+                    [120.3469, 30.3600, 11]
+                ];
+
+                function addTable() {
+                    viewer.entities.removeAll();
+                    
+                    let idx = 1;
+                    for (let item of keyPoint) {
+                        var height = 10 + Math.random() * 40;
+                        var boxEntity = viewer.entities.add({
+                            name: 'Red box with black outline',
+                            position: CTMap.Cartesian3.fromDegrees(item[0], item[1], item[2]),
+                            label: {
+                                text: idx + "号测站",
+                                //fillColor: CTMap.Color.DODGERBLUE,
+                                font:'16px 微软雅黑',
+                                pixelOffset: new CTMap.Cartesian2(0.0, -100)
+                            },
+                            box: {
+                                dimensions: new CTMap.Cartesian3(5.0, 5.0, height),
+                                material: CTMap.Color.RED.withAlpha(0.85),
+                                outline: true,
+                                heightReference:CTMap.HeightReference.RELATIVE_TO_GROUND,
+                                outlineColor: CTMap.Color.WHITE
+                            }
+                        });
+                        stTable.push(boxEntity);
+                        idx++;
+                    }
+                }
+                let bookMarkMgr = viewer.project.bookmarkManager;
+                let currentGroup = bookMarkMgr.addGroup(`默认书签组`);
+
+                function getSelTileset() {
+                    var treeNode = treeObj.getSelectedNodes()[0];
+                    if (treeNode.level == 1) {
+                        let layer = getSelectedLayer(treeNode.getParentNode().name, treeNode.name);
+                        return layer;
+                    }
+
+                }
+
+                Sandcastle.addToolbarButton('路径漫游', () => {
+                    bookMarkMgr.fromJSON(flyPath);
+                    bookMarkMgr.playGroup(bookMarkMgr.itemList[0].id);
+
+                });
+
+                Sandcastle.addToolbarButton('停止漫游', () => {
+
+                    bookMarkMgr.stopPlay();
+
+                });
+
+                Sandcastle.addToolbarButton('模型动画', () => {
+                    loadTaskRout();
+                    setClock();
+
+                });
+                Sandcastle.addToolbarButton('视角跟踪', () => {
+                    viewer.trackedEntity = modelEntity;
+                });
+                Sandcastle.addToolbarButton('取消跟踪', () => {
+                    viewer.trackedEntity = null;
+                });
+                Sandcastle.addToolbarButton('清除模型', () => {
+                    viewer.entities.removeAll();
+
+                });
+
+                viewer.EnvEffects = new CTMap.EnvEffects(viewer);
+
+                Sandcastle.addToolbarButton('告预警模拟', () => {
+                    let EnvEffects = viewer.EnvEffects
+
+                    let pos = new CTMap.Cartesian3.fromDegrees(120.3461, 30.3603, 3);
+                    var radar = EnvEffects.addRadar(pos, 40)
+
+                    let camera = [-2782940.933471966, 4753546.886004808, 3204876.5958184386, 5.640706828494156,
+                        -0.5679664979152457, 6.281103507152073
+                    ];
+
+                    viewer.camera.flyTo({
+                        destination: new CTMap.Cartesian3(camera[0], camera[1], camera[2]),
+                        orientation: {
+                            heading: camera[3],
+                            pitch: camera[4],
+                            roll: camera[5]
+                        }
+                    })
+
+
+                });
+
+                Sandcastle.addToolbarButton('影响分析', () => {
+                    let EnvEffects = viewer.EnvEffects
+                    let pos = new CTMap.Cartesian3.fromDegrees(120.3426, 30.3549, 5);
+                    var radar = EnvEffects.addScan(pos, 26);
+
+                    let camera = [-2782830.435270513, 4753979.274127368, 3204355.5188383134, 5.581270313887062,
+                        -0.510441893304026, 6.281018644109153
+                    ];
+
+                    viewer.camera.flyTo({
+                        destination: new CTMap.Cartesian3(camera[0], camera[1], camera[2]),
+                        orientation: {
+                            heading: camera[3],
+                            pitch: camera[4],
+                            roll: camera[5]
+                        }
+                    })
+                });
+
+
+
+                var stimer;
+                Sandcastle.addToolbarButton('沉降信息', () => {
+                    addTable();
+                });
+                Sandcastle.addToolbarButton('动态对比', () => {
+                    stimer = setInterval(() => {
+                        addTable();
+                    }, 1000);
+
+                });
+
+
+
+                Sandcastle.addToolbarButton('清除', () => {
+                    viewer.EnvEffects.removeAll();
+                    clearInterval(stimer);
+                    view.entities.removeAll();                    
+                
+                });
+
+
+
+                Sandcastle.addToolbarButton('编辑位置', function () {
+                    isEdit = true;
+                    currentLayer = getSelTileset();
+                });
+
+
+                function setPosition(lon, lat, alt) {
+                    var pos = CTMap.Cartesian3.fromDegrees(lon, lat, alt)
+                    var m = CTMap.Transforms.eastNorthUpToFixedFrame(pos);
+                    var scaleM = CTMap.Matrix4.fromUniformScale(0.001);
+                    CTMap.Matrix4.multiply(m, scaleM, m);
+                    currentLayer._root.transform = m;
+                    // currentModel.center = [lon, lat, alt];
+                    // currentModel.datas.map(item => {
+                    //     item.tileset._root.transform = m;
+                    // })
+
+                }
+
+                viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
+                    var cartesian = viewer.camera.pickEllipsoid(movement.endPosition, scene.globe.ellipsoid);
+                    if (cartesian && isEdit) {
+
+                        var cartographic = CTMap.Cartographic.fromCartesian(cartesian);
+                        var lon = CTMap.Math.toDegrees(cartographic.longitude);
+                        var lat = CTMap.Math.toDegrees(cartographic.latitude);
+                        setPosition(lon, lat, 1);
+                    }
+
+                }, CTMap.ScreenSpaceEventType.MOUSE_MOVE);
+
+
+                viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+                    isEdit = false;
+
+                }, CTMap.ScreenSpaceEventType.RIGHT_CLICK);
+
+ 
+                loadData();
+                updateTree();
+                var home = [ -2783149.1649695486, 4753707.284738158, 3204709.439565514,5.808279172101609,-0.5459510120876807,6.2816182006475785]
+                viewer.camera.flyTo({
+                        destination: new CTMap.Cartesian3(home[0], home[1], home[2]),
+                        orientation: {
+                            heading: home[3],
+                            pitch: home[4],
+                            roll: home[5]
+                        }
+                    })
+
+
+
+                    Sandcastle.finishedLoading();
+
+            }
+
+            //Sandcastle_End
+        </script>
+</body>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>国界省界数据</title>
+	<script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+              
+			Sandcastle.addToolbarButton('加载国界', function() {
+				viewer.dataSources.add(Cesium.GeoJsonDataSource.load(dataUrls.dataHome+'bound/bou1_4p.json', {
+					stroke: Cesium.Color.YELLOW,
+					fill: Cesium.Color.PINK.withAlpha(0.1),
+					strokeWidth: 6
+				}));
+			});
+
+			Sandcastle.addToolbarButton('加载省界', function() {
+				viewer.dataSources.add(Cesium.GeoJsonDataSource.load(dataUrls.dataHome+'/bound/bou2_4p.json', {
+					stroke: Cesium.Color.YELLOW,
+					fill: Cesium.Color.PINK.withAlpha(0.1),
+					strokeWidth: 3
+				}));
+			});
+            Sandcastle.finishedLoading();
+        }
+
+//Sandcastle_End
+    </script>
+</body>

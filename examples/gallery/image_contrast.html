@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>影像对比</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display:flex;
+        }
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+        #slider {
+            position: absolute;
+            left: 50%;
+            top: 0px;
+            background-color: #D3D3D3;
+            width: 5px;
+            height: 100%;
+            z-index: 9999;
+    }
+
+    #slider:hover {
+        cursor: ew-resize;
+    }
+
+
+</style>
+ 
+
+</head>
+
+<body>
+    <div id='earthContainer'>
+             <div id="slider"></div>
+    </div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+          
+            var options3D = {           
+                terrainProvider:new CTMap.CesiumTerrainProvider({
+                        url:dataUrls.baseTerrain
+                    })
+            };
+            var  viewer = new CTMap.Viewer("earthContainer",options3D);
+
+            let agsImage =  new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    })
+         
+            var layers = viewer.imageryLayers;
+
+            agsImage = layers.addImageryProvider(agsImage); 
+            agsImage.splitDirection = CTMap.ImagerySplitDirection.LEFT; // Only show to the left of the slider.
+
+                // Sync the position of the slider with the split position
+                var slider = document.getElementById('slider');
+                viewer.scene.imagerySplitPosition = (slider.offsetLeft) / slider.parentElement.offsetWidth;
+
+                var handler = new CTMap.ScreenSpaceEventHandler(slider);
+
+                var moveActive = false;
+
+                function move(movement) {
+                    if(!moveActive) {
+                        return;
+                    }
+
+                    var relativeOffset = movement.endPosition.x ;
+                    var splitPosition = (slider.offsetLeft + relativeOffset) / slider.parentElement.offsetWidth;
+                    slider.style.left = 100.0 * splitPosition + '%';
+                    viewer.scene.imagerySplitPosition = splitPosition;
+                }
+
+                handler.setInputAction(function() {
+                    moveActive = true;
+                }, CTMap.ScreenSpaceEventType.LEFT_DOWN);
+                handler.setInputAction(function() {
+                    moveActive = true;
+                }, CTMap.ScreenSpaceEventType.PINCH_START);
+
+                handler.setInputAction(move, CTMap.ScreenSpaceEventType.MOUSE_MOVE);
+                handler.setInputAction(move, CTMap.ScreenSpaceEventType.PINCH_MOVE);
+
+                handler.setInputAction(function() {
+                    moveActive = false;
+                }, CTMap.ScreenSpaceEventType.LEFT_UP);
+                handler.setInputAction(function() {
+                    moveActive = false;
+                }, CTMap.ScreenSpaceEventType.PINCH_END);
+
+
+
+                Sandcastle.finishedLoading();
+ 
+        }
+
+//Sandcastle_End
+    </script>
+</body>

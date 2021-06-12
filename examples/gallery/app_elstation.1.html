@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>三维电力场站信息可视化平台</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            // viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+            //     url: dataUrls.baseTerrain
+            // });
+
+
+            viewer.scene.globe.depthTestAgainstTerrain = true;
+            viewer.navigation.mousePosition.show = true;
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+            let tileset = [];
+
+
+            var dataURls = [{
+                    name: "宁海模型",
+                    url: 'http://localhost/Data/maxData/宁海模型/3dtiles/tileset.json',
+                    geoError: 64,
+                    trans: [120.3326, 30.3549, 55],
+                    transform: [-0.8743687064941593, -0.4845638632270897, -0.026023596180577948, 0,
+                        0.22102277567232653, -0.44541866937171154, 0.8676123221861444, 0, -0.4320049742049646,
+                        0.7528612564274852, 0.4965597958278497, 0, -2177740.70404011, 4388716.79029236,
+                        4070048.433825, 1
+                    ],
+                    Matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -604158.727881351, 365721.3478983464, -
+                        865648.4624287821, 1
+                    ]
+                }, {
+                    name: "春晓模型",
+                    url: 'http://localhost/Data/maxData/春晓模型/3dtiels/tileset.json',
+                    geoError: 64,
+                    pos: [120.3426, 30.3549, 38],
+                    Matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -602452.1063076276, 360123.01308156457, -
+                        858841.3043404818, 1
+                    ],
+                    transform: [-0.8868608198690515, -0.4610976480340992, -0.029442234266654488, 0,
+                        0.2170638825787782, -0.4720513851234406, 0.8544300794581531, 0, -0.4078739475144476,
+                        0.7513697151073221, 0.5187315241611204, 0, -2180280.49969279, 4393835.34600231,
+                        4063245.22945362, 1
+                    ]
+                }
+
+            ];
+
+
+
+            var dataURls = [{
+                    name: "万象模型",
+                    url: 'http://localhost/Data/maxData/wx/tileset.json',
+                    geoError: 64,
+                    pos: [120.3326, 30.3549, 10]
+
+                },
+
+            ];
+
+
+
+            // var tilesetT = new Cesium.Cesium3DTileset({
+            //     url:'http://localhost/Data/maxData/wx/tileset.json'
+            // });
+
+            // viewer.scene.primitives.add(tilesetT);
+            // viewer.zoomTo(tilesetT);
+            // return;
+
+            var ttt = {
+                name: "天一变模型",
+                geoError: 64,
+                pos: [120.3826, 30.3649, 38],
+                url: "http://localhost/Data/maxData/天一变模型/tiles/tileset.json"
+            }
+
+
+            function loadData() {
+                for (var i = 0; i < dataURls.length; i++) {
+                    tileset[i] = new CTMap.Cesium3DTileset({
+                        url: dataURls[i].url,
+                        maximumScreenSpaceError: dataURls[i].geoError,
+                        maximumNumberOfLoadedTiles: 1000
+                    });
+                    viewer.scene.primitives.add(tileset[i]);
+                    //viewer.flyTo(tileset[i]);                
+                    tileset[i].pos = dataURls[i].pos;
+                    //tileset[i].modelMatrix = dataURls[i].Matrix;
+                    //tileset[i].transform = dataURls[i].transform;
+
+                    //调整位置			
+                    tileset[i].readyPromise.then(function (v) {
+
+                        //var translationHeight = 30.0; 
+
+                        // v.modelMatrix = v.modelMatrix;
+                        //v._root.transform = v.transform;
+
+                        var cartographic = CTMap.Cartographic.fromCartesian(v.boundingSphere.center);
+                        var lon = CTMap.Math.toDegrees(cartographic.longitude);
+                        var lat = CTMap.Math.toDegrees(cartographic.latitude);
+                        var surface = CTMap.Cartesian3.fromRadians(cartographic.longitude, cartographic
+                            .latitude, cartographic.height);
+                        var offset = CTMap.Cartesian3.fromDegrees(v.pos[0], v.pos[1], 1);
+                        var translation = CTMap.Cartesian3.subtract(offset, surface, new Uninpho
+                            .Cartesian3());
+                        v.modelMatrix = CTMap.Matrix4.fromTranslation(translation);
+
+                        v.transformer.scale = 0.001;
+                        //v.transformer.position = v.pos;
+
+                        viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(v.pos[0], v.pos[1], 10),
+                            billboard: {
+                                image: dataUrls.dataHome+'image/mark3.png', // default: undefined                         
+                                pixelOffset: new Cesium.Cartesian2(0, -50), // default: (0, 0)
+                                eyeOffset: new Cesium.Cartesian3(0.0, 0.0, 0.0), // default
+                                horizontalOrigin: Cesium.HorizontalOrigin.CENTER, // default
+                                verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+
+                            }
+                        });
+
+                    });
+
+                }
+            }
+
+
+            let rx, ry, rz;
+            rx = ry = rz = 0;
+            let current = tileset[1];
+
+
+            Sandcastle.addToolbarButton('模型加载', () => {
+                loadData();
+                viewer.flyTo(tileset[0]);
+
+            });
+            Sandcastle.addToolbarButton('获取视角', () => {
+
+                let pos = viewer.camera.position;
+                let camera = viewer.camera;
+                let info = [pos.x, pos.y, pos.z, camera.heading, camera.pitch, camera.roll]
+                console.log(info)
+
+            });
+
+            var rout = [
+                [-2782761.4572142, 4753966.004816314, 3204378.13163217, 1.7312742748998327, -0.20322535507197892,
+                    0.0029470320053235355
+                ],
+                [-2782766.1668091817, 4753966.696368533, 3204375.1612459025, 1.38316995828108, -0.3811183452953133,
+                    0.0030956552687726457
+                ],
+                [-2782776.8044607607, 4753962.19949541, 3204373.3849510397, 0.3923026522043269, -0.5243166060127118,
+                    0.0012934967618107862
+                ]
+
+            ]
+
+
+            var posList = [-2782793.4366407604, 4753884.819890415, 3204382.9009916456, -2782801.93880243,
+                4753880.123745801, 3204382.487202086, -2782804.6112403255, 4753884.797009073, 3204373.295244805, -
+                2782795.4335813825, 4753889.91866005, 3204373.6646958296, -2782794.3051192826, 4753887.160636165,
+                3204378.702438361, -2782794.3051192826, 4753887.160636165, 3204378.702438361
+            ]
+
+            Sandcastle.addToolbarButton('模型定位', () => {
+                viewer.camera.flyTo({
+                    destination: new CTMap.Cartesian3(-2782761.4572142, 4753966.004816314,
+                        3204378.13163217),
+                    orientation: {
+                        heading: 1.7312742748998327,
+                        pitch: -0.20322535507197892,
+                        roll: 0.0029470320053235355
+                    }
+                })
+            });
+
+            Sandcastle.addToolbarButton('高亮', () => {
+                viewer.camera.flyTo({
+                    destination: new CTMap.Cartesian3(-2782842.292205926, 4753943.28575444,
+                        3204384.4414489986),
+                    orientation: {
+                        heading: 6.015339668378665,
+                        pitch: -0.5911443146572299,
+                        roll: 6.282251454535471
+                    }
+                })
+
+                viewer.entities.add({
+                    name: 'Green extruded polygon',
+                    polygon: {
+                        hierarchy: Cesium.Cartesian3.unpackArray(posList),
+                        material: Cesium.Color.RED.withAlpha(0.7)
+                    }
+                });
+
+            });
+
+
+            Sandcastle.addToolbarButton('告警1', () => {
+                let EnvEffects = new CTMap.EnvEffects(viewer);
+                let pos = new CTMap.Cartesian3.fromDegrees(120.3326, 30.3549, 55);
+                var radar = EnvEffects.addRadar(pos, 40)
+
+                let camera = [-2781983.4179791906, 4754439.82801126, 3204499.3846931118, 4.058262481931749, -
+                    0.8039214322386998, 6.279847058775072
+                ];
+
+                viewer.camera.flyTo({
+                    destination: new CTMap.Cartesian3(camera[0], camera[1], camera[2]),
+                    orientation: {
+                        heading: camera[3],
+                        pitch: camera[4],
+                        roll: camera[5]
+                    }
+                })
+
+            });
+
+            Sandcastle.addToolbarButton('告警2', () => {
+                let EnvEffects = new CTMap.EnvEffects(viewer);
+                let pos = new CTMap.Cartesian3.fromDegrees(120.3426, 30.3549, 38);
+                var radar = EnvEffects.addScan(pos, 26);
+
+                let camera = [-2782754.9057423347, 4753941.346382228, 3204523.0376968407, 3.4407431632792136, -
+                    0.4654117074186246, 6.282222261954736
+                ];
+
+                viewer.camera.flyTo({
+                    destination: new CTMap.Cartesian3(camera[0], camera[1], camera[2]),
+                    orientation: {
+                        heading: camera[3],
+                        pitch: camera[4],
+                        roll: camera[5]
+                    }
+                })
+
+
+            });
+
+            var drawControl = new CTMap.DrawTool(viewer, {
+                hasEdit: true,
+
+                onStopDrawing: function (entity) {
+                    console.log("onStopDrawing")
+
+
+                },
+                onStartEditing: function (entity) {
+                    console.log("onStartEditing")
+                },
+                onChangeEditing: function (entity) {
+                    console.log("onChangeEditing:" + entity.id)
+                },
+                onStopEditing: function (entity) {
+                    console.log("onStopEditing")
+                },
+            });
+
+
+
+            var defPolygon = {
+                attr: {
+                    id: "20181127103055",
+                    name: "面",
+                    type: "PolygonPlotting",
+                    remark: ""
+                },
+                edittype: "polygon",
+                name: "面",
+                style: {
+                    color: "#3388ff",
+                    opacity: 0.6,
+                    outline: true,
+                    outlineColor: "#ffffff",
+                    outlineOpacity: 1,
+                    perPositionHeight: false
+                },
+                position: {
+                    height: true,
+                    minCount: 3
+                },
+                type: "polygon"
+
+            };
+
+
+            var defLine = {
+                attr: {
+                    id: "20181127104055",
+                    name: "",
+                    remark: ""
+                },
+                edittype: "polyline",
+                name: "线",
+                style: {
+                    clampToGround: true,
+                    color: "#3388ff",
+                    lineType: "solid",
+                    opacity: 1,
+                    outline: false,
+                    outlineColor: "#ffffff",
+                    outlineWidth: 2,
+                    width: 4
+
+                },
+                position: {
+                    height: false,
+                    minCount: 2
+                },
+                type: "polyline"
+
+            };
+            Sandcastle.addToolbarButton('scale--', (val) => {
+                let transformer = tileset[0].transformer;
+                transformer.scale -= transformer.scale / 2;
+
+            });
+
+            drawControl.startDraw(defPolygon);
+
+
+            /*
+                        Sandcastle.addToolbarButton('X++', (val) => {
+                            rx += 0.3;
+                            let mat = current._root.transform;
+                            var rotationy = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromRotationX(Cesium.Math
+                                .toRadians(rx)));
+                            Cesium.Matrix4.multiply(mat, rotationy, mat);
+                            current._root.transform = mat;
+
+
+                        });
+
+                        Sandcastle.addToolbarButton('X--', (val) => {
+                            rx -= 0.3;
+                            let mat = current._root.transform;
+                            var rotationy = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromRotationX(Cesium.Math
+                                .toRadians(rx)));
+                            Cesium.Matrix4.multiply(mat, rotationy, mat);
+                            current._root.transform = mat;
+                            current.transform = mat;
+
+                        });
+
+                        Sandcastle.addToolbarButton('Y++', (val) => {
+                            ry += 0.3;
+                            let mat = current._root.transform;
+                            var rotationy = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromRotationY(Cesium.Math
+                                .toRadians(ry)));
+                            Cesium.Matrix4.multiply(mat, rotationy, mat);
+                            current._root.transform = mat;
+                            current.transform = mat;
+
+                        });
+                        Sandcastle.addToolbarButton('Y--', (val) => {
+                            ry -= 0.3;
+                            let mat = current._root.transform;
+                            var rotationy = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromRotationY(Cesium.Math
+                                .toRadians(ry)));
+                            Cesium.Matrix4.multiply(mat, rotationy, mat);
+                            current._root.transform = mat;
+                            current.transform = mat;
+
+                        });
+
+                        Sandcastle.addToolbarButton('Z++', (val) => {
+                            rz += 0.3;
+                            let mat = current._root.transform;
+                            var rotationy = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromRotationZ(Cesium.Math
+                                .toRadians(rz)));
+                            Cesium.Matrix4.multiply(mat, rotationy, mat);
+                            current._root.transform = mat;
+                            current.transform = mat;
+
+
+                        });
+
+                        Sandcastle.addToolbarButton('Z--', (val) => {
+                            rz -= 0.3;
+                            let mat = current._root.transform;
+                            var rotationy = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromRotationZ(Cesium.Math
+                                .toRadians(rz)));
+                            Cesium.Matrix4.multiply(mat, rotationy, mat);
+                            current._root.transform = mat;
+                            current.transform = mat;
+
+                        });
+
+            */
+
+
+            Sandcastle.finishedLoading();
+
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

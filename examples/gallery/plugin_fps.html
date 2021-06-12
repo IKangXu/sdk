@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>插件示例</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers = viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+            viewer.scene.globe.depthTestAgainstTerrain = true;
+
+            var scene = viewer.scene;
+
+            viewer.camera.flyTo({
+                destination: new CTMap.Cartesian3(-1034925.112460638, 5606960.632260426, 2863125.670253262),
+                orientation: {
+                    heading: 0.2692300860254706,
+                    pitch: -0.3669474134181274,
+                    roll: 0.0007699013517070696
+                }
+            })
+
+
+            let pliginInfo = {
+                    "title": "显示帧率",
+                    "name": "FrameRate",
+                    "type": "tool",
+                    "js": "FrameRate",
+                    "version": "V1.0",
+                    "description": "显示帧率插件",
+                    "active": false,
+                    "url": "../../Plugins/FrameRate/"
+                };
+
+            Sandcastle.addToolbarButton('加载插件', ()=> { 
+                viewer.addPlugin(pliginInfo);
+                alert("插件加载成功");
+
+            });
+
+            
+            Sandcastle.addToolbarButton('打开插件', ()=> {                 
+                viewer.setCurrentTool(pliginInfo.name);
+
+            });
+
+            Sandcastle.addToolbarButton('关闭插件', ()=> {                
+                
+                viewer.setCurrentTool(null);
+ 
+             }); 
+             Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

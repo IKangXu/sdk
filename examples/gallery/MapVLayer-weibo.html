@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>微博签到数据展示</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+    
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers = viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+
+            var layer = new CTMap.MapVLayer();
+            layer.addToMap(viewer);
+            fetch('../data/weibo.json').then((res) => res.json()).then((rs) => {
+               
+                var data1 = [];
+                    var data2 = [];
+                    var data3 = [];
+                    var data4 = [];
+                    for (var i = 0; i < rs[0].length; i++) {
+                        var geoCoord = rs[0][i].geoCoord;
+                        data1.push({
+                            geometry: {
+                                type: 'Point',
+                                coordinates: geoCoord
+                            }
+                        });
+                    }
+
+                    for (var i = 0; i < rs[1].length; i++) {
+                        var geoCoord = rs[1][i].geoCoord;
+                        data2.push({
+                            geometry: {
+                                type: 'Point',
+                                coordinates: geoCoord
+                            },
+                            time: Math.random() * 10
+                        });
+                    }
+
+                    for (var i = 0; i < rs[2].length; i++) {
+                        var geoCoord = rs[2][i].geoCoord;
+                        data3.push({
+                            geometry: {
+                                type: 'Point',
+                                coordinates: geoCoord
+                            },
+                        });
+                    }
+
+                    var options = {
+                        fillStyle: 'rgba(200, 200, 0, 0.8)',
+                        bigData: 'Point',
+                        size: 0.7,
+                        draw: 'simple',
+                    }
+                    layer.create(new CTMap.MapVOpt(data1, options));
+
+                    var options = {
+                        fillStyle: 'rgba(255, 250, 0, 0.8)',
+                        size: 0.7,
+                        bigData: 'Point',
+                        draw: 'simple',
+                    }
+                    layer.create(new CTMap.MapVOpt(data2, options));
+
+                    var options = {
+                        fillStyle: 'rgba(255, 250, 250, 0.6)',
+                        size: 0.7,
+                        bigData: 'Point',
+                        draw: 'simple',
+                    }
+                    layer.create(new CTMap.MapVOpt(data3, options));
+
+                    var options = {
+                        fillStyle: 'rgba(255, 250, 250, 0.9)',
+                        size: 1.1,
+                        draw: 'simple',
+                        bigData: 'Point',
+                        animation: {
+                            stepsRange: {
+                                start: 0,
+                                end: 10
+                            },
+                            trails: 1,
+                            duration: 6,
+                        }
+                    }
+                    layer.create(new CTMap.MapVOpt(data2, options)); 
+
+            })
+
+
+            Sandcastle.finishedLoading();
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

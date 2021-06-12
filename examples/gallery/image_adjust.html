@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>影像调色</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: auto;
+            height: auto;
+            padding: 20px;
+            border-radius: 4px;
+            color: #fffffff5;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: #0000006b;
+        }
+
+        #toolbar input {
+            vertical-align: middle;
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'>
+        <table>
+            <tbody>
+                <tr>
+                    <td>亮度</td>
+                    <td>
+                        <input type="range" min="0" max="3" step="0.02"
+                            data-bind="value: brightness, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: brightness">
+                    </td>
+                </tr>
+                <tr>
+                    <td>对比度</td>
+                    <td>
+                        <input type="range" min="0" max="3" step="0.02"
+                            data-bind="value: contrast, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: contrast">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Hue</td>
+                    <td>
+                        <input type="range" min="0" max="3" step="0.02" data-bind="value: hue, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: hue">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Saturation</td>
+                    <td>
+                        <input type="range" min="0" max="3" step="0.02"
+                            data-bind="value: saturation, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: saturation">
+                    </td>
+                </tr>
+                <tr>
+                    <td>伽马值</td>
+                    <td>
+                        <input type="range" min="0" max="3" step="0.02" data-bind="value: gamma, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: gamma">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            var viewer = new CTMap.Viewer('earthContainer');
+            var imageryLayers = viewer.imageryLayers;
+
+
+            var viewModel = {
+                brightness: 0,
+                contrast: 0,
+                hue: 0,
+                saturation: 0,
+                gamma: 0
+            };
+
+            CTMap.knockout.track(viewModel);
+
+
+            var toolbar = document.getElementById('toolbar');
+            CTMap.knockout.applyBindings(viewModel, toolbar);
+
+
+            function subscribeLayerParameter(name) {
+                CTMap.knockout.getObservable(viewModel, name).subscribe(
+                    function (newValue) {
+                        if (imageryLayers.length > 0) {
+                            var layer = imageryLayers.get(0);
+                            layer[name] = newValue;
+                        }
+                    }
+                );
+            }
+            subscribeLayerParameter('brightness');
+            subscribeLayerParameter('contrast');
+            subscribeLayerParameter('hue');
+            subscribeLayerParameter('saturation');
+            subscribeLayerParameter('gamma');
+
+
+            function updateViewModel() {
+                if (imageryLayers.length > 0) {
+                    var layer = imageryLayers.get(0);
+                    viewModel.brightness = layer.brightness;
+                    viewModel.contrast = layer.contrast;
+                    viewModel.hue = layer.hue;
+                    viewModel.saturation = layer.saturation;
+                    viewModel.gamma = layer.gamma;
+                }
+            }
+            imageryLayers.layerAdded.addEventListener(updateViewModel);
+            imageryLayers.layerRemoved.addEventListener(updateViewModel);
+            imageryLayers.layerMoved.addEventListener(updateViewModel);
+            updateViewModel();
+
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

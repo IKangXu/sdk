@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+	<title>创建场景</title>
+	 <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+	<link rel="stylesheet" href="./js/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+	<script type="text/javascript" src="./js/ztree/js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="./js/ztree/js/jquery.ztree.core.js"></script>
+	<script type="text/javascript" src="./js/ztree/js/jquery.ztree.excheck.js"></script>
+
+
+	<style>
+		html,
+		body,
+		#earthContainer {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+
+		#toolbar {
+			width: 100%;
+			height: auto;
+			position: absolute;
+			left: 20px;
+			top: 20px;
+		}
+
+		#prjTree {
+			margin: 5px;
+			padding: 15px;
+			position: absolute;
+			left: 0px;
+			top: 100px;
+			background: #000000bf;
+			color: #edffff;
+			border-radius: 2px;
+		}
+
+		.ztree li {
+			margin: 5px 0px;
+		}
+
+		.ztree li a {
+			color: #efeded;
+		}
+	</style>
+</head>
+
+<body>
+	<div id='earthContainer'></div>
+	<div id='toolbar'></div>
+	<div id="prjTree" class="ztree">
+	</div>
+	<script>
+		//Sandcastle_Begin
+		function onload() {
+			//初始化地球
+			//初始化地球
+			var viewer = new CTMap.Viewer('earthContainer');
+
+			var layerManager = viewer.layerManager;
+			var setting = {
+				view: {
+					dblClickExpand: true,
+					showLine: true,
+					selectedMulti: false
+				},
+				key: {
+					checked: "show",
+					children: "children",
+					name: "name",
+				},
+				check: {
+					enable: true
+				},
+				callback: {
+					onCheck: zTreeOnCheck
+				}
+			};
+
+			var mindex = 0;
+
+			function zTreeOnCheck(event, treeId, treeNode) {
+				layerManager.setLayerVisible(treeNode.id, treeNode.checked);
+			};
+
+			function getSelectedNode() {
+				var node = treeObj.getSelectedNodes()[0];
+				if (!node) {
+					alert("请选择节点");
+					return;
+				} else return node;
+
+			}
+ 
+
+			var terrainLayer = {
+				name: "地形数据",
+				type: CTMap.LayerType.CesiumTerrain,
+				options: {
+					url: dataUrls.baseTerrain
+				}
+			};
+
+	
+
+			var modelLayer = {
+				name: "大雁塔模型数据",
+				type: CTMap.LayerType.Cesium3DTile,
+				options: {
+					url: dataUrls.dataHome+'model_qx/tileosgb/tileset.json',
+					maximumScreenSpaceError: 64
+				}
+			};
+
+			function updateTree() {
+				let data = layerManager.layerList
+				var t = $("#prjTree");
+				t = $.fn.zTree.init(t, setting, data);
+				treeObj = $.fn.zTree.getZTreeObj("prjTree");
+				treeObj.expandAll(true);
+
+			}
+			updateTree();
+
+
+
+			Sandcastle.addToolbarButton('新建工程', function () {
+				viewer.createProject();
+				updateTree();
+			});
+
+			Sandcastle.addToolbarButton('加载图层', function () {
+				let node = getSelectedNode();
+				if (!node) {					 
+					return;
+				};
+				layerManager.addLayer(node.id, terrainLayer);
+				layerManager.addLayer(node.id, modelLayer);
+				//fuck checked属性绑定到show  上面不生效？？？？？？
+				updateTree();
+
+			});
+
+			Sandcastle.addToolbarButton('定位图层', function () {
+				let node = getSelectedNode();
+				if (!node||node.type==CTMap.LayerType.Group) {
+					alert("请选择图层节点");					 
+					return;
+				};
+				layerManager.flyToLayer(node.id);
+			});
+
+
+			
+
+
+			Sandcastle.addToolbarButton('保存工程', function () {
+				let data = viewer.saveProject();
+				console.log(data);
+				alert("控制台已输出数据");
+			});
+
+
+			Sandcastle.finishedLoading();
+
+
+		}
+
+		//Sandcastle_End
+	</script>
+</body>

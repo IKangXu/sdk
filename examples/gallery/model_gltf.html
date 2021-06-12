@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>单体模型</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer',{
+                shouldAnimate : true
+            });
+
+            viewer.clock.shouldAnimate =true;
+            let esri =  new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    })
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            let lon = 116.3907;
+            let lat = 39.8986;
+
+            function addModel(url) {
+                for (let i = 0; i < 20; i++) {
+                    var heading = Cesium.Math.toRadians(Math.random() * 360);
+                    var pitch = 0;
+                    var roll = 0;
+                    var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+                    let lon1 = lon + Math.random() * 0.08;
+                    let lat1 = lat + Math.random() * 0.08;
+                    let position = Cesium.Cartesian3.fromDegrees(lon1, lat1, 30);
+                    var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
+                    var entity = viewer.entities.add({
+                        name: "消防车",
+                        position: position,
+                        model: {
+                            uri: url,
+                            minimumPixelSize: 128,
+                            maximumScale: 20000
+                        }
+                    });
+                }
+
+            }
+
+
+            addModel(CTMap.buildModuleUrl('Assets/models/GroundVehicle.glb'));
+
+            viewer.flyTo(viewer.entities);
+
+
+            Sandcastle.addToolbarButton('修改颜色', (val) => {
+                for(let item of viewer.entities.values ) {
+                    if(item.model)
+                    item.model.color = CTMap.Color.fromRandom({minimumAlpha:0.5});
+                }
+
+            });
+            Sandcastle.addToolbarButton('修改方位', (val) => {
+                 for(let item of viewer.entities.values ) {
+                     let hpr = new Cesium.HeadingPitchRoll(Math.random()*360, 0, 0);  
+                     if(item.model)
+                    item.orientation =  CTMap.Transforms.headingPitchRollQuaternion(item.position._value, hpr);;
+                }
+
+            });
+
+            Sandcastle.addToolbarButton('打开动画', (val) => {
+                viewer.clock.shouldAnimate =true;
+            });
+            Sandcastle.addToolbarButton('关闭动画', (val) => {
+                viewer.clock.shouldAnimate =false;
+            });
+
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>书签飞行</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <link rel="stylesheet" href="./js/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">	
+	<script type="text/javascript" src="./js/ztree/js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="./js/ztree/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./js/ztree/js/jquery.ztree.excheck.js"></script>
+    
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+        #bkTree {
+			margin: 5px;
+			padding: 15px;
+			position: absolute;
+			left: 0px;
+			top: 100px;
+			background: #0000005c;
+			color: white;
+		}
+
+		.ztree li {
+			margin: 5px 0px;
+		}
+
+		.ztree li a {
+			color: #efeded;
+		}
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <div id="bkTree" class="ztree">
+    </div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers= viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            var esri = new Cesium.ArcGisMapServerImageryProvider({
+                url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            viewer.terrainProvider =  new CTMap.CesiumTerrainProvider({
+                url:dataUrls.baseTerrain
+            });
+
+            viewer.camera.flyTo({
+                destination : new CTMap.Cartesian3(-1034925.112460638, 5606960.632260426, 2863125.670253262),
+                orientation : {
+                    heading : 0.2692300860254706,
+                    pitch : -0.3669474134181274,
+                    roll : 0.0007699013517070696
+                }
+            })
+
+
+            var setting = {
+				view: {
+					dblClickExpand: true,
+					showLine: true,
+					selectedMulti: false
+				},
+				key: {
+					checked: "show",
+					children: "children",
+					name: "name",
+				},
+				check: {
+					enable: true
+				},
+				callback: {
+
+				}
+			};
+
+			var mindex=0;
+			let bookMarkMgr = viewer.project.bookmarkManager;
+			function updateTree() {
+				let data = bookMarkMgr.itemList
+				var t = $("#bkTree");
+				t = $.fn.zTree.init(t, setting, data);
+				treeObj = $.fn.zTree.getZTreeObj("bkTree");
+				treeObj.expandAll(true);
+			}
+            updateTree();
+            
+			bookMarkMgr.relayTime = 0;
+			let itemindex = 0;
+            let currentGroup, currentItem,prjData;
+
+			Sandcastle.addToolbarButton('添加书签组', function () {
+				currentGroup = bookMarkMgr.addGroup(`默认书签组`);
+				updateTree();
+			});
+
+
+			Sandcastle.addToolbarButton('添加书签', function () {
+				currentItem = bookMarkMgr.addItem(currentGroup.id, `书签${itemindex}`);
+				itemindex++;
+				updateTree();
+			});
+			Sandcastle.addToolbarButton('删除书签', function () {
+				bookMarkMgr.removeItem(currentGroup.id, currentItem.id);
+				updateTree();
+			});
+			Sandcastle.addToolbarButton('飞行定位', function () {
+				bookMarkMgr.flyToItem(currentItem);
+			});
+			Sandcastle.addToolbarButton('清空书签', function () {
+				bookMarkMgr.removeAll();
+				updateTree();
+			});
+
+			Sandcastle.addToolbarButton('开始飞行', function () {
+				bookMarkMgr.playGroup(currentGroup.id);
+			});
+
+			Sandcastle.addToolbarButton('停止飞行', function () {
+				bookMarkMgr.stopPlay();
+			});
+             
+            Sandcastle.finishedLoading();
+        }
+
+//Sandcastle_End
+    </script>
+</body>

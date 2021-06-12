@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>倾斜模型裁剪</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+
+            // 加载三维模型 
+            var tileset = viewer.scene.primitives.add(new CTMap.Cesium3DTileset({
+                url: dataUrls.dataHome+'model_qx/tileosgb/tileset.json'
+            }))
+            viewer.zoomTo(tileset);
+            var scene = viewer.scene;
+
+            var targetY = 0.0;
+            var baseHight = 440;
+
+            var selectedPlane;
+            var clippingPlanes;
+
+
+            // 鼠标左键选中
+            var downHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+            downHandler.setInputAction(function (movement) {
+                var pickedObject = scene.pick(movement.position);
+                if (Cesium.defined(pickedObject) &&
+                    Cesium.defined(pickedObject.id) &&
+                    Cesium.defined(pickedObject.id.plane)) {
+                    selectedPlane = pickedObject.id.plane;
+                    selectedPlane.material = Cesium.Color.WHITE.withAlpha(0.05);
+                    selectedPlane.outlineColor = Cesium.Color.WHITE;
+                    scene.screenSpaceCameraController.enableInputs = false;
+                }
+            }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+            // 鼠标左键选中
+            var upHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+            upHandler.setInputAction(function () {
+                if (Cesium.defined(selectedPlane)) {
+                    selectedPlane.material = Cesium.Color.WHITE.withAlpha(0.1);
+                    selectedPlane.outlineColor = Cesium.Color.WHITE;
+                    selectedPlane = undefined;
+                }
+
+                scene.screenSpaceCameraController.enableInputs = true;
+            }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
+            // 鼠标移动
+            var moveHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+            moveHandler.setInputAction(function (movement) {
+                if (Cesium.defined(selectedPlane)) {
+                    var deltaY = movement.startPosition.y - movement.endPosition.y;
+                    targetY += deltaY;
+                }
+            }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+
+            function createPlaneUpdateFunction(plane) {
+                return () => {
+                    plane.distance = targetY;
+                    tileset.clippingPlanes.get(0).distance = baseHight + targetY;
+                    return plane;
+                };
+            }
+
+            function createPlaEntity() {
+                let clippingPlanes = tileset.clippingPlanes;
+                let boundingSphere = tileset.boundingSphere;
+                let pos = boundingSphere.center;
+                let entityPlan = new Cesium.ClippingPlane(new Cesium.Cartesian3(0, 0, -1), 0);
+
+                var planeEntity = viewer.entities.add({
+                    position: pos,
+                    plane: {
+                        dimensions: new Cesium.Cartesian2(boundingSphere.radius * 1.5, boundingSphere.radius *
+                            1.5),
+                        material: Cesium.Color.WHITE.withAlpha(0.1),
+                        plane: new Cesium.CallbackProperty(createPlaneUpdateFunction(entityPlan), false),
+                        outline: true,
+                        outlineColor: Cesium.Color.WHITE
+                    }
+                });
+
+
+            }
+            
+
+            let clippingTool = tileset.clippingTool;
+            Sandcastle.addToolbarButton('裁剪高度', function () {
+                if (!clippingTool.clipHeight) {
+                    clippingTool.clipHeight = baseHight;
+                    createPlaEntity();
+                }
+            });
+
+            // let polygon = [
+            //     108.9591, 34.2195, 400,
+            //     108.9598, 34.2195, 400,
+            //     108.9598, 34.2201, 400,
+            //     108.9591, 34.2201, 400
+            // ];
+            
+
+            // Sandcastle.addToolbarButton('裁剪模型', function () {
+            //     clippingTool.polygon = polygon;
+            // });
+
+            Sandcastle.addToolbarButton('取消裁剪', function () {
+                clippingTool.enable = false;
+               
+                viewer.entities.removeAll();
+         
+            });
+
+            // Sandcastle.addToolbarButton('裁剪高度', function () {
+            //     if (!clippingTool.clipHeight)
+            //         clippingTool.clipHeight = 440;
+            //     else
+            //         clippingTool.clipHeight++;
+            // });
+
+            Sandcastle.finishedLoading();
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

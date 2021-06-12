@@ -1,0 +1,17 @@
+<div class="navbar-header">
+    <div id="suffix-title">
+        <img src="/examples/images/uninpho_logo.svg" style="width: 132px;height: 60px;" alt="">
+    </div>
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse"
+        aria-expanded="false">
+        <i class="fa fa-bars"></i>
+    </button>
+</div>
+ 
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var suffixHeader = document.getElementById("suffix-title");
+        suffixHeader.innerText = identification.name;
+    });
+</script>

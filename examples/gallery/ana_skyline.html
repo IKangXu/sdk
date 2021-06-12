@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>天际线分析</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            // 加载三维模型灰模
+            var tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                url: dataUrls.dataHome+'building_texture/tileset.json'
+            }))
+
+            tileset.readyPromise.then(function (tileset) {
+                viewer.scene.primitives.add(tileset);
+                var pos = new CTMap.Cartesian3(-2175282.798096478, 4393329.870820272,  4066564.16690707);
+                viewer.camera.flyTo({
+                    destination: pos,
+                    orientation: {
+                        heading: 5.048700612650428,
+                        pitch: -0.17453292365134399,
+                        roll: 6.280018983393266
+                    }
+                });
+
+            }).otherwise(function (error) {
+                console.log(error)
+            })
+
+            var skyline = viewer.analysis.skyline;
+            skyline.skylineOption.strokeDistance = 2000;
+            skyline.open();
+
+            Sandcastle.addToolbarButton('开启天际线', function () {
+                skyline.open();
+            });
+
+             Sandcastle.addToggleButton('描边',false, (val) =>{
+                skyline.skylineOption.enabeEdge = val;
+            }); 
+
+
+            Sandcastle.addToolbarButton('关闭天际线', function () {
+                skyline.close();
+            }); 
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>单体模型</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+             
+            viewer.scene.globe.depthTestAgainstTerrain =true;
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            let lon = 116.3907;
+            let lat = 39.8986;
+    
+
+            function addModel(url) {
+                for (let i = 0; i < 20; i++) {
+                    var heading = Cesium.Math.toRadians(Math.random() * 360);
+                    var pitch = 0;
+                    var roll = 0;
+                    var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+                    let lon1 = lon + Math.random() * 0.08;
+                    let lat1 = lat + Math.random() * 0.08;
+                    let position = Cesium.Cartesian3.fromDegrees(lon1, lat1, 0);
+                    var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
+                    var entity = viewer.entities.add({
+                        name: "消防车",
+                        position: position,
+                        model: {
+                            uri: url,
+                            minimumPixelSize: 128,
+                            maximumScale: 20000
+                        }
+                    });
+                }
+
+            }
+
+
+            addModel(Cesium.buildModuleUrl('Assets/models/firetruck.glb')); 
+            viewer.flyTo(viewer.entities); 
+ 
+          let transformEditor = new CTMap.transformEditor(viewer.scene);
+
+        Sandcastle.addToolbarButton('调整位置', function () {
+            //model.modelMatrix = new Cesium.Matrix4(0.9961946980917457,-0.08715574274765825,0,0,0.05602263155122217,0.6403416087687968,0.7660444431189781,0,-0.06676517241775076,-0.7631294127377697,0.6427876096865391, 0, -426427.5649314479, -4874089.370505605, 4077985.572200376, 1)		
+        });
+
+        Sandcastle.addToolbarButton('开始编辑', function () {
+            transformEditor.start();				
+        });
+
+        Sandcastle.addToolbarButton('停止编辑', function () {
+            transformEditor.stop();
+        });
+
+
+
+        Sandcastle.finishedLoading();
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

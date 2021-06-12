@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>火焰</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: auto;
+            height: auto;
+            padding: 20px;
+            border-radius: 4px;
+            color: #fffffff5;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: #0000006b;
+        }
+
+
+        #toolbar input {
+            vertical-align: middle;
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+
+        #toolbar .header {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'>
+        <table>
+            <tbody>
+                <tr>
+                    <td>速率</td>
+                    <td>
+                        <input type="range" min="0.0" max="100.0" step="1"
+                            data-bind="value: emissionRate, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: emissionRate">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>大小</td>
+                    <td>
+                        <input type="range" min="2" max="60.0" step="1"
+                            data-bind="value: particleSize, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: particleSize">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>最小周期</td>
+                    <td>
+                        <input type="range" min="0.1" max="30.0" step="1"
+                            data-bind="value: minimumParticleLife, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: minimumParticleLife">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>最大周期</td>
+                    <td>
+                        <input type="range" min="0.1" max="30.0" step="1"
+                            data-bind="value: maximumParticleLife, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: maximumParticleLife">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>最小速度</td>
+                    <td>
+                        <input type="range" min="0.0" max="30.0" step="1"
+                            data-bind="value: minimumSpeed, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: minimumSpeed">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>最大速度</td>
+                    <td>
+                        <input type="range" min="0.0" max="30.0" step="1"
+                            data-bind="value: maximumSpeed, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: maximumSpeed">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>开始比例</td>
+                    <td>
+                        <input type="range" min="0.0" max="10.0" step="1"
+                            data-bind="value: startScale, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: startScale">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>结束比例</td>
+                    <td>
+                        <input type="range" min="0.0" max="10.0" step="1"
+                            data-bind="value: endScale, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: endScale">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>重力系数</td>
+                    <td>
+                        <input type="range" min="-20.0" max="20.0" step="1"
+                            data-bind="value: gravity, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: gravity">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers = viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+
+
+            //Set the random number seed for consistent results.
+            CTMap.Math.setRandomNumberSeed(3);
+
+            //Set bounds of our simulation time
+            var start = CTMap.JulianDate.fromDate(new Date(2015, 2, 25, 16));
+            var stop = CTMap.JulianDate.addSeconds(start, 120, new CTMap.JulianDate());
+
+            //Make sure viewer is at the desired time.
+            viewer.clock.startTime = start.clone();
+            viewer.clock.stopTime = stop.clone();
+            viewer.clock.currentTime = start.clone();
+            viewer.clock.clockRange = CTMap.ClockRange.LOOP_STOP; //Loop at the end
+            viewer.clock.multiplier = 1;
+            viewer.clock.shouldAnimate = true;
+
+             
+            var viewModel = {
+                emissionRate: 60.0,
+                gravity: 0.0,
+                minimumParticleLife: 1.2,
+                maximumParticleLife: 1.2,
+                minimumSpeed: 1.0,
+                maximumSpeed: 4.0,
+                startScale: 1.0,
+                endScale: 5.0,
+                particleSize: 25.0
+            };
+
+            CTMap.knockout.track(viewModel);
+            var toolbar = document.getElementById('toolbar');
+            CTMap.knockout.applyBindings(viewModel, toolbar);
+
+            var entityPosition = new CTMap.Cartesian3();
+            var entityOrientation = new CTMap.Quaternion();
+            var rotationMatrix = new CTMap.Matrix3();
+            var modelMatrix = new CTMap.Matrix4();
+
+            function computeModelMatrix(entity, time) {
+                return entity.computeModelMatrix(time, new CTMap.Matrix4());
+            }
+
+            var emitterModelMatrix = new CTMap.Matrix4();
+            var translation = new CTMap.Cartesian3();
+            var rotation = new CTMap.Quaternion();
+            var hpr = new CTMap.HeadingPitchRoll();
+            var trs = new CTMap.TranslationRotationScale();
+
+            function computeEmitterModelMatrix() {
+                hpr = CTMap.HeadingPitchRoll.fromDegrees(0.0, 0.0, 0.0, hpr);
+                trs.translation = CTMap.Cartesian3.fromElements(-4.0, 0.0, 1.4, translation);
+                trs.rotation = CTMap.Quaternion.fromHeadingPitchRoll(hpr, rotation);
+
+                return CTMap.Matrix4.fromTranslationRotationScale(trs, emitterModelMatrix);
+            }
+
+            var pos1 = CTMap.Cartesian3.fromDegrees(-75.15787310614596, 39.97862668312678);
+            var pos2 = CTMap.Cartesian3.fromDegrees(-75.1633691390455, 39.95355089912078);
+            var position = new CTMap.SampledPositionProperty();
+
+            position.addSample(start, pos1);
+            position.addSample(stop, pos2);
+
+            var entity = viewer.entities.add({
+                availability: new CTMap.TimeIntervalCollection([new CTMap.TimeInterval({
+                    start: start,
+                    stop: stop
+                })]),
+                model: {
+                    uri: dataUrls.dataHome+'model_gltf/消防车.gltf',
+                    minimumPixelSize: 64
+                },
+                viewFrom: new CTMap.Cartesian3(-100.0, 0.0, 100.0),
+                position: position,
+                orientation: new CTMap.VelocityOrientationProperty(position)
+            });
+            viewer.trackedEntity = entity;
+
+            var scene = viewer.scene;
+            var particleSystem = scene.primitives.add(new CTMap.ParticleSystem({
+                image: dataUrls.dataHome+'image/smoke.png',
+
+                startColor: CTMap.Color.LIGHTSEAGREEN.withAlpha(0.7),
+                endColor: CTMap.Color.WHITE.withAlpha(0.0),
+
+                startScale: viewModel.startScale,
+                endScale: viewModel.endScale,
+
+                minimumParticleLife: viewModel.minimumParticleLife,
+                maximumParticleLife: viewModel.maximumParticleLife,
+
+                minimumSpeed: viewModel.minimumSpeed,
+                maximumSpeed: viewModel.maximumSpeed,
+
+                imageSize: new CTMap.Cartesian2(viewModel.particleSize, viewModel.particleSize),
+
+                emissionRate: viewModel.emissionRate,
+
+                bursts: [
+                    // these burst will occasionally sync to create a multicolored effect
+                    new CTMap.ParticleBurst({
+                        time: 5.0,
+                        minimum: 10,
+                        maximum: 100
+                    }),
+                    new CTMap.ParticleBurst({
+                        time: 10.0,
+                        minimum: 50,
+                        maximum: 100
+                    }),
+                    new CTMap.ParticleBurst({
+                        time: 15.0,
+                        minimum: 200,
+                        maximum: 300
+                    })
+                ],
+
+                lifetime: 16.0,
+
+                emitter: new CTMap.CircleEmitter(2.0),
+
+                emitterModelMatrix: computeEmitterModelMatrix(),
+
+                updateCallback: applyGravity
+            }));
+
+            var gravityScratch = new CTMap.Cartesian3();
+
+            function applyGravity(p, dt) {
+                // We need to compute a local up vector for each particle in geocentric space.
+                var position = p.position;
+
+                CTMap.Cartesian3.normalize(position, gravityScratch);
+                CTMap.Cartesian3.multiplyByScalar(gravityScratch, viewModel.gravity * dt, gravityScratch);
+
+                p.velocity = CTMap.Cartesian3.add(p.velocity, gravityScratch, p.velocity);
+            }
+
+            viewer.scene.preUpdate.addEventListener(function (scene, time) {
+                particleSystem.modelMatrix = computeModelMatrix(entity, time);
+
+                // Account for any changes to the emitter model matrix.
+                particleSystem.emitterModelMatrix = computeEmitterModelMatrix();
+
+                // Spin the emitter if enabled.
+                if (viewModel.spin) {
+                    viewModel.heading += 1.0;
+                    viewModel.pitch += 1.0;
+                    viewModel.roll += 1.0;
+                }
+            });
+
+            Cesium.knockout.getObservable(viewModel, 'emissionRate').subscribe(
+                function (newValue) {
+                    particleSystem.emissionRate = parseFloat(newValue);
+                }
+            );
+
+            Cesium.knockout.getObservable(viewModel, 'particleSize').subscribe(
+                function (newValue) {
+                    var particleSize = parseFloat(newValue);
+                    particleSystem.minimumImageSize.x = particleSize;
+                    particleSystem.minimumImageSize.y = particleSize;
+                    particleSystem.maximumImageSize.x = particleSize;
+                    particleSystem.maximumImageSize.y = particleSize;
+                }
+            );
+
+            Cesium.knockout.getObservable(viewModel, 'minimumParticleLife').subscribe(
+                function (newValue) {
+                    particleSystem.minimumParticleLife = parseFloat(newValue);
+                }
+            );
+
+            Cesium.knockout.getObservable(viewModel, 'maximumParticleLife').subscribe(
+                function (newValue) {
+                    particleSystem.maximumParticleLife = parseFloat(newValue);
+                }
+            );
+
+            Cesium.knockout.getObservable(viewModel, 'minimumSpeed').subscribe(
+                function (newValue) {
+                    particleSystem.minimumSpeed = parseFloat(newValue);
+                }
+            );
+
+            Cesium.knockout.getObservable(viewModel, 'maximumSpeed').subscribe(
+                function (newValue) {
+                    particleSystem.maximumSpeed = parseFloat(newValue);
+                }
+            );
+
+            Cesium.knockout.getObservable(viewModel, 'startScale').subscribe(
+                function (newValue) {
+                    particleSystem.startScale = parseFloat(newValue);
+                }
+            );
+
+            Cesium.knockout.getObservable(viewModel, 'endScale').subscribe(
+                function (newValue) {
+                    particleSystem.endScale = parseFloat(newValue);
+                }
+            );
+
+            var options = [{
+                text: '圆形',
+                onselect: function () {
+                    particleSystem.emitter = new CTMap.CircleEmitter(2.0);
+                }
+            }, {
+                text: '球形',
+                onselect: function () {
+                    particleSystem.emitter = new CTMap.SphereEmitter(2.5);
+                }
+            }, {
+                text: '圆柱形',
+                onselect: function () {
+                    particleSystem.emitter = new CTMap.ConeEmitter(CTMap.Math.toRadians(45.0));
+                }
+            }, {
+                text: '方形',
+                onselect: function () {
+                    particleSystem.emitter = new CTMap.BoxEmitter(new CTMap.Cartesian3(10.0, 10.0,
+                        10.0));
+                }
+            }];
+
+            Sandcastle.addToolbarMenu(options);
+
+
+
+            Sandcastle.finishedLoading();
+
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>淹没分析</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers = viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+
+
+            var tileset = viewer.scene.primitives.add(new CTMap.Cesium3DTileset({
+                url: dataUrls.dataHome+'model_qx/tileosgb/tileset.json'
+            }))
+
+            tileset.readyPromise.then(function (tileset) {
+                viewer.zoomTo(tileset, new CTMap.HeadingPitchRange(0.5, -0.2, tileset.boundingSphere.radius *
+                    1.0))
+            }).otherwise(function (error) {
+                console.log(error)
+            })
+
+            var earth =viewer;
+
+            var floodAnalyze = earth.analysis.flood;
+            var pickPoint = false;
+            floodAnalyze.minHeight = 400;
+            floodAnalyze.maxHeight = 500;
+            var testEntity = [];
+
+
+            function startFlood(p1) {
+                let ptList = CTMap.Cartesian3.fromDegreesArrayHeights(p1);
+                ptList.push(ptList[0]);
+                testEntity.push(earth.entities.add({
+                    polyline: {
+                        positions: ptList,
+                        clampToGround: true,
+                        width: 3
+                    }
+                }));
+
+                floodAnalyze.setPolygon(p1);
+                earth.clearGraphic();
+            }
+
+
+
+            var handler = new CTMap.ScreenSpaceEventHandler(earth.scene.canvas);
+            handler.setInputAction(function (event) {
+                if (!pickPoint) return;
+                var CarPosition = earth.scene.globe.pick(earth.camera.getPickRay(event.position), earth.scene);
+                var object = earth.scene.pick(event.position);
+                if(object){
+                    CarPosition = earth.scene.pickPosition(event.position);
+                }
+
+
+                if (CarPosition) {
+                    let height = CTMap.Cartographic.fromCartesian(CarPosition).height
+                    floodAnalyze.minHeight = height;
+                    testEntity.push(earth.entities.add({
+                        position: CarPosition,
+                        point: {
+                            pixelSize: 12,
+                            color:CTMap.Color.RED
+                        }
+                    }));
+                    pickPoint = false;
+
+                }
+
+            }, CTMap.ScreenSpaceEventType.LEFT_CLICK);
+
+
+
+            Sandcastle.addToolbarButton('绘制分析区域', function () {
+                earth.trackPolygon(startFlood);
+            });
+
+            Sandcastle.addToolbarButton('设置颜色', function () {
+                floodAnalyze.color = CTMap.Color.BLUE.withAlpha(0.5)
+            });
+
+            Sandcastle.addToolbarButton('选取起点', function () {
+                pickPoint = true;
+            });
+
+            Sandcastle.addToolbarButton('设置淹没高度', function () {
+                floodAnalyze.maxHeight = floodAnalyze.minHeight + 200;
+            });
+
+
+
+            Sandcastle.addToolbarButton('淹没速度++', function () {
+                floodAnalyze.speed += 0.2;
+            });
+
+
+
+            Sandcastle.addToolbarButton('淹没速度--', function () {
+                floodAnalyze.speed -= 0.2;
+            });
+
+
+            Sandcastle.addToolbarButton('开始分析', function () {
+                floodAnalyze.open();
+            });
+            Sandcastle.addToolbarButton('停止分析', function () {
+                earth.analysis.closeAll();
+                floodAnalyze.close();
+                for (let item of testEntity)
+                    earth.entities.remove(item);
+
+            });
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

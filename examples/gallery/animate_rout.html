@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>路径动画</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            let lon = 116.3907;
+            let lat = 39.8986;
+
+            function addModel(url) {
+                for (let i = 0; i < 20; i++) {
+                    var heading = CTMap.Math.toRadians(Math.random() * 360);
+                    var pitch = 0;
+                    var roll = 0;
+                    var hpr = new CTMap.HeadingPitchRoll(heading, pitch, roll);
+                    let lon1 = lon + Math.random() * 0.08;
+                    let lat1 = lat + Math.random() * 0.08;
+                    let position = CTMap.Cartesian3.fromDegrees(lon1, lat1, 30);
+                    var orientation = CTMap.Transforms.headingPitchRollQuaternion(position, hpr);
+                    var entity = viewer.entities.add({
+                        name: "消防车",
+                        position: position,
+                        model: {
+                            uri: url,
+                            minimumPixelSize: 128,
+                            maximumScale: 20000
+                        }
+                    });
+                }
+
+            }
+ 
+  var routData = [-1010961.8964659909,5603584.172100881,2869500.433988394,-1011079.3478463653,5603564.999324877,2869503.518952964,-1011190.6526225073,5603531.559866495,2869539.3619459257,-1011267.2774204079,5603511.722649808,2869542.746733572,-1011356.1056698157,5603502.717186989,2869538.011163681,-1011495.0219101197,5603499.70682758,2869534.1460332107,-1011540.0979396503,5603489.858829148,2869543.6836461336,-1011565.3348104454,5603481.280479974,2869554.710592003,-1011616.9770056561,5603459.084732994,2869586.104989217,-1011659.3361132069,5603434.276309353,2869618.4754278366,-1011697.7344783412,5603415.09707037,2869640.5445102756,-1011732.0825591511,5603408.589306291,2869648.4801580794,-1011770.7081008784,5603400.891723351,2869649.1379844854,-1011799.2324918257,5603400.280237431,2869641.135608091,-1011819.4771521005,5603399.149814506,2869632.2582117207,-1011842.6635742654,5603403.860787048,2869616.116544448,-1011871.870515911,5603418.006565174,2869579.4078845466,-1011922.5084105541,5603455.15125435,2869503.51616828,-1011940.7636538157,5603467.41298335,2869474.7609276,-1011983.3321288585,5603489.701166483,2869438.182861638,-1012018.9878645114,5603499.259274399,2869417.9307837286,-1012076.6524037315,5603501.407839461,2869398.3133910145,-1012195.6393814725,5603500.128722277,2869391.1876492016,-1012294.2237789646,5603493.5509944735,2869377.160737981,-1012497.3006120786,5603511.305072545,2869283.933742311,-1012615.2018371351,5603521.912284378,2869248.6440431946,-1012761.900739373,5603530.01092143,2869168.4256171877,-1012850.6521302682,5603537.847342802,2869118.408756105,-1012896.1348342806,5603552.460229284,2869091.4840897666,-1012938.8118836243,5603568.271079777,2869053.568305228,-1012980.5681908913,5603583.11851488,2869017.0876934263,-1013003.0575127683,5603586.3276180895,2869005.0848348793,-1013020.5286415917,5603585.881498378,2869002.0431753714,-1013054.7045860728,5603580.770585456,2869007.2080641827,-1013101.7256331736,5603568.522518558,2869030.561658443,-1013170.4766855844,5603552.7440283075,2869070.314636882,-1013210.0258209252,5603540.944637677,2869090.2473592423,-1013236.8589227032,5603533.767241324,2869096.2644852824,-1013256.6936795092,5603531.564769335,2869095.259773798,-1013275.3210011611,5603531.443456007,2869090.8901530504,-1013298.065614631,5603533.647530754,2869080.5391105153,-1013319.0283722157,5603538.769008626,2869065.93810155,-1013349.2050009496,5603553.930137177,2869034.295941044,-1013371.7792041682,5603563.0134202475,2869003.689631158,-1013418.89190967,5603585.559909955,2868954.721623617,-1013438.863838167,5603601.345771254,2868925.124922373,-1013443.8881800344,5603614.765772561,2868897.47005409,-1013435.3649168949,5603623.764858571,2868869.876113703,-1013409.773981517,5603633.724187475,2868845.5030264556,-1013377.2081667129,5603646.925640939,2868829.244710944,-1013338.3895254941,5603674.0233616745,2868820.0309010213,-1013328.6893089688,5603693.401495261,2868802.956526599,-1013321.6775401421,5603712.63441841,2868760.466328021,-1013335.2186244492,5603717.324526549,2868719.844874824,-1013362.2408000347,5603717.38409035,2868694.8476947444,-1013415.2139651012,5603716.269415627,2868665.4099390483,-1013440.0058816916,5603726.42180265,2868643.5964408587,-1013461.6111355724,5603744.529553097,2868577.933121876,-1013489.0966003727,5603743.489100014,2868548.83536565,-1013528.5285213784,5603743.07118747,2868540.0164499725,-1013598.0692284753,5603729.836848125,2868535.278717308,-1013660.2467435045,5603705.229900441,2868533.1828568317,-1013704.0647817132,5603689.087719454,2868568.594827105,-1013725.9765493914,5603670.349357712,2868592.7277533123,-1013762.618022652,5603640.864480039,2868584.1227595992,-1013796.0592381126,5603618.09132526,2868555.0253282804,-1013827.334251394,5603600.122488256,2868540.5643448317,-1013838.3435492896,5603589.112292182,2868542.1348780757,-1013847.0446931506,5603579.291873222,2868552.975799535,-1013850.849755118,5603568.157767515,2868567.483273674,-1013846.5383479955,5603561.166084973,2868596.7094152058,-1013849.2376930041,5603550.80602105,2868632.077879517,-1013860.6317296408,5603542.877518469,2868645.030735504,-1013881.6178212974,5603540.684301033,2868650.3111164854,-1013900.5530095007,5603542.090954165,2868642.226602111,-1013924.982114688,5603550.824605048,2868625.6283887527,-1013953.5920083668,5603561.124132253,2868613.959778337,-1013970.0538503285,5603568.470715386,2868617.1449174746,-1014002.0525511148,5603567.110349294,2868638.836104273,-1014094.1342809293,5603504.4128835425,2868712.599622155,-1014228.9825831422,5603423.295732408,2868829.075625611,-1014235.6096439927,5603391.129919281,2868854.3974047448,-1014228.1471961132,5603364.9804876475,2868923.538942623,-1014258.7248804157,5603335.741273824,2868944.4464615034,-1014524.441413952,5603260.160842991,2869010.4687398146,-1014567.2240403076,5603193.4304378955,2869125.6020306507,-1014708.8215695084,5603112.092132478,2869107.3018004433,-1014790.9128888185,5603054.238357272,2869172.6045672717,-1014826.559342622,5603041.265212942,2869195.1694890605,-1014854.6394439117,5603024.4640640095,2869250.414923179,-1014895.3229347798,5603024.108384587,2869264.779879284,-1014915.7173138587,5603029.350105466,2869246.342340721,-1014925.1362347121,5603035.3058449635,2869219.167373932,-1014900.860618941,5603043.598968642,2869188.9767641257,-1014801.991569133,5603096.712767991,2869050.4796349,-1014746.1309032915,5603179.14485559,2868981.36896962,-1014605.0140923096,5603264.21660849,2868830.1725791222,-1014392.196809673,5603439.948998313,2868528.694010171,-1014359.1322356313,5603519.850962529,2868393.490285812,-1014392.6234171668,5603556.140378286,2868277.531461938,-1014439.3377821973,5603600.266234419,2868177.5740756826,-1014617.3060045409,5603537.679454135,2868234.3706376106,-1015848.0513422156,5603084.614548974,2868676.127544219,-1016447.0172242979,5602917.572908682,2868814.97680125]
+            
+            
+  let animation ;
+
+            function loadTaskRout() {
+               
+                    let start = CTMap.JulianDate.fromDate(new Date());
+                    var keyPos = new CTMap.SampledPositionProperty();
+                    keyPos.backwardExtrapolationDuration = 2;
+                    keyPos.backwardExtrapolationType = CTMap.ExtrapolationType.HOLD;
+                    keyPos.forwardExtrapolationType = CTMap.ExtrapolationType.HOLD;
+                    let orientation = new CTMap.VelocityOrientationProperty(keyPos);
+                    let result = [];
+                    let pointList = CTMap.Cartesian3.unpackArray(routData, result) 
+
+                    for (let j = 0; j < pointList.length; j++) {
+                        let ctime = CTMap.JulianDate.addSeconds(
+                            start,
+                            8 + j * 3,
+                            new CTMap.JulianDate()
+                        );
+                        keyPos.addSample(ctime, pointList[j]);
+                    }
+
+                    modelEntity = viewer.entities.add({
+                        position: keyPos,
+                        //show: false,
+                        orientation: orientation,
+                        model: { 
+                            uri: CTMap.buildModuleUrl('Assets/models/firetruck.glb'),
+                            minimumPixelSize: 64
+                        }
+                    });
+                    let offset = 0;
+
+                    animation = viewer.entities.add({
+                        position: keyPos,
+                        //show: false,
+                        orientation: orientation,
+                        label: {
+                            text: "消防车",
+                            font: "16px 微软雅黑",
+                            fillColor: CTMap.Color.DEEPSKYBLUE,
+                            outlineColor: CTMap.Color.BLACK,
+                            outlineWidth: 1.0,
+                            pixelOffset:new CTMap.Cartesian2(0, -40),
+                            showBackground: true,
+                            backgroundColor: CTMap.Color.BLACK.withAlpha(0.9),
+                            backgroundPadding: new CTMap.Cartesian2(2, 2),
+                            disableDepthTestDistance: Number.POSITIVE_INFINITY
+                        },
+                        corridor: {
+                            positions: pointList,
+                            width: 6.0,
+                            material: new CTMap.StripeMaterialProperty({
+                                         evenColor: CTMap.Color.fromCssColorString("#FF0000").withAlpha(0.8),
+                                        oddColor: CTMap.Color.fromCssColorString("#9FEE00").withAlpha(0.8),
+                                        repeat: 40,
+                                        orientation: CTMap.StripeOrientation.VERTICAL,
+                                        offset:  new CTMap.CallbackProperty(
+                                                                (time)=>{
+                                                                    return offset+=0.0008;
+
+                                                                },
+                                                                false
+                                                            )
+                                    })
+                        },
+                        ellipse: {
+                            semiMajorAxis: 20,
+                            semiMinorAxis: 20,
+                            //material:CTMap.Color.RED.withAlpha(0.3),
+                            material: CTMap.Color.LIME.withAlpha(0.15)
+                        }
+                        //   rectangle: {
+                        //     coordinates: new CTMap.CallbackProperty(this.getRectangle, false),
+                        //     material: CTMap.Color.RED.withAlpha(0.3),
+                        //     //rotation: new CTMap.CallbackProperty(this.getRotation, false),
+                        //     classificationType: CTMap.ClassificationType.BOTH
+                        // }
+                    });
+
+                    //添加polygon
+                
+            }
+
+    function setClock(){
+        let times =modelEntity.position._property._times;
+        let start = times[0];
+        let end = times[times.length - 1];
+        viewer.clock.startTime = start;
+        viewer.clock.stopTime = end;
+        viewer.clock.currentTime = start;
+        viewer.clock.clockRange = CTMap.ClockRange.LOOP_STOP;
+        viewer.clock.multiplier = viewer.clock.multiplier / 2;
+        viewer.flyTo(animation);
+        viewer.clock.shouldAnimate = true;
+    }
+
+         
+            Sandcastle.addToolbarButton('路径动画', () => {
+                loadTaskRout();
+                setClock();
+            });
+            Sandcastle.addToolbarButton('视角跟踪', () => {
+                viewer.trackedEntity =modelEntity;
+            });
+            Sandcastle.addToolbarButton('取消跟踪', () => {
+                viewer.trackedEntity =null;
+            });
+
+            viewer.flyTo(viewer.entities);
+
+ 
+            Sandcastle.finishedLoading();
+            
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

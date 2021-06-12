@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>全国30米地形数据</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers = viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain,
+                requestVertexNormals :true
+            });
+            viewer.scene.globe.depthTestAgainstTerrain = true; 
+            var scene = viewer.scene;
+
+            var center = [-1136550.7143207944, 5368176.604343416, 3254552.2249880456];
+            var orientantion = [5.329705527440996, -0.49556751102864816, 6.280446994760659];
+
+         
+            var slopeAnayze = viewer.analysis.slope;
+            
+            var slopeRamp = [0.0, 0.29, 0.5, Math.sqrt(2)/2, 0.87, 0.91, 1.0];                       
+            slopeAnayze.colorRamp.set(slopeRamp[0], '#000000'); //black
+            slopeAnayze.colorRamp.set(slopeRamp[1], '#2747E0'); //blue
+            slopeAnayze.colorRamp.set(slopeRamp[2], '#D33B7D'); //pink
+            slopeAnayze.colorRamp.set(slopeRamp[3], '#D33038'); //red
+            slopeAnayze.colorRamp.set(slopeRamp[4], '#FF9742'); //orange
+            slopeAnayze.colorRamp.set(slopeRamp[5], '#ffd700'); //yellow
+            slopeAnayze.colorRamp.set(slopeRamp[6], '#ffffff'); //white
+
+            viewer.camera.flyTo({
+                destination: new Cesium.Cartesian3(center[0], center[1], center[2]),
+                orientation: {
+                    heading: orientantion[0],
+                    pitch: orientantion[1],
+                    roll: orientantion[2],
+                }
+            });
+
+
+            function startAna(p1) {     
+               slopeAnayze.setPolygon(p1);                
+               slopeAnayze.open();
+               viewer.clearGraphic();
+            }
+ 
+
+            Sandcastle.addToolbarButton('开始分析', function () {
+                viewer.trackPolygon(startAna);
+            });
+
+            Sandcastle.addToolbarButton('设置颜色', function () {
+               // shadingUniforms.image = getColorRamp();
+            });
+            Sandcastle.addToolbarButton('停止分析', function () {
+                slopeAnayze.close();
+                viewer.entities.removeAll();
+            }); 
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

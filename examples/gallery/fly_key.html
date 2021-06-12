@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>环视</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+        #tooltip {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 80px;
+            color: #edffff;           
+            width: auto;
+            padding: 10px;
+            background: #00000080;
+            border: 1px solid #ffffff66;
+            border-radius: 2px;
+            font-size: 15px;
+        }
+        
+        #tooltip td{
+            padding: 0px 10px;
+
+            
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='tooltip'>
+        <table>
+            <tr>
+                <td> 相机平移:</td>
+                <td>W:向前平移</td>
+                <td>S:向后平移 </td>
+                <td>A:向左平移 </td>
+                <td>D:向右平移</td>
+                <td>Q:相机抬高</td>
+                <td>E:相机降低</td>
+            </tr>            
+            <tr>
+                <td> 相机固定:</td>
+                <td> &uarr;:抬头</td>
+                <td> &darr;:低头 </td>
+                <td> &larr;:向左旋转 </td>
+                <td> &rarr;:向右旋转</td>
+            </tr>
+            <tr>
+                <td> 目标点固定:</td>
+                <td>I:飞近</td>
+                <td>K:飞远 </td>
+                <td>J:逆时针旋转 </td>
+                <td>L:顺时针旋转</td>
+                <td>U:向上旋转</td>
+                <td>O:向下旋转</td>
+            </tr>
+        </table>
+
+    </div>
+
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers = viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+
+
+            viewer.camera.flyTo({
+                destination: new Cesium.Cartesian3(-1009373.2459224868, 5605851.992480287, 2880850.0868039546),
+                orientation: {
+                    heading: 6.101629882895379,
+                    pitch: -0.378981147966442,
+                    roll: 6.282657945763344
+                }
+            });
+
+            let keyNavagation = new CTMap.KeyboardNavigation(viewer);
+
+            Sandcastle.addToolbarButton('启用键盘导航', function () {
+                keyNavagation.enable = true;
+            });
+
+            Sandcastle.addToolbarButton('停止键盘导航', function () {
+                keyNavagation.enable = false;
+            });
+
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

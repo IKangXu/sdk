@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>三维电力场站信息可视化平台</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer',{shouldAnimate: true});
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+
+            var routData = [-2781911.7918978436, 4754457.46159368, 3204356.960324453, -2781874.9921384915,
+                4754381.978780335, 3204503.4262967147, -2781867.2231461504, 4754381.965417807, 3204510.190071838, -
+                2781861.6377612413, 4754383.952647895, 3204512.0358272195, -2781804.85324197, 4754415.131137969,
+                3204514.1370899216, -2781804.6538606156, 4754418.206038156, 3204509.6498106313, -2781810.9356151037,
+                4754431.3645478925, 3204484.254102144, -2781804.5019988227, 4754435.173815928, 3204484.0756271533, -
+                2781696.1390528404, 4754494.695918104, 3204488.1331066615, -2781696.2277412373, 4754497.78325442,
+                3204483.387221556, -2781704.51417127, 4754515.10213938, 3204449.9808027907, -2781717.3552515646,
+                4754540.496667827, 3204400.288395835, -2781719.8835493834, 4754542.859735396, 3204394.447003375, -
+                2781834.497395904, 4754479.020843343, 3204391.526739213, -2781835.3373229546, 4754478.632967757,
+                3204391.4604300624, -2781845.1092269705, 4754497.641701889, 3204354.0684471866
+            ]
+
+
+            viewer.scene.globe.depthTestAgainstTerrain = true;
+            viewer.navigation.mousePosition.show = true;
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+
+
+            var dataURls = [{
+                    name: "宁海模型",
+                    url: 'http://localhost/Data/maxData/宁海模型/3dtiles/tileset.json',
+                    geoError: 32,
+                    transform: [-0.8743687064941593, -0.4845638632270897, -0.026023596180577948, 0,
+                        0.22102277567232653, -0.44541866937171154, 0.8676123221861444, 0, -0.4320049742049646,
+                        0.7528612564274852, 0.4965597958278497, 0, -2177740.70404011, 4388716.79029236,
+                        4070048.433825, 1
+                    ],
+                    Matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -604158.727881351, 365721.3478983464, -
+                        865648.4624287821, 1
+                    ]
+                }, {
+                    name: "春晓模型",
+                    url: 'http://localhost/Data/maxData/春晓模型/3dtiels/tileset.json',
+                    geoError: 32,
+                    Matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -602452.1063076276, 360123.01308156457, -
+                        858841.3043404818, 1
+                    ],
+                    transform: [-0.8868608198690515, -0.4610976480340992, -0.029442234266654488, 0,
+                        0.2170638825787782, -0.4720513851234406, 0.8544300794581531, 0, -0.4078739475144476,
+                        0.7513697151073221, 0.5187315241611204, 0, -2180280.49969279, 4393835.34600231,
+                        4063245.22945362, 1
+                    ]
+                }, {
+                    name: "万象模型",
+                    url: 'http://localhost/Data/maxData/wx/tileset.json',
+                    geoError: 256,
+                    Matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -604241.6399209327, 357935.7345346734, -
+                        865339.7058355273, 1
+                    ],
+                    transform: [-0.0008628449685696545, -0.0005040463567358977, -0.000037892353784107095, 0,
+                        0.00021436059427530572, -0.00043277801012532005, 0.0008756441797750426, 0, -
+                        0.0004577642360822544, 0.0007474225473005452, 0.00048146800511642874, 0, -
+                        2177574.41700944, 4396359.91064106, 4070041.25273316, 1
+                    ]
+                },
+                {
+                    name: "宁海模型1",
+                    url: 'http://localhost/Data/maxData/宁海模型/3dtiles/tileset.json',
+                    geoError: 32,
+                    Matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -604664.8564414531, 365444.11583293416, -
+                        865638.8852824899, 1
+                    ],
+                    transform: [-0.8746784230988638, -0.4839397033072344, -0.027203303626427564, 0,
+                        0.23104222926181892, -0.4656104874867807, 0.8542987546754655, 0, -0.42609522933613647,
+                        0.7409515756817232, 0.5190699548536369, 0, -2177740.70404011, 4388716.79029236,
+                        4070048.433825, 1
+                    ]
+                },
+                {
+                    name: "万象模型1",
+                    url: 'http://localhost/Data/maxData/wx/tileset.json',
+                    geoError: 256,
+                    Matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -604739.4933427395, 357644.3973705927, -
+                        865339.7058355273, 1
+                    ],
+                    transform: [-0.0008750197992752958, -0.00048332389188376863, -0.000027172898456882545, 0,
+                        0.00023044774856646662, -0.00046525677165443744, 0.0008546519593438827, 0, -
+                        0.00042571608620871706, 0.0007415754526439079, 0.0005184897896575349, 0, -
+                        2177574.41700944, 4396359.91064106, 4070041.25273316, 1
+                    ]
+                },
+
+
+            ];
+
+            function loadData() {
+                for (var i = 0; i < dataURls.length; i++) {
+                    dataURls[i].tileset = new CTMap.Cesium3DTileset({
+                        url: dataURls[i].url,
+                        maximumScreenSpaceError: dataURls[i].geoError,
+                        maximumNumberOfLoadedTiles: 1000
+                    });
+                    viewer.scene.primitives.add(dataURls[i].tileset);
+                    //viewer.flyTo(tileset[i]);                
+                    dataURls[i].tileset.pos = dataURls[i].pos;
+                    dataURls[i].tileset.scale = dataURls[i].scale;
+                    dataURls[i].tileset.Matrix = dataURls[i].Matrix;
+                    dataURls[i].tileset.transform = dataURls[i].transform;
+
+                    //调整位置			
+                    dataURls[i].tileset.readyPromise.then(function (v) {
+                        v.modelMatrix = v.Matrix;
+                        v._root.transform = v.transform;
+
+                        viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(v.pos[0], v.pos[1], 10),
+                            billboard: {
+                                image: dataUrls.dataHome+'image/mark3.png', // default: undefined                         
+                                pixelOffset: new Cesium.Cartesian2(0, -50), // default: (0, 0)
+                                eyeOffset: new Cesium.Cartesian3(0.0, 0.0, 0.0), // default
+                                horizontalOrigin: Cesium.HorizontalOrigin.CENTER, // default
+                                verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+
+                            }
+                        });
+
+                    });
+
+                }
+            }
+
+
+            let rx, ry, rz;
+            rx = ry = rz = 0;
+            let current;
+            let modelEntity;
+             
+
+            function loadTaskRout() {
+               
+                    let start = Cesium.JulianDate.fromDate(new Date());
+                    var keyPos = new Cesium.SampledPositionProperty();
+                    keyPos.backwardExtrapolationDuration = 2;
+                    keyPos.backwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
+                    keyPos.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
+                    let orientation = new Cesium.VelocityOrientationProperty(keyPos);
+                    let result = [];
+                    let pointList = Cesium.Cartesian3.unpackArray(routData, result) 
+
+                    for (let j = 0; j < pointList.length; j++) {
+                        let ctime = Cesium.JulianDate.addSeconds(
+                            start,
+                            8 + j * 3,
+                            new Cesium.JulianDate()
+                        );
+                        keyPos.addSample(ctime, pointList[j]);
+                    }
+
+                    modelEntity = viewer.entities.add({
+                        position: keyPos,
+                        //show: false,
+                        orientation: orientation,
+                        model: { 
+                            uri: "../SampleData/model_gltf/消防车.gltf",
+                            minimumPixelSize: 64
+                        }
+                    });
+                    let offset = 0;
+
+                    let animation = viewer.entities.add({
+                        position: keyPos,
+                        //show: false,
+                        orientation: orientation,
+                        label: {
+                            text: "消防车",
+                            font: "16px 微软雅黑",
+                            fillColor: Cesium.Color.DEEPSKYBLUE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 1.0,
+                            showBackground: true,
+                            backgroundColor: Cesium.Color.BLACK.withAlpha(0.9),
+                            backgroundPadding: new Cesium.Cartesian2(2, 2),
+                            disableDepthTestDistance: Number.POSITIVE_INFINITY
+                        },
+                        corridor: {
+                            positions: pointList,
+                            width: 2.0,
+                            material: new Cesium.StripeMaterialProperty({
+                                         evenColor: Cesium.Color.fromCssColorString("#FF0000").withAlpha(0.5),
+                                        oddColor: Cesium.Color.fromCssColorString("#9FEE00").withAlpha(0.5),
+                                        repeat: 40,
+                                        orientation: Cesium.StripeOrientation.VERTICAL,
+                                        offset:  new Cesium.CallbackProperty(
+                                                                (time)=>{
+                                                                    return offset+=0.0008;
+
+                                                                },
+                                                                false
+                                                            )
+                                    })
+                        },
+                        ellipse: {
+                            semiMajorAxis: 20,
+                            semiMinorAxis: 20,
+                            //material:Cesium.Color.RED.withAlpha(0.3),
+                            material: Cesium.Color.LIME.withAlpha(0.15)
+                        }
+                        //   rectangle: {
+                        //     coordinates: new Cesium.CallbackProperty(this.getRectangle, false),
+                        //     material: Cesium.Color.RED.withAlpha(0.3),
+                        //     //rotation: new Cesium.CallbackProperty(this.getRotation, false),
+                        //     classificationType: Cesium.ClassificationType.BOTH
+                        // }
+                    });
+
+                    //添加polygon
+                
+            }
+
+    function setClock(){
+        let times =modelEntity.position._property._times;
+        let start = times[0];
+        let end = times[times.length - 1];
+        viewer.clock.startTime = start;
+        viewer.clock.stopTime = end;
+        viewer.clock.currentTime = start;
+        viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
+        viewer.clock.multiplier = viewer.clock.multiplier / 2;
+        viewer.trackedEntity = modelEntity;
+        viewer.clock.shouldAnimate = true;
+    }
+
+            Sandcastle.addToolbarButton('模型加载', () => {
+                loadData();
+                viewer.flyTo(dataURls[0].tileset);
+            });
+            Sandcastle.addToolbarButton('路径动画', () => {
+                loadTaskRout();
+                setClock();
+            });
+            Sandcastle.addToolbarButton('视角跟踪', () => {
+                viewer.trackedEntity =modelEntity;
+            });
+            Sandcastle.addToolbarButton('取消跟踪', () => {
+                viewer.trackedEntity =null;
+            });
+
+            
+
+
+            Sandcastle.finishedLoading();
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>线标绘</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <link rel="stylesheet" href="./js/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">	
+	<script type="text/javascript" src="./js/ztree/js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="./js/ztree/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./js/ztree/js/jquery.ztree.excheck.js"></script>
+    
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+      
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    </div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var layers= viewer.scene.imageryLayers;
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            var esri = new Cesium.ArcGisMapServerImageryProvider({
+                url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+            });
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            viewer.terrainProvider =  new CTMap.CesiumTerrainProvider({
+                url:dataUrls.baseTerrain
+            });
+
+            viewer.camera.flyTo({
+                destination : new CTMap.Cartesian3(-1034925.112460638, 5606960.632260426, 2863125.670253262),
+                orientation : {
+                    heading : 0.2692300860254706,
+                    pitch : -0.3669474134181274,
+                    roll : 0.0007699013517070696
+                }
+            })
+
+	 
+            
+           var defPoint = {
+                edittype: "imagepoint",
+                style: {
+                    image: Cesium.buildModuleUrl('Assets/Images/plotIcon/marker/mark1.png'),
+                    opacity: 1,
+                    rotation: 0,
+                    scale: 1
+                },
+                type: "billboard"
+
+            };
+
+ 
+  			let dragIcon = CTMap.buildModuleUrl('Assets/Images/plotIcon/marker/dragIcon.png');
+
+            this.drawControl = new CTMap.DrawTool(viewer,{
+                hasEdit: true,
+                dragIcon: dragIcon,
+                onStopDrawing: function (entity) {
+                    console.log("onStopDrawing")
+                    currentEntity = entity;
+
+                },
+                onStartEditing: function (entity) {
+                    console.log("onStartEditing")
+                },
+                onChangeEditing: function (entity) {
+                    console.log("onChangeEditing:"+entity.id)
+                },
+                onStopEditing: function (entity) {
+                    console.log("onStopEditing")
+                },
+            });
+
+            
+            var defLine = {
+                attr: {
+                    id: "20181127104055",
+                    name: "",
+                    remark: ""
+                },
+                edittype: "polyline",
+                name: "线",
+                style: {
+                    clampToGround: true,
+                    color: "#3388ff",
+                    lineType: "solid",
+                    opacity: 1,
+                    outline: false,
+                    outlineColor: "#ffffff",
+                    outlineWidth: 2,
+                    width: 4
+
+                },
+                position: {
+                    height: false,
+                    minCount: 2
+                },
+                type: "polyline"
+
+            };
+
+            var defLineEx = {
+                attr: {
+                    id: "20181127104055",
+                    name: "",
+                    remark: ""
+                },
+                edittype: "polyline",
+                name: "线",
+                style: {
+                    clampToGround: true,
+                    color: "#3388ff",
+                    lineType: "solid",
+                    opacity: 1,
+                    outline: false,
+                    outlineColor: "#ffffff",
+                    outlineWidth: 2,
+                    width: 50,
+                    material:{
+                        evenColor: "#ffffff",
+                        oddColor: "#000000",
+                        repeat: 30, 
+                        reverse:false
+                    }
+
+                },
+                position: {
+                    height: true,
+                    minCount: 2
+                },
+                type: "polyline"
+
+            };
+             
+            var defWall =  {
+                attr: {
+                    id: "20181127104055",
+                    name: "",
+                    remark: ""
+                },
+                edittype: "wall",
+                name: "墙体",
+                style: {
+                    color:"#00FF00",
+                    extrudedHeight:40,
+                    opacity:0.6,
+                    outline:true,
+                    outlineColor:"#ffffff"
+
+                },
+                position: {
+                    height: true,
+                    minCount: 2
+                },
+                type: "wall"
+
+            };
+
+
+
+            var defPipe =  {
+                attr: {
+                    id: "20181127104055",
+                    name: "",
+                    remark: ""
+                },
+                edittype: "polylineVolume",
+                name: "墙体",
+                style: {
+                    color:"#00FF00",
+                    opacity:1,
+                    outline:false,
+                    outlineColor:"#ffffff",
+                    radius:10,
+                    shape:"pipeline"
+
+                },
+                position: {
+                    height: true,
+                    minCount: 2
+                },
+                type: "polylineVolume"
+
+            };
+
+             Sandcastle.addToolbarButton('添加普通线', function () {
+                 defLine.style.clampToGround = false;
+				   drawControl.startDraw(defLine);
+                   drawControl.hasEdit(true);
+			});
+
+			Sandcastle.addToolbarButton('添加贴地线', function () {
+				  defLine.style.clampToGround = true;
+                   drawControl.startDraw(defLine);
+			});
+
+            Sandcastle.addToolbarButton('添加动画线', function () {
+				  drawControl.startDraw(defLineEx);
+			});
+
+			Sandcastle.addToolbarButton('添加墙体', function () {
+				  drawControl.startDraw(defWall);
+			});
+	        Sandcastle.addToolbarButton('添加管道', function () {
+				  drawControl.startDraw(defPipe);
+			});
+
+            Sandcastle.addToolbarButton('清除标绘', function () {
+				  drawControl.removeAll();
+			});
+
+            Sandcastle.finishedLoading();
+		 
+            
+        }
+
+//Sandcastle_End
+    </script>
+</body>

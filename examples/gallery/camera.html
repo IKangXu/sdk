@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>Hello World</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var camera =viewer.camera; 
+            Sandcastle.addToolbarButton('相机位置', () =>{ 
+                let x = camera.position.x;
+                let y = camera.position.y;
+                let z = camera.position.z;
+
+                let heading = camera.heading;
+                let pitch = camera.pitch;
+                let roll = camera.roll;
+                console.log(x,y,z);
+                console.log(heading,pitch,roll);
+
+             });
+             Sandcastle.finishedLoading();
+        }
+
+//Sandcastle_End
+    </script>
+</body>

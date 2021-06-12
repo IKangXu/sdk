@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>可视域分析</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+        #options {
+            background: #0000009c;
+            color: white;
+            border: 1px solid #444;
+            color: #edffff;
+            padding: 10px;
+            width: 268px;
+            margin: 10px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'>
+        <table id="options" style="display: none;">
+            <tbody>
+                <tr>
+                    <td>水平角</td>
+                    <td>
+                        <input type="range" min="0" max="360" step="1" data-bind="value: heading, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: heading">
+                    </td>
+                </tr>
+                <tr>
+                    <td>垂直角</td>
+                    <td>
+                        <input type="range" min="0" max="45" step="1" data-bind="value: pitch, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: pitch">
+                    </td>
+                </tr>
+                <tr>
+                    <td>视场角</td>
+                    <td>
+                        <input type="range" min="5" max="178" step="1" data-bind="value: fov, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: fov">
+                    </td>
+                </tr>
+                <tr>
+                    <td>远距离</td>
+                    <td>
+                        <input type="range" min="10" max="3000" step="1" data-bind="value: far, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: far">
+                    </td>
+                </tr>
+                <tr>
+                    <td>近距离</td>
+                    <td>
+                        <input type="range" min="1" max="100" step="1" data-bind="value: near, valueUpdate: 'input'">
+                        <input type="text" size="5" data-bind="value: near">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+
+            var viewModel = {
+                heading: 0,
+                pitch: 0,
+                fov: 45,
+                near: 5,
+                far: 1000
+            };
+            CTMap.knockout.track(viewModel);
+            var toolbar = document.getElementById('toolbar');
+            CTMap.knockout.applyBindings(viewModel, toolbar);
+
+            function subscribeLayerParameter(name) {
+                CTMap.knockout.getObservable(viewModel, name).subscribe(
+                    function (newValue) {
+                        if (name == "heading" || name == "pitch") {
+                            var hpr = viewshad.hpr;
+                            hpr[name] = Cesium.Math.toRadians(newValue);
+                            viewshad.hpr = hpr;
+                        } else {
+                            viewshad[name] = Number(newValue);
+                        }
+
+
+                    }
+                );
+            }
+            subscribeLayerParameter('heading');
+            subscribeLayerParameter('pitch');
+            subscribeLayerParameter('fov');
+            subscribeLayerParameter('near');
+            subscribeLayerParameter('far');
+
+
+
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            var img_google = new CTMap.UrlTemplateImageryProvider({
+                subdomains: ["1", "2", "3"],
+                url: "http://mt{s}.google.cn/vt/lyrs=y&hl=zh-CN&x={x}&y={y}&z={z}"
+            });
+
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    }));
+
+            // 加载三维模型灰模
+            var tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                url: dataUrls.dataHome+'building_texture/tileset.json'
+            }))
+
+            tileset.readyPromise.then(function (tileset) {
+                viewer.scene.primitives.add(tileset);
+                var pos = new CTMap.Cartesian3(-2175282.798096478, 4393329.870820272, 4066564.16690707);
+                viewer.camera.flyTo({
+                    destination: pos,
+                    orientation: {
+                        heading: 5.048700612650428,
+                        pitch: -0.17453292365134399,
+                        roll: 6.280018983393266
+                    }
+                });
+
+            }).otherwise(function (error) {
+                console.log(error)
+            })
+
+            var viewshad = viewer.analysis.viewshedAnalyze;
+            viewshad.showDome = false;
+            viewshad.showDistance = false;
+
+
+            Sandcastle.addToolbarButton('开启通视分析', function () {
+                viewshad.open();
+                document.getElementById("options").style.display = "block";;
+
+            });
+
+
+
+            Sandcastle.addToolbarButton('停止分析', function () {
+                viewshad.close();
+            });
+
+
+            Sandcastle.finishedLoading();
+
+
+        }
+
+        //Sandcastle_End
+    </script>
+</body>

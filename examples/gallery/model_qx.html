@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>倾斜模型</title>
+     <script type="text/javascript" src="./js/thirdparty.js" ></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="./js/main"></script>
+
+    <style>
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='earthContainer'></div>
+    <div id='toolbar'></div>
+    <script>
+        //Sandcastle_Begin
+        function onload() {
+            //初始化地球
+            //初始化地球
+            var viewer = new CTMap.Viewer('earthContainer');
+            let esri =  new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    })
+
+            viewer.terrainProvider = new CTMap.CesiumTerrainProvider({
+                url: dataUrls.baseTerrain
+            });
+            var layers = viewer.scene.imageryLayers;
+            layers.addImageryProvider(new CTMap.ArcGisMapServerImageryProvider({
+                        url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+                    })); 
+            viewer.scene.globe.depthTestAgainstTerrain =true;
+
+            // 加载三维模型灰模
+            var tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                url: dataUrls.dataHome+'model_qx/tileosgb/tileset.json'
+            }))
+
+            tileset.readyPromise.then(function (tileset) {
+               
+                   //调整位置
+                    var modelPos = CTMap.Cartesian3.fromDegrees(108.9594 ,34.2195 ,36.05);
+                    var m = CTMap.Transforms.eastNorthUpToFixedFrame(modelPos);  
+                    tileset._root.transform = m;  
+
+            }).otherwise(function (error) {
+                console.log(error)
+            })
+
+            viewer.flyTo(tileset)
+
+
+
+            let transformEditor = new CTMap.transformEditor(viewer.scene);
+            
+            Sandcastle.addToolbarButton('调整位置', function () {
+                //model.modelMatrix = new Cesium.Matrix4(0.9961946980917457,-0.08715574274765825,0,0,0.05602263155122217,0.6403416087687968,0.7660444431189781,0,-0.06676517241775076,-0.7631294127377697,0.6427876096865391, 0, -426427.5649314479, -4874089.370505605, 4077985.572200376, 1)		
+            });
+
+            Sandcastle.addToolbarButton('开始编辑', function () {
+                transformEditor.tileset = tileset;
+                transformEditor.start();
+            });
+
+            Sandcastle.addToolbarButton('停止编辑', function () {
+                transformEditor.stop();
+            });
+
+            Sandcastle.addToolbarButton('颜色', function () {
+                tileset.style = new Cesium.Cesium3DTileStyle({
+                    color :{
+                        conditions:[
+                            ['true','color() *vec(1,1,1,1)']
+                        ]
+
+                    } 
+                });
+            });
+ 
+            Sandcastle.finishedLoading();
+        }
+
+        //Sandcastle_End
+    </script>
+</body>
