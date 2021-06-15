@@ -29,7 +29,8 @@ export default class PolygonControl {
             entityattr = {
                 fill: true,
                 classificationType: Cesium.ClassificationType.BOTH,
-                hierarchy: new DynamicProperty([])
+                // hierarchy: new DynamicProperty([])
+                hierarchy: Cesium.Cartesian3.fromDegreesArray([])
             }
         }
 

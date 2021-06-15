@@ -1,5 +1,5 @@
- 
-import DrawUtils from "./DrawUtils"; 
+
+import DrawUtils from "./DrawUtils";
 import Latlng from "./Latlng";
 
 export default class EventControl {
@@ -11,13 +11,13 @@ export default class EventControl {
 
     }
 
-    setCursor (style) {
+    setCursor(style) {
         document.getElementById(this.viewer._container.id).style.cursor = style || '';
     }
     /**
       * 【绘制】单个坐标点的对象（点、字）绘制处理程序，绑定单击事件 
       */
-    createDrawPointHandler (entity) {
+    createDrawPointHandler(entity) {
         this.setCursor('crosshair');
 
         var that = this;
@@ -46,7 +46,7 @@ export default class EventControl {
      *多个坐标点的对象（线）绘制处理程序，绑定单击、鼠标移动、双击事件
      * Creates a handler that lets you modify a list of positions.
      */
-    createDrawPolylineHandler (entity, positions) {
+    createDrawPolylineHandler(entity, positions) {
         this.setCursor('crosshair');
         var that = this;
 
@@ -62,7 +62,7 @@ export default class EventControl {
                     positions.pop();
                 }
                 if (entity.attribute && entity.attribute.addHeight)////在绘制点基础自动增加高度
-                    cartesian =  DrawUtils.getPositionsWithHeight(cartesian, entity.attribute.addHeight);
+                    cartesian = DrawUtils.getPositionsWithHeight(cartesian, entity.attribute.addHeight);
 
                 positions.push(cartesian);
 
@@ -110,7 +110,7 @@ export default class EventControl {
             entity.startEditing();
             that.setCursor();
 
-        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK );
+        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
         //记录最近一次值 
         this.drawHandler = handler;
@@ -122,7 +122,7 @@ export default class EventControl {
      * 面绘制处理程序，绑定单击、鼠标移动、双击事件
      * Creates a handler that lets you modify a list of positions.
      */
-    createDrawPolygonHandler (entity, positions) {
+    createDrawPolygonHandler(entity, positions) {
         this.setCursor('crosshair');
         var that = this;
 
@@ -138,10 +138,11 @@ export default class EventControl {
                     positions.pop();
                 }
                 positions.push(cartesian);
+                entity.polygon.hierarchy = positions;
 
                 if (entity.attribute.style.extrudedHeight) {
                     //存在extrudedHeight高度设置时
-                    var maxHight =  DrawUtils.getMaxHeightForPositions(positions);
+                    var maxHight = DrawUtils.getMaxHeightForPositions(positions);
                     entity.polygon.extrudedHeight = maxHight + Number(entity.attribute.style.extrudedHeight);
                 }
 
@@ -159,10 +160,11 @@ export default class EventControl {
                         positions.pop();
                     }
                     positions.push(cartesian);
+                    entity.polygon.hierarchy = positions;
 
                     if (entity.attribute.style.extrudedHeight) {
                         //存在extrudedHeight高度设置时
-                        var maxHight =  DrawUtils.getMaxHeightForPositions(positions);
+                        var maxHight = DrawUtils.getMaxHeightForPositions(positions);
                         entity.polygon.extrudedHeight = maxHight + Number(entity.attribute.style.extrudedHeight);
                     }
 
@@ -178,6 +180,7 @@ export default class EventControl {
             that.drawHandler = null;
 
             positions.pop();//必要代码 消除双击带来的多余经纬度 
+            entity.polygon.hierarchy = positions;
 
             entity.stopDrawing();
             entity.startEditing();
@@ -195,7 +198,7 @@ export default class EventControl {
      * Cesium矩形，绑定单击、鼠标移动、双击事件;
      * Creates a handler that lets you modify a list of positions.
      */
-    createTwoPointsModelHandler  (entity, coordinates) {
+    createTwoPointsModelHandler(entity, coordinates) {
         this.setCursor('crosshair');
         var that = this;
         entity.inProgress = true;
@@ -264,7 +267,7 @@ export default class EventControl {
      * 除记录墙体的鼠标拾取的坐标外,还需记录顶部和底部的高程,并赋值给墙体Entity
      * Creates a handler that lets you modify a list of positions.
      */
-    createDrawWallHandler (entity, positions, minimumHeights, maximumHeights) {
+    createDrawWallHandler(entity, positions, minimumHeights, maximumHeights) {
         this.setCursor('crosshair');
         var that = this;
 
@@ -340,7 +343,7 @@ export default class EventControl {
     /**
      * 释放未完成的创建绘制
      */
-    destroyDrawHandler () {
+    destroyDrawHandler() {
         this.setCursor();
         if (this.drawHandler) {
             this.setCursor();
@@ -352,7 +355,7 @@ export default class EventControl {
     /**
      * 绑定左键单击事件[选中激活编辑+单击空白处取消编辑]
      */
-    createEditSelectHandler  (calback) {
+    createEditSelectHandler(calback) {
 
         var that = this;
         var handler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
@@ -380,7 +383,7 @@ export default class EventControl {
      * 【编辑】将协助选择和拖动编辑绑定的拖动到，实体对象 
      * Initialize the utility handler that will assist in selecting and manipulating Dragger billboards.
      */
-    createEditDraggerHandler () {
+    createEditDraggerHandler() {
         var draggerHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
         draggerHandler.dragger = null;
 
@@ -394,11 +397,11 @@ export default class EventControl {
                     // Resize the dragger.
                     if (entity.point) {
 
-                       // entity.billboard.scale_src = entity.billboard.scale._value;
-                       // entity.billboard.scale._value = entity.billboard.scale_src * 1.2;
+                        // entity.billboard.scale_src = entity.billboard.scale._value;
+                        // entity.billboard.scale._value = entity.billboard.scale_src * 1.2;
 
-                       entity.point.color=Cesium.Color.RED;
-                       entity.point.pixelSize=10;
+                        entity.point.color = Cesium.Color.RED;
+                        entity.point.pixelSize = 10;
 
 
                     }
@@ -476,8 +479,8 @@ export default class EventControl {
                     scratchBoundingSphere.radius = 1;
 
                     var metersPerPixel = that.viewer.scene.frameState.camera.getPixelSize(scratchBoundingSphere,
-                                that.viewer.scene.frameState.context.drawingBufferWidth,
-                                that.viewer.scene.frameState.context.drawingBufferHeight);
+                        that.viewer.scene.frameState.context.drawingBufferWidth,
+                        that.viewer.scene.frameState.context.drawingBufferHeight);
 
                     var zOffset = new Cesium.Cartesian3();
 
@@ -506,8 +509,8 @@ export default class EventControl {
                 scratchBoundingSphere.radius = 1;
 
                 var metersPerPixel = that.viewer.scene.frameState.camera.getPixelSize(scratchBoundingSphere,
-                                                                                 that.viewer.scene.frameState.context.drawingBufferWidth,
-                                                                                that.viewer.scene.frameState.context.drawingBufferHeight);
+                    that.viewer.scene.frameState.context.drawingBufferWidth,
+                    that.viewer.scene.frameState.context.drawingBufferHeight);
 
                 var zOffset = new Cesium.Cartesian3();
 
@@ -525,20 +528,20 @@ export default class EventControl {
         // Left up stops dragging.
         draggerHandler.setInputAction(function () {
             if (draggerHandler.dragger) {
-                if (draggerHandler.dragger.billboard||draggerHandler.dragger.model||draggerHandler.dragger.label) {
-                    if(draggerHandler.dragger.billboard){
+                if (draggerHandler.dragger.billboard || draggerHandler.dragger.model || draggerHandler.dragger.label) {
+                    if (draggerHandler.dragger.billboard) {
                         //恢复大小
                         draggerHandler.dragger.billboard.scale._value = draggerHandler.dragger.billboard.scale_src;
                     }
-                    else if (draggerHandler.dragger.model){
-                         //恢复大小
+                    else if (draggerHandler.dragger.model) {
+                        //恢复大小
                         //draggerHandler.dragger.model;
                     }
-                    else if (draggerHandler.dragger.label){
+                    else if (draggerHandler.dragger.label) {
                         //恢复大小
-                       //draggerHandler.dragger.model;
-                   }
-                    draggerHandler.dragger._isDragger =false;
+                        //draggerHandler.dragger.model;
+                    }
+                    draggerHandler.dragger._isDragger = false;
                 }
 
                 draggerHandler.dragger = null;
@@ -551,20 +554,20 @@ export default class EventControl {
         // Left up stops dragging.
         draggerHandler.setInputAction(function () {
             if (draggerHandler.dragger) {
-                if (draggerHandler.dragger.billboard||draggerHandler.dragger.model||draggerHandler.dragger.label) {
-                    if(draggerHandler.dragger.billboard){
+                if (draggerHandler.dragger.billboard || draggerHandler.dragger.model || draggerHandler.dragger.label) {
+                    if (draggerHandler.dragger.billboard) {
                         //恢复大小
                         draggerHandler.dragger.billboard.scale._value = draggerHandler.dragger.billboard.scale_src;
                     }
-                    else if (draggerHandler.dragger.model){
-                         //恢复大小
+                    else if (draggerHandler.dragger.model) {
+                        //恢复大小
                         //draggerHandler.dragger.model;
                     }
-                    else if (draggerHandler.dragger.label){
+                    else if (draggerHandler.dragger.label) {
                         //恢复大小
-                       //draggerHandler.dragger.model;
-                   }
-                    draggerHandler.dragger._isDragger =false;
+                        //draggerHandler.dragger.model;
+                    }
+                    draggerHandler.dragger._isDragger = false;
                 }
 
                 draggerHandler.dragger = null;
@@ -577,7 +580,7 @@ export default class EventControl {
         this.draggerHandler = draggerHandler;
     }
 
-    destroyEditHandler () {
+    destroyEditHandler() {
 
         if (this.selectHandler) {
             this.selectHandler.destroy();

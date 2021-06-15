@@ -1,4 +1,4 @@
- 
+
 import DrawUtils from "./DrawUtils";
 
 export default class PolygonEditor {
@@ -8,7 +8,7 @@ export default class PolygonEditor {
         this.entity = entity;
         this.draggers = [];
 
-        var positions = entity.polygon.hierarchy._value;
+        var positions = entity.polygon.hierarchy._value.positions;
         //entity.polygon.hierarchy.isConstant = false;
         for (var i = 0; i < positions.length; i++) {
             var loc = positions[i];
@@ -18,6 +18,7 @@ export default class PolygonEditor {
                 heightReference: !entity.attribute.style.perPositionHeight,
                 onDrag: function (dragger, position) {
                     dragger.positions[dragger.index] = position;
+                    entity.polygon.hierarchy = dragger.positions;
                     entity.changeEditing();
                 }
             });
