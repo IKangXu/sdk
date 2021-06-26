@@ -62,6 +62,8 @@ export default class Clusterpoint {
 
                         cluster.billboard.show = true;
                         cluster.billboard.id = cluster.label.id;
+                        cluster.billboard.eyeOffset = new Cesium.Cartesian3(0, 0, -10);
+                        cluster.billboard.disableDepthTestDistance = Number.POSITIVE_INFINITY;
                         cluster.billboard.verticalOrigin =
                             Cesium.VerticalOrigin.CENTER;
 
@@ -90,8 +92,7 @@ export default class Clusterpoint {
                             cluster.label.verticalOrigin = Cesium.VerticalOrigin.CENTER;
                             cluster.label.disableDepthTestDistance = Number.POSITIVE_INFINITY;
                             cluster.label.pixelOffset = new Cesium.Cartesian2(0, 0);
-                            cluster.label.eyeOffset = new Cesium.Cartesian3(0, 0, 0);
-
+                            cluster.label.eyeOffset = new Cesium.Cartesian3(0, 0, -10);
 
                             if (this_.options.style[xx].textstyle) {
                                 for (var t in this_.options.style[xx].textstyle) {
