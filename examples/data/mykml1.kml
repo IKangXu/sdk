@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+	<Style id="CO">
+		<BalloonStyle>
+			<text>
+				<![CDATA[
+				<table style='color:white ' align="center">
+				<tr><th><b>参数</b></th><th><b>数量</b></th><th><b>平均值</b></th><th><b>最大值</b></th><th><b>最小值</b></th></tr>
+				<tr><td>人员</td><td>$[a1]</td></tr>
+				<tr><td>CH4</td><td>$[b1]</td><td>$[b2]</td><td>$[b3]</td><td>$[b4]</td></tr>
+				<tr><td>CO</td><td>$[c1]</td><td>$[c2]</td><td>$[c3]</td><td>$[c4]</td></tr>
+				<tr><td>温度</td><td>$[d1]</td><td>$[d2]</td><td>$[d3]</td><td>$[d4]</td></tr>
+				</table>
+				]]>
+			</text>
+			<bgColor>#ff673005</bgColor>
+			<textColor>#ffffff087</textColor>
+			</BalloonStyle>
+			<IconStyle><Icon><href>/Apps/SampleData/kml/传感器图标/co.png</href></Icon></IconStyle>
+			<LabelStyle>
+			    <scale>1</scale>
+			</LabelStyle>
+	</Style>
+	<Style id="FM">
+    		<BalloonStyle>
+    			<text>
+    				<![CDATA[
+    				<table style='color:white ' align="center">
+    				<tr><th><b>参数</b></th><th><b>数量</b></th><th><b>平均值</b></th><th><b>最大值</b></th><th><b>最小值</b></th></tr>
+    				<tr><td>人员</td><td>$[a1]</td></tr>
+    				<tr><td>CH4</td><td>$[b1]</td><td>$[b2]</td><td>$[b3]</td><td>$[b4]</td></tr>
+    				<tr><td>CO</td><td>$[c1]</td><td>$[c2]</td><td>$[c3]</td><td>$[c4]</td></tr>
+    				<tr><td>温度</td><td>$[d1]</td><td>$[d2]</td><td>$[d3]</td><td>$[d4]</td></tr>
+    				</table>
+    				]]>
+    			</text>
+    			<bgColor>#ff673005</bgColor>
+    			<textColor>#ffffff087</textColor>
+    			</BalloonStyle>
+    			<IconStyle><Icon><href>/Apps/SampleData/kml/传感器图标/FM.png</href></Icon></IconStyle>
+    			<LabelStyle>
+    			    <scale>1</scale>
+    			</LabelStyle>
+    	</Style>
+    	<Style id="KD">
+            		<BalloonStyle>
+            			<text>
+            				<![CDATA[
+            				<table style='color:white ' align="center">
+            				<tr><th><b>参数</b></th><th><b>数量</b></th><th><b>平均值</b></th><th><b>最大值</b></th><th><b>最小值</b></th></tr>
+            				<tr><td>人员</td><td>$[a1]</td></tr>
+            				<tr><td>CH4</td><td>$[b1]</td><td>$[b2]</td><td>$[b3]</td><td>$[b4]</td></tr>
+            				<tr><td>CO</td><td>$[c1]</td><td>$[c2]</td><td>$[c3]</td><td>$[c4]</td></tr>
+            				<tr><td>温度</td><td>$[d1]</td><td>$[d2]</td><td>$[d3]</td><td>$[d4]</td></tr>
+            				</table>
+            				]]>
+            			</text>
+            			<bgColor>#ff673005</bgColor>
+            			<textColor>#ffffff087</textColor>
+            			</BalloonStyle>
+            			<IconStyle><Icon><href>/Apps/SampleData/kml/传感器图标/KD.png</href></Icon></IconStyle>
+            			<LabelStyle>
+            			    <scale>1</scale>
+            			</LabelStyle>
+            	</Style>
+	<Placemark>
+		<name>FM</name>
+		<styleUrl>#FM</styleUrl>
+	    <Point>
+			<coordinates>116.44,39.90,10</coordinates>
+	    </Point>
+		<ExtendedData>
+			<Data name="a1"><value>10</value></Data>
+			<Data name="b1"><value>10</value></Data>
+			<Data name="b2"><value>0</value></Data>
+			<Data name="b3"><value>0</value></Data>
+			<Data name="b4"><value>0</value></Data>
+			<Data name="c1"><value>10</value></Data>
+			<Data name="c2"><value>0</value></Data>
+			<Data name="c3"><value>0</value></Data>
+			<Data name="c4"><value>0</value></Data>
+			<Data name="d1"><value>10</value></Data>
+			<Data name="d2"><value>0</value></Data>
+			<Data name="d3"><value>0</value></Data>
+			<Data name="d4"><value>0</value></Data>
+		</ExtendedData>
+	</Placemark>
+	<Placemark>
+    		<name>FM</name>
+    		<styleUrl>#FM</styleUrl>
+    	    <Point>
+    			<coordinates>116.44,39.901,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+    	<Placemark>
+            		<name>FM</name>
+            		<styleUrl>#FM</styleUrl>
+            	    <Point>
+            			<coordinates>116.44,39.902,10</coordinates>
+            	    </Point>
+            		<ExtendedData>
+            			<Data name="a1"><value>10</value></Data>
+            			<Data name="b1"><value>10</value></Data>
+            			<Data name="b2"><value>0</value></Data>
+            			<Data name="b3"><value>0</value></Data>
+            			<Data name="b4"><value>0</value></Data>
+            			<Data name="c1"><value>10</value></Data>
+            			<Data name="c2"><value>0</value></Data>
+            			<Data name="c3"><value>0</value></Data>
+            			<Data name="c4"><value>0</value></Data>
+            			<Data name="d1"><value>10</value></Data>
+            			<Data name="d2"><value>0</value></Data>
+            			<Data name="d3"><value>0</value></Data>
+            			<Data name="d4"><value>0</value></Data>
+            		</ExtendedData>
+            	</Placemark>
+        <Placemark>
+            		<name>FM</name>
+            		<styleUrl>#FM</styleUrl>
+            	    <Point>
+            			<coordinates>116.44,39.904,10</coordinates>
+            	    </Point>
+            		<ExtendedData>
+            			<Data name="a1"><value>10</value></Data>
+            			<Data name="b1"><value>10</value></Data>
+            			<Data name="b2"><value>0</value></Data>
+            			<Data name="b3"><value>0</value></Data>
+            			<Data name="b4"><value>0</value></Data>
+            			<Data name="c1"><value>10</value></Data>
+            			<Data name="c2"><value>0</value></Data>
+            			<Data name="c3"><value>0</value></Data>
+            			<Data name="c4"><value>0</value></Data>
+            			<Data name="d1"><value>10</value></Data>
+            			<Data name="d2"><value>0</value></Data>
+            			<Data name="d3"><value>0</value></Data>
+            			<Data name="d4"><value>0</value></Data>
+            		</ExtendedData>
+            	</Placemark>
+         <Placemark>
+             		<name>FM</name>
+             		<styleUrl>#FM</styleUrl>
+             	    <Point>
+             			<coordinates>116.44,39.905,10</coordinates>
+             	    </Point>
+             		<ExtendedData>
+             			<Data name="a1"><value>10</value></Data>
+             			<Data name="b1"><value>10</value></Data>
+             			<Data name="b2"><value>0</value></Data>
+             			<Data name="b3"><value>0</value></Data>
+             			<Data name="b4"><value>0</value></Data>
+             			<Data name="c1"><value>10</value></Data>
+             			<Data name="c2"><value>0</value></Data>
+             			<Data name="c3"><value>0</value></Data>
+             			<Data name="c4"><value>0</value></Data>
+             			<Data name="d1"><value>10</value></Data>
+             			<Data name="d2"><value>0</value></Data>
+             			<Data name="d3"><value>0</value></Data>
+             			<Data name="d4"><value>0</value></Data>
+             		</ExtendedData>
+             	</Placemark>
+	<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.445,39.901,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.446,39.902,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.4452,39.9016,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.4451,39.9019,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.442,39.906,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.448,39.907,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.444,39.902,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.447,39.901,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.442,39.903,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+		<Placemark>
+    		<name>CO</name>
+    		<styleUrl>#CO</styleUrl>
+    	    <Point>
+    			<coordinates>116.441,39.907,10</coordinates>
+    	    </Point>
+    		<ExtendedData>
+    			<Data name="a1"><value>10</value></Data>
+    			<Data name="b1"><value>10</value></Data>
+    			<Data name="b2"><value>0</value></Data>
+    			<Data name="b3"><value>0</value></Data>
+    			<Data name="b4"><value>0</value></Data>
+    			<Data name="c1"><value>10</value></Data>
+    			<Data name="c2"><value>0</value></Data>
+    			<Data name="c3"><value>0</value></Data>
+    			<Data name="c4"><value>0</value></Data>
+    			<Data name="d1"><value>10</value></Data>
+    			<Data name="d2"><value>0</value></Data>
+    			<Data name="d3"><value>0</value></Data>
+    			<Data name="d4"><value>0</value></Data>
+    		</ExtendedData>
+    	</Placemark>
+	    <Placemark>
+            		<name>KD</name>
+            		<styleUrl>#KD</styleUrl>
+            	    <Point>
+            			<coordinates>116.448,39.906,6</coordinates>
+            	    </Point>
+            		<ExtendedData>
+            			<Data name="a1"><value>10</value></Data>
+            			<Data name="b1"><value>10</value></Data>
+            			<Data name="b2"><value>0</value></Data>
+            			<Data name="b3"><value>0</value></Data>
+            			<Data name="b4"><value>0</value></Data>
+            			<Data name="c1"><value>10</value></Data>
+            			<Data name="c2"><value>0</value></Data>
+            			<Data name="c3"><value>0</value></Data>
+            			<Data name="c4"><value>0</value></Data>
+            			<Data name="d1"><value>10</value></Data>
+            			<Data name="d2"><value>0</value></Data>
+            			<Data name="d3"><value>0</value></Data>
+            			<Data name="d4"><value>0</value></Data>
+            		</ExtendedData>
+            	</Placemark>
+            	 <Placemark>
+                         <name>KD</name>
+                         <styleUrl>#KD</styleUrl>
+                         <Point>
+                               <coordinates>116.448,39.909,6</coordinates>
+                         </Point>
+                         <ExtendedData>
+                               <Data name="a1"><value>10</value></Data>
+                               <Data name="b1"><value>10</value></Data>
+                               <Data name="b2"><value>0</value></Data>
+                               <Data name="b3"><value>0</value></Data>
+                               <Data name="b4"><value>0</value></Data>
+                               <Data name="c1"><value>10</value></Data>
+                               <Data name="c2"><value>0</value></Data>
+                               <Data name="c3"><value>0</value></Data>
+                               <Data name="c4"><value>0</value></Data>
+                               <Data name="d1"><value>10</value></Data>
+                               <Data name="d2"><value>0</value></Data>
+                               <Data name="d3"><value>0</value></Data>
+                               <Data name="d4"><value>0</value></Data>
+                         </ExtendedData>
+                 </Placemark>
+                  <Placemark>
+                         <name>KD</name>
+                         <styleUrl>#KD</styleUrl>
+                         <Point>
+                                <coordinates>116.449,39.909,6</coordinates>
+                         </Point>
+                         <ExtendedData>
+                                <Data name="a1"><value>10</value></Data>
+                                <Data name="b1"><value>10</value></Data>
+                                <Data name="b2"><value>0</value></Data>
+                                <Data name="b3"><value>0</value></Data>
+                                <Data name="b4"><value>0</value></Data>
+                                <Data name="c1"><value>10</value></Data>
+                                <Data name="c2"><value>0</value></Data>
+                                <Data name="c3"><value>0</value></Data>
+                                <Data name="c4"><value>0</value></Data>
+                                <Data name="d1"><value>10</value></Data>
+                                <Data name="d2"><value>0</value></Data>
+                                <Data name="d3"><value>0</value></Data>
+                                <Data name="d4"><value>0</value></Data>
+                         </ExtendedData>
+                         </Placemark>
+                         <Placemark>
+                                <name>KD</name>
+                                <styleUrl>#KD</styleUrl>
+                                <Point>
+                                       <coordinates>116.448,39.910,6</coordinates>
+                                </Point>
+                                <ExtendedData>
+                                <Data name="a1"><value>10</value></Data>
+                                <Data name="b1"><value>10</value></Data>
+                                <Data name="b2"><value>0</value></Data>
+                                <Data name="b3"><value>0</value></Data>
+                                <Data name="b4"><value>0</value></Data>
+                                <Data name="c1"><value>10</value></Data>
+                                <Data name="c2"><value>0</value></Data>
+                                <Data name="c3"><value>0</value></Data>
+                                <Data name="c4"><value>0</value></Data>
+                                <Data name="d1"><value>10</value></Data>
+                                <Data name="d2"><value>0</value></Data>
+                                <Data name="d3"><value>0</value></Data>
+                                <Data name="d4"><value>0</value></Data>
+                                 </ExtendedData>
+                         </Placemark>
+               <Placemark>
+                      <name>KD</name>
+                      <styleUrl>#KD</styleUrl>
+                      <Point>
+                           <coordinates>116.450,39.909,6</coordinates>
+                      </Point>
+                <ExtendedData>
+                    <Data name="a1"><value>10</value></Data>
+                    <Data name="b1"><value>10</value></Data>
+                    <Data name="b2"><value>0</value></Data>
+                    <Data name="b3"><value>0</value></Data>
+                    <Data name="b4"><value>0</value></Data>
+                    <Data name="c1"><value>10</value></Data>
+                    <Data name="c2"><value>0</value></Data>
+                    <Data name="c3"><value>0</value></Data>
+                    <Data name="c4"><value>0</value></Data>
+                    <Data name="d1"><value>10</value></Data>
+                    <Data name="d2"><value>0</value></Data>
+                    <Data name="d3"><value>0</value></Data>
+					<Data name="d4"><value>0</value></Data>
+              </ExtendedData>
+        </Placemark>
+</Document>
+</kml>

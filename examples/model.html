@@ -36,9 +36,8 @@
     <button style="z-index:100;    position: absolute;
     top: 10px;" onclick="hah()">ss</button>
     <button style="z-index:100;    position: absolute;
-    top: 40px;" onclick="drawLine()">ss</button>
-    <button style="z-index:100;    position: absolute;
-    top: 75px;" onclick="drawPolygon()">ss</button>
+    top: 50px;" onclick="addModel2()">sss</button>
+
     <script>
         Cesium.Ion.defaultAccessToken =
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4ZmJiMTQzMC0xYjFlLTRlZDktYjI5ZS1mOGIxMzY2ZDQ1NTciLCJpZCI6ODYwOCwic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU1MjM3OTcyN30.MSLoEjzlm83XTm1qRlt521SlgoU2jsthi566S6-9m_w'
@@ -64,9 +63,9 @@
             timeline: false,
             vrButton: false,
         })
-        var longitude = 112.7295;//-0.0290214;//1.9675213071193185342443546843346
-        var latitude = 35.6735;//-0.0171607;//0.62262500489856534546316705881548
-        var height = 534;//-800;//800;
+        var longitude = 116.3907; //-0.0290214;//1.9675213071193185342443546843346
+        var latitude = 39.8986; //-0.0171607;//0.62262500489856534546316705881548
+        var height = 534; //-800;//800;
         viewer.camera.flyTo({
             destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height), // 经度、纬度、高度     
         })
@@ -76,7 +75,7 @@
         function getImageryProviderArr() {
             var providerViewModels = [];
             var imgModel3;
-var sa=`window.DDDD=function () {
+            var sa = `window.DDDD=function () {
                     return [
 
                         new Cesium.ArcGisMapServerImageryProvider({
@@ -86,8 +85,8 @@ var sa=`window.DDDD=function () {
                         }),
                     ];
                 }`;
-                    eval(sa)
-var cf=eval('window.DDDD')
+            eval(sa)
+            var cf = eval('window.DDDD')
             imgModel3 = new Cesium.ProviderViewModel({
                 name: '天地图影像',
                 tooltip: '天地图全球影像地图服务（国家测绘局）',
@@ -169,103 +168,98 @@ var cf=eval('window.DDDD')
 
             return providerViewModels;
         }
+
         function hah() {
-            var mousePosition = window.viewer.navigation.mousePosition
-            mousePosition.show = true
-            alert('dddd');
-            //-0.9223314049237771,-0.3863997664224603,0,0,0.22533651533051827,-0.5378754409964992,0.8123505800031912,0,-0.3138920743663831,0.7492564517449882,0.5831693880584605,0,-2004172.2464182964,4783934.060993213,3698556.905630034,1
-            var m = Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(longitude, latitude, height));
 
-            var url_b3dm = "./hangdao/tileset.json";
+            addModel('data/222.gltf');
 
-            g_hangdaoTileset = new Cesium.Cesium3DTileset({
-                url: url_b3dm,
-                skipLevelOfDetail: true,
-                baseScreenSpaceError: 1024,
-                skipScreenSpaceErrorFactor: 16,
-                skipLevels: 1,
-                immediatelyLoadDesiredLevelOfDetail: false,
-                loadSiblings: false,
-                cullWithChildrenBounds: true,
-                modelMatrix: m
-
-            });
-
-
-            //viewer.scene.primitives.add(g_hangdaoTileset);
-            g_hangdaoTileset.readyPromise.then(function (tileset) {
-
-                /*tileset.style = new Cesium.Cesium3DTileStyle({
-                       color: "color('rgba(255,0,0,1)')"
-                       });*/
-                viewer.scene.primitives.add(tileset);
-
-
-
-
-                // viewer.zoomTo(tileset);
-                //viewer.zoomTo(tileset, new Cesium.HeadingPitchRange(0,-3.14/4, tileset.boundingSphere.radius * 1.0));
-            });
+            viewer.flyTo(_dataSource.entities);
         }
 
+        var _dataSource = new Cesium.CustomDataSource("sbmodel");
+        viewer.dataSources.add(_dataSource);
 
+        function addModel(url) {
+            let lon = 116.3907;
+            let lat = 39.8986;
+            for (let i = 0; i < 20; i++) {
+                var heading = Cesium.Math.toRadians(Math.random() * 360);
+                var pitch = 0;
+                var roll = 0;
+                var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+                let lon1 = lon + Math.random() * 0.08;
+                let lat1 = lat + Math.random() * 0.08;
+                let position = Cesium.Cartesian3.fromDegrees(lon1, lat1, 30);
+                var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
+                // var entity = _dataSource.entities.add({
+                //     name: "aaa" + 1,
+                //     position: position,
+                //     orientation: orientation,
+                //     model: {
+                //         uri: url,
+                //         minimumPixelSize: 128,
+                //         maximumScale: 20000
+                //     }
+                // });
 
-        var drawControl = new CTMap.DrawTool(window.viewer, {
-            hasEdit: true,
-            // dragIcon: dragIcon,
-            onStopDrawing: function (entity) {
-                console.log('onStopDrawing')
-            },
-            onStartEditing: function (entity) { },
-            onChangeEditing: function (entity) { },
-            onStopEditing: function (entity) { }
-        })
-        // 画面
-        function drawPolygon() {
-            var defPolygon = {
-                edittype: 'polygon',
-                name: '面',
-                style: {
-                    color: '#3388ff',
-                    opacity: 0.6,
-                    outline: true,
-                    outlineColor: '#ffffff',
-                    outlineOpacity: 1,
-                    perPositionHeight: true
-                },
-                position: {
-                    height: true,
-                    minCount: 3
-                },
-                type: 'polygon'
+                // 生成一个函数，该函数从以提供的原点为中心的参考帧到提供的椭圆体的固定参考帧计算4x4变换矩阵。
+                var fixedFrame = Cesium.Transforms.localFrameToFixedFrameGenerator('north', 'west');
+                var model = _dataSource._primitives.add(Cesium.Model.fromGltf({
+                    id: Cesium.createGuid(),
+                    // 资源路径
+                    url: url,
+                    // 模型矩阵
+                    modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(position, hpr, Cesium
+                        .Ellipsoid.WGS84, fixedFrame, position),
+                    // 模型最小刻度
+                    minimumPixelSize: 128,
+                    // 模型标尺
+                    scale: 1.0,
+                    // 模型最大刻度
+                    maximumScale: 20000,
+                    // // 仅用于调试。显示模型绘制时的边界球。
+                    // debugShowBoundingVolume: false,
+                    // // 仅用于调试，显示魔仙绘制时的线框
+                    // debugWireframe: false
+                }))
+                model.property = {
+                    id: i,
+                    name: "name" + i,
+                }
             }
-            drawControl.startDraw(defPolygon)
-            //  drawControl.hasEdit(true);
-        }
-        // 画线
-        function drawLine() {
-            var defLine = {
-                edittype: 'polyline',
-                name: '线',
-                style: {
-                    clampToGround: false,
-                    color: '#3388ff',
-                    lineType: 'solid',
-                    opacity: 1,
-                    outline: false,
-                    outlineColor: '#ffffff',
-                    outlineWidth: 2,
-                    width: 4
-                },
-                position: {
-                    height: false,
-                    minCount: 2
-                },
-                type: 'polyline'
-            }
-            drawControl.startDraw(defLine)
-            //  drawControl.hasEdit(true);
+
         }
 
+
+        function addModel2() {
+            let lon = 116.4;
+            let lat = 39.4;
+            let url = 'data/mo1.gltf';
+            let instances = [];
+            for (let i = 0; i < 20; i += 1) {
+
+                var heading = Cesium.Math.toRadians(Math.random() * 360);
+                var pitch = Cesium.Math.toRadians(Math.random() * 90);
+                var roll = 0;
+                let lon1 = lon + Math.random() * 0.07;
+                let lat1 = lat + Math.random() * 0.07;
+                let cartesian = Cesium.Cartesian3.fromDegrees(lon1, lat1, 30);
+                var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+
+                //"06b599a35f0045989d3e229f3d8ead1300290d72"
+                //批量加载
+                let modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(cartesian, hpr); // 旋转
+                Cesium.Matrix4.multiplyByUniformScale(modelMatrix, 1, modelMatrix); // 缩放
+                instances.push({
+                    modelMatrix: modelMatrix
+                });
+            }
+            let primitive = new Cesium.ModelInstanceCollection({
+                url: url,
+                instances: instances,
+                allowPicking: true
+            });
+            viewer.scene.primitives.add(primitive)
+        }
     </script>
 </body>

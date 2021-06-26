@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+    <script src="../thirdParty/Cesium/Cesium.js"></script>
+	<script src="../dist/CTMapb.js"></script>
+	<style>
+        @import url(../thirdParty/Cesium/Widgets/widgets.css);
+
+		html,
+		body,
+		#earthContainer {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
+</head>
+
+<body>
+	<div id='earthContainer'></div>
+	<script>
+
+		Cesium.Ion.defaultAccessToken =
+			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4ZmJiMTQzMC0xYjFlLTRlZDktYjI5ZS1mOGIxMzY2ZDQ1NTciLCJpZCI6ODYwOCwic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU1MjM3OTcyN30.MSLoEjzlm83XTm1qRlt521SlgoU2jsthi566S6-9m_w'
+
+		//初始化地球
+		var viewer = new CTMap.Viewer('earthContainer', {
+			// globe: false,
+			animation: false,
+			baseLayerPicker: false,
+			baselayervis: true,
+			fullscreenButton: true,
+			geocoder: true,
+			homeButton: false,
+			imageryProvider: undefined,
+			infoBox: false,
+			// navigation:false,
+			navigationHelpButton: false,
+			navigationInstructionsInitiallyVisible: false,
+			sceneModePicker: false,
+			selectionIndicator: false,
+			shouldAnimate: false,
+			timeline: false,
+			vrButton: false,
+		})
+
+
+		var results = {
+			"type": "FeatureCollection",
+			"features": []
+		};
+
+		var randomCount = 2000;
+		while (randomCount--) {
+			results.features.push({
+				"type": "Feature",
+				"properties": {
+					"value": parseInt(Math.random() * 10000000)
+				},
+				"geometry": {
+					"type": "Point",
+					coordinates: [85 + Math.random() * 30, 25 + Math.random() * 20]
+				},
+			})
+		}
+	
+		var clu = new CTMap.Clusterpoint({
+			viewer: viewer,
+			dataOrUrl: results,
+			pixelRange: 25,
+			style: [{
+				num: 1,
+				size: 30,
+				color: "#1c86d1cc"
+			},
+			{
+				num: 50,
+				size: 32,
+				textstyle: {
+					font: "normal 16px MicroSoft YaHei",
+					fillColor: Cesium.Color.RED
+				},
+				color: "#67c23acc"
+			},
+			{
+				num: 100,
+				size: 34,
+				color: "#f56c6ccc"
+			}, {
+				num: 200,
+				size: 38,
+				color: "#e6a23ccc"
+			}
+			],
+			img: "images/marker/marker.png",
+		});
+
+	</script>
+</body>
+
+</html>

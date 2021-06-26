@@ -25,6 +25,7 @@ import KeyboardNavigation from "./Utility/KeyboardNavigation"
 
 import { HeatMapLayer, HeatMapOpt } from './Layer/HeatMap/HeatMapLayer'
 import { MapVLayer, MapVOpt } from './Layer/MapV/MapVLayer'
+import Clusterpoint from './Layer/Clusterpoint';
 import licManager from "./LicManager/LicManager"
 import welcom from "./LicManager/WelcomAPI"
 import LatLonGridLayer from './Layer/LatLonGridLayer'
@@ -49,6 +50,7 @@ CTMap['KeyboardNavigation'] = KeyboardNavigation;
 CTMap['BaiDuImageryProvider'] = BaiDuImageryProvider;
 
 CTMap['MapVLayer'] = MapVLayer;
+CTMap['Clusterpoint'] = Clusterpoint;
 CTMap['MapVOpt'] = MapVOpt;
 CTMap['HeatMapLayer'] = HeatMapLayer;
 CTMap['HeatMapOpt'] = HeatMapOpt;
@@ -57,11 +59,11 @@ CTMap['WaterFacePrimitive'] = WaterFacePrimitive;
 
 
 try {
-  CTMap = licManager.checkLicense()?CTMap:{}; 
-  } catch (err) {
-     
-  } 
-   
-  welcom.greeting()
+  CTMap = licManager.checkLicense() ? CTMap : {};
+} catch (err) {
+
+}
+
+welcom.greeting()
 
 export default CTMap;
