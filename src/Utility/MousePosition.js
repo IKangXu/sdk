@@ -35,7 +35,7 @@
          let self = this;
 
          var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-         handler.setInputAction(function (movement) {
+         handler.setInputAction(function(movement) {
              if (!self._show)
                  return;
              var lon, lat, alt;
@@ -43,9 +43,9 @@
              var cartesian = ScenePick.pickPosition(self.viewer, movement.endPosition);
              if (Cesium.defined(cartesian)) {
                  var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-                 lon = Cesium.Math.toDegrees(cartographic.longitude).toFixed(4);
-                 lat = Cesium.Math.toDegrees(cartographic.latitude).toFixed(4);
-                 alt = cartographic.height.toFixed(2);
+                 lon = Cesium.Math.toDegrees(cartographic.longitude).toFixed(7);
+                 lat = Cesium.Math.toDegrees(cartographic.latitude).toFixed(7);
+                 alt = cartographic.height.toFixed(4);
                  alt = alt < 0 ? 0.00 : alt;
              } else {
                  lon = "";
@@ -53,7 +53,7 @@
                  alt = "";
              }
 
-             var cameraHeight = Cesium.Cartographic.fromCartesian(camera.position).height.toFixed(2);
+             var cameraHeight = Cesium.Cartographic.fromCartesian(camera.position).height.toFixed(4);
              self.mousePosition.innerHTML = `经度: &nbsp;${lon} &nbsp; &nbsp; &nbsp; 纬度: &nbsp;${lat} &nbsp; &nbsp; &nbsp;  高程: &nbsp;${alt} &nbsp; &nbsp; &nbsp; 镜头高度: &nbsp;${cameraHeight}`;
          }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
      }
