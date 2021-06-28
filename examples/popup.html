@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Hello World</title>
+    <script src="../thirdParty/Cesium/Cesium.js"></script>
+    <script src="../dist/CTMapb.js"></script>
+
+    <style>
+        @import url(../thirdParty/Cesium/Widgets/widgets.css);
+
+        html,
+        body,
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+
+        .popupdialog {
+            position: absolute;
+            z-index: 999;
+            color: #fff;
+            margin: -20px 0px 0px 0px;
+            transform: translate(-50%, -100%);
+        }
+
+        .popupdialog .bx-popup-close {
+            float: right;
+        }
+
+        .popupdialog .divpoint-wrap {
+            padding: 0;
+            width: max-content;
+        }
+
+        .popupdialog .divpoint-center {
+            background: linear-gradient(45deg, rgb(22 126 146 / 80%), rgb(125 148 172 / 80%), 40%, rgb(22 117 154 / 80%));
+            border: 1px solid #dfe3e273;
+            border-radius: 5px;
+        }
+
+        .popupdialog .bx-popup-tip {
+            width: 17px;
+            background: #fff;
+            height: 17px;
+            padding: 1px;
+            margin: -10px auto 0;
+            -webkit-transform: rotate(45deg);
+            -moz-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+        .popupdialog .bx-popup-header-ctn {
+            background: #0777aacc;
+            color: #fff;
+            font-size: 15px;
+            padding: 4px;
+            margin: 0 0 0 0px;
+        }
+
+        .popupdialog .bx-popup-content-ctn {
+            padding: 5px 8px;
+        }
+
+        .popupdialog .bx-popup-content-ctn .bx-popup-content img {
+            border-radius: 100px;
+        }
+
+        .popupdialog .directional {
+            position: absolute;
+            bottom: -12px;
+            left: calc(50% - 5px);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 12px solid rgb(138 151 160);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id='earthContainer'></div>
+    <script>
+        Cesium.Ion.defaultAccessToken =
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4ZmJiMTQzMC0xYjFlLTRlZDktYjI5ZS1mOGIxMzY2ZDQ1NTciLCJpZCI6ODYwOCwic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU1MjM3OTcyN30.MSLoEjzlm83XTm1qRlt521SlgoU2jsthi566S6-9m_w'
+
+        //初始化地球
+        var viewer = new CTMap.Viewer('earthContainer', {
+            // globe: false,
+            animation: false,
+            baseLayerPicker: false,
+            baselayervis: true,
+            fullscreenButton: true,
+            geocoder: true,
+            homeButton: false,
+            imageryProvider: undefined,
+            imageryProviderViewModels: getImageryProviderArr(),
+            infoBox: false,
+            // navigation:false,
+            navigationHelpButton: false,
+            navigationInstructionsInitiallyVisible: false,
+            sceneModePicker: false,
+            selectionIndicator: false,
+            shouldAnimate: false,
+            timeline: false,
+            vrButton: false,
+        })
+        var longitude = 112.7295;//-0.0290214;//1.9675213071193185342443546843346
+        var latitude = 35.6735;//-0.0171607;//0.62262500489856534546316705881548
+        var height = 534;//-800;//800;
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height), // 经度、纬度、高度     
+        })
+
+
+        //获取自定义底图切换
+        function getImageryProviderArr() {
+            var providerViewModels = [];
+            var imgModel3;
+            var sa = `window.DDDD=function () {
+                    return [
+
+                        new Cesium.ArcGisMapServerImageryProvider({
+                            "name": "arcgis地图",
+                            "url": "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer",
+                            
+                        }),
+                    ];
+                }`;
+            eval(sa)
+            var cf = eval('window.DDDD')
+            imgModel3 = new Cesium.ProviderViewModel({
+                name: '天地图影像',
+                tooltip: '天地图全球影像地图服务（国家测绘局）',
+                iconUrl: "../img/basemaps/tdt_img.png",
+                creationFunction: cf
+            });
+            providerViewModels.push(imgModel3);
+
+
+
+
+            var imgModel;
+
+            imgModel = new Cesium.ProviderViewModel({
+                name: '天地图影像',
+                tooltip: '天地图全球影像地图服务（国家测绘局）',
+                iconUrl: "../img/basemaps/tdt_img.png",
+                creationFunction: function () {
+                    return [
+
+                        new Cesium.WebMapTileServiceImageryProvider({
+                            "name": "天地图影像底图",
+                            "url": "http://t{s}.tianditu.gov.cn/img_w/wmts?service=WMTS&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=ef6151d9f0386f3b2a2fdf1d58fe9b32",
+                            "subdomains": [
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7"
+                            ],
+                            "layer": "img_w",
+                            "style": "default",
+                            "format": "tiles",
+                            "tileMatrixSetID": "GoogleMapsCompatible",
+                            "maximumLevel": 18
+                        }),
+
+                    ];
+                }
+            });
+            providerViewModels.push(imgModel);
+
+
+            var imgModel2;
+
+            imgModel2 = new Cesium.ProviderViewModel({
+                name: '天地图影像',
+                tooltip: '天地图全球影像地图服务（国家测绘局）',
+                iconUrl: "../img/basemaps/tdt_img.png",
+                creationFunction: function () {
+                    return [
+                        new Cesium.WebMapTileServiceImageryProvider({
+                            "name": "天地图影像底图",
+                            "url": "http://t{s}.tianditu.gov.cn/cia_w/wmts?service=WMTS&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=1c3ff1358b17417f1782dd1ae7bdd00a",
+                            "subdomains": [
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7"
+                            ],
+                            "layer": "cia_w",
+                            "style": "default",
+                            "format": "tiles",
+                            "tileMatrixSetID": "GoogleMapsCompatible",
+                            "maximumLevel": 18
+                        }),
+                    ];
+                }
+            });
+            providerViewModels.push(imgModel2);
+
+
+            return providerViewModels;
+        }
+
+        var tp = new CTMap.tooltip(viewer)
+
+        // 添加弹窗
+        tp.add({
+            geometry: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
+            content: {
+                header: '标题',
+                isclose: false,
+                content: `
+                <div><span>名称：</span><span>aaa</span></div>
+                <div><span>分数</span><span>454</span></div>
+                `
+            }
+        })
+        var tp1 = new CTMap.tooltip(viewer)
+        tp1.add({
+            geometry: Cesium.Cartesian3.fromDegrees(longitude + 0.01, latitude + 0.01, height),
+            content: {
+                header: '标题',
+                isclose: false,
+                content: `
+                <div><span>名称：</span><span>aaa</span></div>
+                <div><span>分数</span><span>454</span></div>
+                `
+            }
+        })
+    </script>
+</body>
