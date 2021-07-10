@@ -38,23 +38,27 @@
          handler.setInputAction(function(movement) {
              if (!self._show)
                  return;
-             var lon, lat, alt;
+             var lon, lat, alt, x, y;
              //var cartesian = scene.pickPosition(movement.endPosition);   
              var cartesian = ScenePick.pickPosition(self.viewer, movement.endPosition);
              if (Cesium.defined(cartesian)) {
-                 var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+                 var ellipsoid = scene.globe.ellipsoid
+                 var cartographic = ellipsoid.cartesianToCartographic(cartesian)
                  lon = Cesium.Math.toDegrees(cartographic.longitude).toFixed(7);
                  lat = Cesium.Math.toDegrees(cartographic.latitude).toFixed(7);
                  alt = cartographic.height.toFixed(4);
-                 alt = alt < 0 ? 0.00 : alt;
+                 var x = cartesian.x.toFixed(2);
+                 var y = cartesian.y.toFixed(2);
              } else {
                  lon = "";
                  lat = "";
                  alt = "";
+                 x = "";
+                 y = "";
              }
 
              var cameraHeight = Cesium.Cartographic.fromCartesian(camera.position).height.toFixed(4);
-             self.mousePosition.innerHTML = `经度: &nbsp;${lon} &nbsp; &nbsp; &nbsp; 纬度: &nbsp;${lat} &nbsp; &nbsp; &nbsp;  高程: &nbsp;${alt} &nbsp; &nbsp; &nbsp; 镜头高度: &nbsp;${cameraHeight}`;
+             self.mousePosition.innerHTML = `经度: &nbsp;${lon} &nbsp; &nbsp; &nbsp; 纬度: &nbsp;${lat} &nbsp; &nbsp; &nbsp;  高程: &nbsp;${alt} &nbsp; &nbsp; &nbsp;横：&nbsp; ${x} 纵：&nbsp; ${y} &nbsp; &nbsp;镜头高度: &nbsp;${cameraHeight}`;
          }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
      }
 
@@ -71,7 +75,7 @@
          this.mousePosition = document.createElement('div');
          this.mousePosition.style.height = '26px';
          this.mousePosition.style.lineHeight = '26px';
-         this.mousePosition.style.width = '580px';
+         this.mousePosition.style.width = '850px';
          this.mousePosition.style.position = 'absolute';
          this.mousePosition.style.right = '60px';
          this.mousePosition.style.color = '#e9e9e9';
