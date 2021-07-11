@@ -7,6 +7,7 @@ import Tool from './Plugin/Tool';
 import Viewer from "./Viewer/Viewer"
 import DrawTool from "./Tools/Draw/DrawTool"
 import Measure from "./Tools/Measure/Measure"
+import tooltip from "./Tools/tooltip"
 // import tile3DLayer from "./Layer/tile3DLayer"
 //通视分析
 import ViewshedAnalyze from "./Analyze/ViewshedAnalyze"
@@ -57,6 +58,7 @@ CTMap['HeatMapOpt'] = HeatMapOpt;
 CTMap['LatLonGridLayer'] = LatLonGridLayer;
 CTMap['WaterFacePrimitive'] = WaterFacePrimitive;
 
+CTMap['tooltip'] = tooltip;
 
 try {
   CTMap = licManager.checkLicense() ? CTMap : {};
