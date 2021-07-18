@@ -209,6 +209,7 @@
              },
              //绘制完成后
              showDrawEnd: function (entity) {
+                 debugger
                  var positions = measureCtrl.drawControl.getPositions(entity);
                  var count = this.arrLables.length - positions.length;
                  if (count >= 0) {

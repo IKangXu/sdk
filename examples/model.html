@@ -182,14 +182,18 @@
         function addModel(url) {
             let lon = 116.3907;
             let lat = 39.8986;
+            var alt = 30;
             for (let i = 0; i < 20; i++) {
-                var heading = Cesium.Math.toRadians(Math.random() * 360);
-                var pitch = 0;
-                var roll = 0;
+                var heading = Cesium.Math.toRadians(180)
+                var pitch = Cesium.Math.toRadians(0)
+                var roll = Cesium.Math.toRadians(0)
+                // var heading = Cesium.Math.toRadians(Math.random() * 360);
+                // var pitch = 0;
+                // var roll = 0;
                 var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
                 let lon1 = lon + Math.random() * 0.08;
                 let lat1 = lat + Math.random() * 0.08;
-                let position = Cesium.Cartesian3.fromDegrees(lon1, lat1, 30);
+                let position = Cesium.Cartesian3.fromDegrees(lon1, lat1, alt);
                 var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
                 // var entity = _dataSource.entities.add({
                 //     name: "aaa" + 1,
