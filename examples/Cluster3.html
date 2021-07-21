@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="../thirdParty/Cesium/Cesium.js"></script>
+	<script src="../dist/CTMapb.js"></script>
+	<style>
+		@import url(../thirdParty/Cesium/Widgets/widgets.css);
+
+		html,
+		body,
+		#earthContainer {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
+</head>
+
+<body>
+	<div id='earthContainer'></div>
+	<script>
+
+		Cesium.Ion.defaultAccessToken =
+			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4ZmJiMTQzMC0xYjFlLTRlZDktYjI5ZS1mOGIxMzY2ZDQ1NTciLCJpZCI6ODYwOCwic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU1MjM3OTcyN30.MSLoEjzlm83XTm1qRlt521SlgoU2jsthi566S6-9m_w'
+
+		//初始化地球
+		var viewer = new CTMap.Viewer('earthContainer', {
+			// globe: false,
+			animation: false,
+			baseLayerPicker: false,
+			baselayervis: true,
+			fullscreenButton: true,
+			geocoder: true,
+			homeButton: false,
+			imageryProvider: undefined,
+			infoBox: false,
+			// navigation:false,
+			navigationHelpButton: false,
+			navigationInstructionsInitiallyVisible: false,
+			sceneModePicker: false,
+			selectionIndicator: false,
+			shouldAnimate: false,
+			timeline: false,
+			vrButton: false,
+		})
+
+		var tiles = new window.Cesium.Cesium3DTileset({
+			url: "./data/Hangdao-tileset2/tileset.json"
+		})
+		// 获取生成的3维对象
+		var target = viewer.scene.primitives.add(tiles)
+		window.clustercallback = []
+
+		window.viewchangehandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
+		window.viewchangehandler.setInputAction((click) => {
+			var ellipsoid = viewer.scene.globe.ellipsoid
+			var height = ellipsoid.cartesianToCartographic(viewer.camera.position).height
+			if (height < 3500) {
+				openUndergroundMode()
+			} else {
+				cancelUndergroundMode()
+			}
+			if (window.clustercallback && window.clustercallback.length > 0) {
+				for (var ci = 0; ci < window.clustercallback.length; ci++) {
+					if (typeof window.clustercallback[ci] === "function") {
+						window.clustercallback[ci]()
+					}
+				}
+			}
+		}, Cesium.ScreenSpaceEventType.WHEEL)
+
+		window.viewer.scene.globe.depthTestAgainstTerrain = true
+
+		// 开启地下模式
+		function openUndergroundMode() {
+			window.viewer.scene.sun.show = false
+			window.viewer.scene.moon.show = false
+			window.viewer.scene.skyBox.show = false
+			window.viewer.scene.skyAtmosphere.show = false
+			// window.viewer.scene.fxaa = true;
+			window.viewer.scene.undergroundMode = true // 重要，开启地下模式，设置基色透明，这样就看不见黑色地球了
+			window.viewer.scene.globe.show = false // 不显示地球，这条和地球透明度选一个就可以
+			window.viewer.scene.globe.baseColor = new Cesium.Color(0, 0, 0, 0)
+			window.viewer.scene.backgroundcolor = new Cesium.Color(0, 0, 0, 0)
+			// window.viewer.scene.globe.depthTestAgainstTerrain = false;
+			// window.viewer.scene.highDynamicRange = false;
+			window.viewer.scene.screenSpaceCameraController.minimumZoomDistance = -10 // 相机的高度的最小值
+			// window.viewer.scene.pickPositionSupported=true;
+			window.viewer.camera.near = 0.0001
+			window.viewer.scene.screenSpaceCameraController._zoomFactor = 1 // 默认5，缩放速度
+		}
+		// 关闭地下模式
+		function cancelUndergroundMode() {
+			window.viewer.scene.sun.show = true
+			window.viewer.scene.moon.show = true
+			window.viewer.scene.skyBox.show = true
+			window.viewer.scene.skyAtmosphere.show = true
+			// window.viewer.scene.fxaa = true;
+			window.viewer.scene.undergroundMode = false // 重要，开启地下模式，设置基色透明，这样就看不见黑色地球了
+			window.viewer.scene.globe.show = true // 不显示地球，这条和地球透明度选一个就可以
+			window.viewer.scene.globe.baseColor = new Cesium.Color(0, 0, 0, 0)
+			window.viewer.scene.backgroundcolor = new Cesium.Color(0, 0, 0, 0)
+			// window.viewer.scene.globe.depthTestAgainstTerrain = false;
+			// window.viewer.scene.highDynamicRange = false;
+			window.viewer.scene.screenSpaceCameraController.minimumZoomDistance = -10 // 相机的高度的最小值
+			// window.viewer.scene.pickPositionSupported=true;
+			window.viewer.camera.near = 0.0001
+			window.viewer.scene.screenSpaceCameraController._zoomFactor = 1 // 默认5，缩放速度
+		}
+
+		///////////////////////////////////
+		viewer.goto(112.7244906, 35.6668855, 5000);
+
+		showwall({
+			positions: [
+				112.7070975, 35.6835104, 1.0,
+				112.7232543, 35.6687934, 1.0,
+				112.7159555, 35.6640818, 1.0,
+				112.7037317, 35.6756560, 1.0,
+				112.7070975, 35.6835104, 1.0
+			],
+			maxheight: 120,
+			minheight: 0,
+			color: Cesium.Color.YELLOW,
+		})
+		showwall({
+			positions: [
+				112.7286071, 35.6664507, 1.0,
+				112.7422459, 35.6540317, 1.0,
+				112.7414623, 35.6520376, 1.0,
+				112.7345220, 35.6584232, 1.0,
+				112.7308378, 35.6552125, 1.0,
+				112.7233579, 35.6621703, 1.0,
+				112.7286071, 35.6664507, 1.0
+			],
+			maxheight: 120,
+			minheight: 0,
+			color: Cesium.Color.RED,
+		})
+		function showwall(opt) {
+			var alp = 0.8;
+			var num = 0;
+			var maximumHeights = []
+			var minimumHeights = []
+			for (var i = 0; i < opt.positions.length / 3; i++) {
+				maximumHeights.push(opt.maxheight)
+				minimumHeights.push(opt.minheight)
+			}
+			viewer.entities.add({
+				wall: {
+					positions: Cesium.Cartesian3.fromDegreesArrayHeights(opt.positions),
+					maximumHeights: maximumHeights,
+					minimumHeights: minimumHeights,
+					outline: false,
+					outlineColor: Cesium.Color.LIGHTGRAY,
+					outlineWidth: 2,
+					material: new Cesium.ImageMaterialProperty({
+						image: "images/fence.png",
+						transparent: true,
+						color: new Cesium.CallbackProperty(function () {
+							if ((num % 2) === 0) {
+								alp -= 0.005;
+							} else {
+								alp += 0.005;
+							}
+
+							if (alp <= 0.3) {
+								num++;
+							} else if (alp >= 0.8) {
+								num++;
+							}
+							return opt.color.withAlpha(alp)
+							//entity的颜色透明 并不影响材质，并且 entity也会透明
+						}, false)
+					})
+				},
+			});
+		}
+
+
+		//////、、、、、、、、、、/////////////
+
+		/////////////////////////////////////////////
+		var clustericonlist = {}
+		var position1 = new CTMap.Cartesian3.fromDegrees(112.7272456, 35.6598819, 0)
+		var position2 = new CTMap.Cartesian3.fromDegrees(112.7326480, 35.6601326, 0)
+		let EnvEffects = new CTMap.EnvEffects(viewer);
+		EnvEffects.addScan(position1, 90, Cesium.Color.RED)
+
+		EnvEffects.addScan(position2, 120, Cesium.Color.GREEN)
+
+		var dataSources = new Cesium.CustomDataSource(Cesium.createGuid())
+		viewer.dataSources.add(dataSources)
+
+		var heading = Cesium.Math.toRadians(180)
+		var pitch = Cesium.Math.toRadians(0)
+		var roll = Cesium.Math.toRadians(0)
+		var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+		var orientation = Cesium.Transforms.headingPitchRollQuaternion(position1, hpr)
+		var _num = 0;
+		var _size = 64;
+		var _height = 64;
+		var e1 = dataSources.entities.add({
+			position: position1,
+			// 模型方向
+			orientation: orientation,
+			billboard: {
+				image: drawImage(43, 64, "#ff0000"),
+				width: new Cesium.CallbackProperty(function () {
+					if ((_num % 2) === 0) {
+						_size -= 1;
+					} else {
+						_size += 1;
+					}
+					if (_size <= 56) {
+						_num++;
+					} else if (_size >= 72) {
+						_num++;
+					}
+					return _size
+				}),
+				height: new Cesium.CallbackProperty(function () {					
+					return _size
+				})
+			}
+		})
+		function drawImage(text, size, color, textcolor) {
+			if (clustericonlist[text + '_' + size + '_' + color + '_' + textcolor]) {
+				return clustericonlist[text + '_' + size + '_' + color + '_' + textcolor]
+			}
+			var canvas = document.createElement('canvas')
+			canvas.height = size
+			canvas.width = size
+			var ctx = canvas.getContext('2d')
+			// 画圈
+			ctx.beginPath()
+			ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true)
+			ctx.fillStyle = color + '66'
+			ctx.closePath()
+			ctx.fill()
+
+			// 画圈
+			ctx.beginPath()
+			ctx.arc(size / 2, size / 2, size / 2.6, 0, Math.PI * 2, true)
+			ctx.fillStyle = color
+			ctx.closePath()
+			ctx.fill()
+
+			ctx.font = '16px bold 楷体'
+			ctx.fillStyle = textcolor || '#ffffff'
+			var tx = (size - (text + '').length * 9) / 2
+			ctx.fillText(text, tx, (size / 2 + 6))
+			// var canvasdataurl = canvas.toDataURL()
+			clustericonlist[text + '_' + size + '_' + color + '_' + textcolor] = canvas// canvasdataurl
+			return canvas
+		}
+	</script>
+</body>
+
+</html>
