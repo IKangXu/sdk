@@ -117,8 +117,189 @@
 
 		///////////////////////////////////
 		viewer.goto(112.7244906, 35.6668855, 5000);
+		class areacluster {
+			constructor(viewer, opts) {
+				this.viewer = viewer;
+				this.opts = opts;
+				this.arealist = []
+				this.clusterpointlist = []
+				this.clustericonlist = {}
+				this.dataSources = new Cesium.CustomDataSource(Cesium.createGuid())
+				viewer.dataSources.add(this.dataSources)
+				this.dataSources2 = new Cesium.CustomDataSource(Cesium.createGuid())
+				viewer.dataSources.add(this.dataSources2)
+				this.dataSources.show = false
+				this.dataSources2.show = false
+				this.addcallback();
+			}
+			addcallback() {
+				var this_ = this
+				var ccb = function () {
+					this_.updateshow();
+				}
+				this_.cbnum = window.clustercallback.length
+				window.clustercallback.push(ccb)
+			}
+			updateshow() {
+				var this_ = this
+				var h = this_.viewer.camera.positionCartographic.height
+				if (h < this_.opts.maxheight && h > this_.opts.minheight) {
+					this_.dataSources.show = true
+					this_.dataSources2.show = true
+				} else {
+					this_.dataSources.show = false
+					this_.dataSources2.show = false
+				}
+			}
+			showwalllist(walllist) {
+				if (walllist.length > 0) {
+					this.dataSources2.entities.removeAll()
+					this.arealist = walllist
+					for (var i = 0; i < walllist.length; i++) {
+						this.showwall(walllist[i])
+					}
+				}
+			}
+			showclusterpointlist(pointlist) {
+				if (pointlist.length > 0) {
+					this.dataSources.entities.removeAll()
+					this.clusterpointlist = pointlist
+					for (var i = 0; i < pointlist.length; i++) {
+						this.addstatispoint(pointlist[i])
+					}
+				}
+			}
+			showwall(opt) {
+				var alp = 0.8;
+				var num = 0;
+				var maximumHeights = []
+				var minimumHeights = []
+				for (var i = 0; i < opt.positions.length / 3; i++) {
+					maximumHeights.push(opt.maxheight)
+					minimumHeights.push(opt.minheight)
+				}
+				var a1 = this.dataSources2.entities.add({
+					wall: {
+						positions: Cesium.Cartesian3.fromDegreesArrayHeights(opt.positions),
+						maximumHeights: maximumHeights,
+						minimumHeights: minimumHeights,
+						outline: true,
+						// outlineColor: Cesium.Color.LIGHTGRAY,
+						outlineWidth: 2,
+						material: new Cesium.ImageMaterialProperty({
+							image: "images/fence.png",
+							transparent: true,
+							color: new Cesium.CallbackProperty(function () {
+								if ((num % 2) === 0) {
+									alp -= 0.005;
+								} else {
+									alp += 0.005;
+								}
 
-		showwall({
+								if (alp <= 0.3) {
+									num++;
+								} else if (alp >= 0.8) {
+									num++;
+								}
+								return opt.color.withAlpha(alp)
+								//entity的颜色透明 并不影响材质，并且 entity也会透明
+							}, false)
+						})
+					},
+				});
+				a1.prop = opt.prop
+			}
+
+			//
+			addstatispoint(opt) {
+				var style = opt.style;
+				var position = new CTMap.Cartesian3.fromDegrees(opt.position[0], opt.position[1], opt.position[2])
+				var heading = Cesium.Math.toRadians(180)
+				var pitch = Cesium.Math.toRadians(0)
+				var roll = Cesium.Math.toRadians(0)
+				var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+				var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr)
+
+				var _num = 0;
+				var _size = style.size;
+				var e1 = this.dataSources.entities.add({
+					position: position,
+					// 模型方向
+					orientation: orientation,
+					billboard: {
+						image: this.drawImage(style.num, style.size * 1.2, style.color, style.textcolor),
+						width: new Cesium.CallbackProperty(function () {
+							if ((_num % 2) === 0) {
+								_size -= 0.5;
+							} else {
+								_size += 0.5;
+							}
+							if (_size <= 0.8 * style.size) {
+								_num++;
+							} else if (_size >= 1.2 * style.size) {
+								_num++;
+							}
+							return _size
+						}),
+						height: new Cesium.CallbackProperty(function () {
+							return _size
+						})
+					}
+				})
+				e1.prop = opt.prop
+				e1.layertype = "statiscluster"
+			}
+			drawImage(text, size, color, textcolor) {
+				if (this.clustericonlist[text + '_' + size + '_' + color + '_' + textcolor]) {
+					return this.clustericonlist[text + '_' + size + '_' + color + '_' + textcolor]
+				}
+				var canvas = document.createElement('canvas')
+				canvas.height = size
+				canvas.width = size
+				var ctx = canvas.getContext('2d')
+				// 画圈
+				ctx.beginPath()
+				ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true)
+				ctx.fillStyle = color + '55'
+				ctx.closePath()
+				ctx.fill()
+
+				// 画圈
+				ctx.beginPath()
+				ctx.arc(size / 2, size / 2, size / 3, 0, Math.PI * 2, true)
+				ctx.fillStyle = color
+				ctx.closePath()
+				ctx.fill()
+
+				ctx.font = '24px bold 楷体'
+				ctx.fillStyle = textcolor || '#ffffff'
+				var tx = (size - (text + '').length * 14) / 2
+				ctx.fillText(text, tx, (size / 2 + 6))
+				// var canvasdataurl = canvas.toDataURL()
+				this.clustericonlist[text + '_' + size + '_' + color + '_' + textcolor] = canvas// canvasdataurl
+				return canvas
+			}
+			//
+			remove() {
+				if (this.cbnum != null) {
+					window.clustercallback[this.cbnum] = null
+					this.cbnum = null
+				}
+				this.viewer.dataSources.remove(this.dataSources)
+				this.dataSources = null
+				this.viewer.dataSources.remove(this.dataSources2)
+				this.dataSources2 = null
+			}
+		}
+
+		var al = new areacluster(
+			viewer,
+			{
+				maxheight: 3500,
+				minheight: 2000,
+			}
+		)
+		var walllist = [{
 			positions: [
 				112.7070975, 35.6835104, 1.0,
 				112.7232543, 35.6687934, 1.0,
@@ -126,11 +307,14 @@
 				112.7037317, 35.6756560, 1.0,
 				112.7070975, 35.6835104, 1.0
 			],
+			prop: {
+				id: '001',
+				name: "区域1"
+			},
 			maxheight: 120,
 			minheight: 0,
 			color: Cesium.Color.YELLOW,
-		})
-		showwall({
+		}, {
 			positions: [
 				112.7286071, 35.6664507, 1.0,
 				112.7422459, 35.6540317, 1.0,
@@ -140,127 +324,250 @@
 				112.7233579, 35.6621703, 1.0,
 				112.7286071, 35.6664507, 1.0
 			],
+			prop: {
+				id: '002',
+				name: "区域2"
+			},
 			maxheight: 120,
 			minheight: 0,
 			color: Cesium.Color.RED,
-		})
-		function showwall(opt) {
-			var alp = 0.8;
-			var num = 0;
-			var maximumHeights = []
-			var minimumHeights = []
-			for (var i = 0; i < opt.positions.length / 3; i++) {
-				maximumHeights.push(opt.maxheight)
-				minimumHeights.push(opt.minheight)
+		}, {
+			positions: [
+				112.7292300, 35.6706511, 1.0,
+				112.7290533, 35.6692360, 1.0,
+				112.7279847, 35.6673893, 1.0,
+				112.7266483, 35.6681828, 1.0,
+				112.7292300, 35.6706511, 1.0
+			],
+			prop: {
+				id: '003',
+				name: "区域3"
+			},
+			maxheight: 120,
+			minheight: 0,
+			color: Cesium.Color.AQUA,
+		}]
+		al.showwalllist(walllist);
+
+		var clusterpoints = [{
+			position: [112.7280184, 35.6634797, 0],
+			style: { num: 13, size: 64, color: "#ff0000" },
+			prop: {
+				id: "z0001",
+				center: {
+					x: 112.728,
+					y: 35.663,
+					z: 1500
+				}
 			}
-			viewer.entities.add({
-				wall: {
-					positions: Cesium.Cartesian3.fromDegreesArrayHeights(opt.positions),
-					maximumHeights: maximumHeights,
-					minimumHeights: minimumHeights,
-					outline: false,
-					outlineColor: Cesium.Color.LIGHTGRAY,
-					outlineWidth: 2,
-					material: new Cesium.ImageMaterialProperty({
-						image: "images/fence.png",
-						transparent: true,
-						color: new Cesium.CallbackProperty(function () {
-							if ((num % 2) === 0) {
-								alp -= 0.005;
-							} else {
-								alp += 0.005;
+		}, {
+			position: [112.7326480, 35.6601326, 0],
+			style: { num: 143, size: 76, color: "#4CAF50" },
+			prop: {
+				id: "z0002",
+				center: {
+					x: 112.732,
+					y: 35.66,
+					z: 1500
+				}
+			}
+		}, {
+			position: [112.7280100, 35.6691166, 0],
+			style: { num: 21, size: 68, color: "#ff0000" },
+			prop: {
+				id: "z0003",
+				center: {
+					x: 112.728,
+					y: 35.669,
+					z: 1500
+				}
+			}
+		}, {
+			position: [112.7284606, 35.6685685, 0],
+			style: { num: 234, size: 81, color: "#4CAF50" },
+			prop: {
+				id: "z0004",
+				center: {
+					x: 112.728,
+					y: 35.668,
+					z: 1500
+				}
+			}
+		}]
+		al.showclusterpointlist(clusterpoints)
+		al.updateshow()
+
+
+		/////////////////
+		//显示点
+
+		class showfacilitypoint {
+			constructor(opt) {
+				this.options = {
+					url: '',
+					minheight: -200,
+					maxheight: 2000
+				}
+				this.options = Object.assign(this.options, opt)
+				this.viewer = opt.viewer
+				this.dataSources = null
+				this.dataSources2 = null
+				if (this.options.url && this.options.url !== '') {
+					this.loadjson()
+				}
+			}
+
+			loadjson() {
+				var this_ = this
+
+				this_.dataSources = new Cesium.CustomDataSource(Cesium.createGuid())
+				this_.viewer.dataSources.add(this_.dataSources)
+				this_.dataSources2 = new Cesium.CustomDataSource(Cesium.createGuid())
+				this_.viewer.dataSources.add(this_.dataSources2)
+				this_.dataSources.show = false
+				this_.dataSources2.show = false
+				this_.addcallback()
+				Cesium.Resource.fetchJson(this_.options.url).then(function (jsonData) {
+					for (let i = 0; i < jsonData.Map.length; i += 1) {
+						var obj = jsonData.Map[i]
+						var pos = JSON.parse('[' + obj.Position + ']')
+						var lon = 112.7293848
+						var lat = 35.6739366
+						var alt = 0
+
+						const scale = obj.scale || 1.0
+						var ellipsoid = viewer.scene.globe.ellipsoid
+						var cart3 = ellipsoid.cartographicToCartesian(Cesium.Cartographic.fromDegrees(lon, lat, alt))
+						var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(cart3)
+
+						var mat3 = Cesium.Matrix3.fromRowMajorArray(JSON.parse('[' + obj.Matrix + ']'))
+						var c3 = Cesium.Cartesian3.fromArray(pos)
+						var mat4 = Cesium.Matrix4.fromRotationTranslation(mat3, c3)
+						var m = Cesium.Matrix4.multiplyTransformation(modelMatrix, mat4, new Cesium.Matrix4())
+
+						var cart3 = new Cesium.Matrix4.getTranslation(m, new Cesium.Cartesian3())
+						var m1 = Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Matrix4.getTranslation(m, new Cesium.Cartesian3()), Cesium.Ellipsoid.WGS84, new Cesium.Matrix4())
+						// 矩阵相除
+						var m3 = Cesium.Matrix4.multiply(Cesium.Matrix4.inverse(m1, new Cesium.Matrix4()), m, new Cesium.Matrix4())
+						// 得到旋转矩阵
+						var mat3 = Cesium.Matrix4.getMatrix3(m3, new Cesium.Matrix3())
+						// 计算四元数
+						var q = Cesium.Quaternion.fromRotationMatrix(mat3)
+						// 计算旋转角(弧度)
+						var hpr = Cesium.HeadingPitchRoll.fromQuaternion(q)
+						// 得到角度
+						// var heading = Cesium.Math.toDegrees(hpr.heading);
+						// var pitch = Cesium.Math.toDegrees(hpr.pitch);
+						// var roll = Cesium.Math.toDegrees(hpr.roll);
+						var orientation = Cesium.Transforms.headingPitchRollQuaternion(cart3, hpr)
+
+						var model = this_.options.model || {}
+						model.uri = './data/传感器设备_data/GSY10.gltf',// obj.Name // './SampleData/gltf/jw.gltf',
+							model.distanceDisplayCondition = this_.options.distanceDisplayCondition ? new Cesium.DistanceDisplayCondition(this_.options.distanceDisplayCondition[0], this_.options.distanceDisplayCondition[1]) : null
+						model.property = obj
+						model.config = this_.options
+						var imgs = ['监控.png', '绿色电脑.png', '绿色黄车.png', '绿色黄我.png', '紫色蓝电脑.png', 'ch4.png', 'co2.png', 'o2.png']
+						var img = './images/marker/' + imgs[Math.floor(Math.random() * 8)]
+						this_.dataSources.entities.add({
+							position: cart3,
+							// 模型方向
+							orientation: orientation,
+							billboard: {
+								image: img,
 							}
-
-							if (alp <= 0.3) {
-								num++;
-							} else if (alp >= 0.8) {
-								num++;
-							}
-							return opt.color.withAlpha(alp)
-							//entity的颜色透明 并不影响材质，并且 entity也会透明
-						}, false)
-					})
-				},
-			});
-		}
-
-
-		//////、、、、、、、、、、/////////////
-
-		/////////////////////////////////////////////
-		var clustericonlist = {}
-		var position1 = new CTMap.Cartesian3.fromDegrees(112.7272456, 35.6598819, 0)
-		var position2 = new CTMap.Cartesian3.fromDegrees(112.7326480, 35.6601326, 0)
-		let EnvEffects = new CTMap.EnvEffects(viewer);
-		EnvEffects.addScan(position1, 90, Cesium.Color.RED)
-
-		EnvEffects.addScan(position2, 120, Cesium.Color.GREEN)
-
-		var dataSources = new Cesium.CustomDataSource(Cesium.createGuid())
-		viewer.dataSources.add(dataSources)
-
-		var heading = Cesium.Math.toRadians(180)
-		var pitch = Cesium.Math.toRadians(0)
-		var roll = Cesium.Math.toRadians(0)
-		var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
-		var orientation = Cesium.Transforms.headingPitchRollQuaternion(position1, hpr)
-		var _num = 0;
-		var _size = 64;
-		var _height = 64;
-		var e1 = dataSources.entities.add({
-			position: position1,
-			// 模型方向
-			orientation: orientation,
-			billboard: {
-				image: drawImage(43, 64, "#ff0000"),
-				width: new Cesium.CallbackProperty(function () {
-					if ((_num % 2) === 0) {
-						_size -= 1;
-					} else {
-						_size += 1;
+						})
+						this_.dataSources2.entities.add({
+							position: cart3,
+							model: model
+						})
 					}
-					if (_size <= 56) {
-						_num++;
-					} else if (_size >= 72) {
-						_num++;
-					}
-					return _size
-				}),
-				height: new Cesium.CallbackProperty(function () {					
-					return _size
 				})
 			}
-		})
-		function drawImage(text, size, color, textcolor) {
-			if (clustericonlist[text + '_' + size + '_' + color + '_' + textcolor]) {
-				return clustericonlist[text + '_' + size + '_' + color + '_' + textcolor]
+			addcallback() {
+				var this_ = this
+				var ccb = function () {
+					this_.updateshow();
+				}
+				this_.cbnum = window.clustercallback.length
+				window.clustercallback.push(ccb)
 			}
-			var canvas = document.createElement('canvas')
-			canvas.height = size
-			canvas.width = size
-			var ctx = canvas.getContext('2d')
-			// 画圈
-			ctx.beginPath()
-			ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true)
-			ctx.fillStyle = color + '66'
-			ctx.closePath()
-			ctx.fill()
+			updateshow() {
+				var this_ = this
+				var h = this_.viewer.camera.positionCartographic.height
+				if (h < this_.options.maxheight && h > this_.options.divideheight) {
+					this_.dataSources.show = true
+					this_.dataSources2.show = false
+				}
+				else if (h < this_.options.divideheight && h > this_.options.minheight) {
+					this_.dataSources.show = false
+					this_.dataSources2.show = true
+				}
+				else {
+					this_.dataSources.show = false
+					this_.dataSources2.show = false
+				}
+			}
 
-			// 画圈
-			ctx.beginPath()
-			ctx.arc(size / 2, size / 2, size / 2.6, 0, Math.PI * 2, true)
-			ctx.fillStyle = color
-			ctx.closePath()
-			ctx.fill()
-
-			ctx.font = '16px bold 楷体'
-			ctx.fillStyle = textcolor || '#ffffff'
-			var tx = (size - (text + '').length * 9) / 2
-			ctx.fillText(text, tx, (size / 2 + 6))
-			// var canvasdataurl = canvas.toDataURL()
-			clustericonlist[text + '_' + size + '_' + color + '_' + textcolor] = canvas// canvasdataurl
-			return canvas
+			remove() {
+				this.viewer.dataSources.remove(this.dataSources)
+				this.dataSources = null
+				this.viewer.dataSources.remove(this.dataSources2)
+				this.dataSources2 = null
+			}
 		}
+
+		var cp = new showfacilitypoint({
+			"viewer": viewer,
+			"url": "./data/cs4444.json",
+			"minheight": -1000,
+			"divideheight": 50,
+			"maxheight": 2000,
+			"center": {
+				"y": 35.6699143,
+				"x": 112.7281507,
+				"z": 800,
+				"heading": 360.00,
+				"pitch": -90.00,
+				"roll": 0
+			}
+		})
+
+		/////////////////////
+
+		var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
+
+		handler.setInputAction(function (movement) {
+			var fea = viewer.scene.pick(movement.position)
+			if (fea) {
+				if (fea.id) {
+					if (fea.id.layertype && fea.id.layertype === "statiscluster") {
+						if (fea.id.prop) {
+							viewer.camera.flyTo({
+								destination: Cesium.Cartesian3.fromDegrees(fea.id.prop.center.x, fea.id.prop.center.y, fea.id.prop.center.z), // 经度、纬度、高度     
+								complete: function () {
+									al.updateshow()
+									cp.updateshow()
+									var ents = cp.dataSources.entities._entities._array;
+									var n = 0;
+									var si = setInterval(() => {
+										var showf = !ents[0].show
+										if (n === 20) {
+											clearInterval(si)
+											showf = true
+										}
+										for (var i = 0; i < 150; i++) {
+											ents[i].show = showf
+										}
+										n++;
+									}, 200);
+								}
+							})
+						}
+					}
+				}
+			}
+		}, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+
 	</script>
 </body>
 
