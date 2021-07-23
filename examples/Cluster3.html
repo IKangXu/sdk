@@ -548,18 +548,7 @@
 									al.updateshow()
 									cp.updateshow()
 									var ents = cp.dataSources.entities._entities._array;
-									var n = 0;
-									var si = setInterval(() => {
-										var showf = !ents[0].show
-										if (n === 20) {
-											clearInterval(si)
-											showf = true
-										}
-										for (var i = 0; i < 150; i++) {
-											ents[i].show = showf
-										}
-										n++;
-									}, 200);
+									showtimechange(ents)
 								}
 							})
 						}
@@ -567,6 +556,144 @@
 				}
 			}
 		}, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+
+		function showtimechange(ents) {
+			var _num = 0;
+			var width = 64;
+			var size = 64;
+			var r1 = 0
+			function changeR1() { //这是callback，参数不能内传
+				r1 = r1 + 0.1;
+				if (r1 >= 10) {
+					r1 = 0;
+				}
+				return r1;
+			}
+			for (var i = 555; i < 556; i++) {
+				ents[i].billboard.width = new Cesium.CallbackProperty(function () {
+					if ((_num % 2) === 0) {
+						width -= 0.4;
+					} else {
+						width += 0.4;
+					}
+					if (width <= 0.6 * size) {
+						_num++;
+					} else if (width >= size) {
+						_num++;
+					}
+					return width
+				})
+				ents[i].billboard.height = new Cesium.CallbackProperty(function () {
+					return width
+				})
+				if (ents[i].ellipse) {
+					ents[i].ellipse.show = true
+				} else {
+					ents[i].ellipse = {
+						semiMinorAxis: new Cesium.CallbackProperty(changeR1, false),
+						semiMajorAxis: new Cesium.CallbackProperty(changeR1, false),
+						 height: -10,
+						material: Cesium.Color.RED.withAlpha(0.3),
+						outline: true,
+						outlineColor: Cesium.Color.RED.withAlpha(0.5),
+						outlineWidth: 2,
+					}
+				}
+			}
+			setTimeout(() => {
+				for (var i = 555; i < 556; i++) {
+					ents[i].billboard.width = 64;
+					ents[i].billboard.height = 64;
+					ents[i].ellipse.show = false
+				}
+
+			}, 10000);
+		}
+
+
+		// 、、、、、、、、、、、、、、
+		/**
+		 *两个圆扩散纹理
+		 * */
+		function addCircleRipple(data) {
+			var r1 = 0, r2 = 0; var r3 = 0, r4 = 0;
+			function changeR1() { //这是callback，参数不能内传
+				r1 = r1 + data.deviationR;
+				if (r1 >= data.maxR) {
+					r1 = 0;
+				}
+				return r1;
+			}
+			function changeR2() {
+				r2 = r2 + data.deviationR;
+				if (r2 >= data.maxR) {
+					r2 = 0;
+				}
+				return r2 * 0.8;
+			}
+			function changeR3() {
+				r3 = r3 + data.deviationR;
+				if (r3 >= data.maxR) {
+					r3 = 0;
+				}
+				return r3 * 0.3;
+			}
+			//第一个圆先跑
+			viewer.entities.add({
+				description: "LIGHT_POINTS",
+				position: Cesium.Cartesian3.fromDegrees(data.json.coordinates[0], data.json.coordinates[1], data.json.coordinates[2]),
+				show: true,
+				ellipse: {
+					semiMinorAxis: new Cesium.CallbackProperty(changeR1, false),
+					semiMajorAxis: new Cesium.CallbackProperty(changeR1, false),
+					height: 10,
+					material: Cesium.Color.YELLOW.withAlpha(0.1),
+					outline: true,
+					outlineColor: Cesium.Color.RED.withAlpha(0.4),
+					outlineWidth: 2,
+				}
+			});
+			//第二个圆开始跑
+			viewer.entities.add({
+				description: "LIGHT_POINTS",
+				position: Cesium.Cartesian3.fromDegrees(data.json.coordinates[0], data.json.coordinates[1], data.json.coordinates[2]),
+				show: true,
+				ellipse: {
+					semiMinorAxis: new Cesium.CallbackProperty(changeR2, false),
+					semiMajorAxis: new Cesium.CallbackProperty(changeR2, false),
+					height: 10,
+					material: Cesium.Color.YELLOW.withAlpha(0),
+					outline: true,
+					outlineColor: Cesium.Color.RED.withAlpha(0.3),
+					outlineWidth: 2,
+				}
+			});
+
+			viewer.entities.add({
+				description: "LIGHT_POINTS",
+				position: Cesium.Cartesian3.fromDegrees(data.json.coordinates[0], data.json.coordinates[1], data.json.coordinates[2]),
+				show: true,
+				ellipse: {
+					semiMinorAxis: data.maxR * 0.2,
+					semiMajorAxis: data.maxR * 0.2,
+					// semiMinorAxis: new Cesium.CallbackProperty(changeR11, false),
+					// semiMajorAxis: new Cesium.CallbackProperty(changeR12, false),
+					height: 10,
+					material: Cesium.Color.RED.withAlpha(1),
+					outline: true,
+					outlineColor: Cesium.Color.RED.withAlpha(0.6),
+					outlineWidth: 2,
+				}
+			});
+		}
+
+
+
+		addCircleRipple({
+			json: { "name": "北京A", "value": 100, "coordinates": [112.72707387181842, 35.67828223627626, -35.88361988685761] },
+			deviationR: 1,//差值 差值也大 速度越快
+			maxR: 50
+		});
 
 	</script>
 </body>
