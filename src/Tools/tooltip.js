@@ -2,7 +2,7 @@
 export default class tooltip {
     constructor(viewer, className) {
         this.viewer = viewer;
-        this.className = 'popupdialog' || className;
+        this.className = className || 'popupdialog';
         this.id = 0;
         this.ctnList = {}
     }
