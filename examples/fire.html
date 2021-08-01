@@ -20,11 +20,21 @@
 			padding: 0;
 			overflow: hidden;
 		}
+
+		.start {
+			width: 40px;
+			height: 26px;
+			background-color: #ffff00;
+			position: absolute;
+			top: 10px;
+			left: 10px;
+		}
 	</style>
 </head>
 
 <body>
 	<div id='earthContainer'></div>
+	<div onclick="start1()" class="start">开始</div>
 	<script>
 
 		Cesium.Ion.defaultAccessToken =
@@ -50,12 +60,79 @@
 			timeline: false,
 			vrButton: false,
 		})
-		var longitude = 112.7295;//-0.0290214;//1.9675213071193185342443546843346
-		var latitude = 35.6735;//-0.0171607;//0.62262500489856534546316705881548
-		var height = 534;//-800;//800;
-		viewer.camera.flyTo({
-			destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height), // 经度、纬度、高度     
+		var longitude = 112.7244906;//-0.0290214;//1.9675213071193185342443546843346
+		var latitude = 35.6668855;//-0.0171607;//0.62262500489856534546316705881548
+		var height = 5000;//-800;//800;
+		// viewer.camera.flyTo({
+		// 	destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height), // 经度、纬度、高度     
+		// })
+
+		var tiles = new window.Cesium.Cesium3DTileset({
+			url: "./data/Hangdao-tileset2/tileset.json"
 		})
+		// 获取生成的3维对象
+		var target = viewer.scene.primitives.add(tiles)
+		window.clustercallback = []
+
+		window.viewchangehandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
+		window.viewchangehandler.setInputAction((click) => {
+			var ellipsoid = viewer.scene.globe.ellipsoid
+			var height = ellipsoid.cartesianToCartographic(viewer.camera.position).height
+			if (height < 3500) {
+				openUndergroundMode()
+			} else {
+				cancelUndergroundMode()
+			}
+			if (window.clustercallback && window.clustercallback.length > 0) {
+				for (var ci = 0; ci < window.clustercallback.length; ci++) {
+					if (typeof window.clustercallback[ci] === "function") {
+						window.clustercallback[ci]()
+					}
+				}
+			}
+		}, Cesium.ScreenSpaceEventType.WHEEL)
+
+		window.viewer.scene.globe.depthTestAgainstTerrain = true
+
+		// 开启地下模式
+		function openUndergroundMode() {
+			window.viewer.scene.sun.show = false
+			window.viewer.scene.moon.show = false
+			window.viewer.scene.skyBox.show = false
+			window.viewer.scene.skyAtmosphere.show = false
+			// window.viewer.scene.fxaa = true;
+			window.viewer.scene.undergroundMode = true // 重要，开启地下模式，设置基色透明，这样就看不见黑色地球了
+			window.viewer.scene.globe.show = false // 不显示地球，这条和地球透明度选一个就可以
+			window.viewer.scene.globe.baseColor = new Cesium.Color(0, 0, 0, 0)
+			window.viewer.scene.backgroundcolor = new Cesium.Color(0, 0, 0, 0)
+			// window.viewer.scene.globe.depthTestAgainstTerrain = false;
+			// window.viewer.scene.highDynamicRange = false;
+			window.viewer.scene.screenSpaceCameraController.minimumZoomDistance = -10 // 相机的高度的最小值
+			// window.viewer.scene.pickPositionSupported=true;
+			window.viewer.camera.near = 0.0001
+			window.viewer.scene.screenSpaceCameraController._zoomFactor = 1 // 默认5，缩放速度
+		}
+		// 关闭地下模式
+		function cancelUndergroundMode() {
+			window.viewer.scene.sun.show = true
+			window.viewer.scene.moon.show = true
+			window.viewer.scene.skyBox.show = true
+			window.viewer.scene.skyAtmosphere.show = true
+			// window.viewer.scene.fxaa = true;
+			window.viewer.scene.undergroundMode = false // 重要，开启地下模式，设置基色透明，这样就看不见黑色地球了
+			window.viewer.scene.globe.show = true // 不显示地球，这条和地球透明度选一个就可以
+			window.viewer.scene.globe.baseColor = new Cesium.Color(0, 0, 0, 0)
+			window.viewer.scene.backgroundcolor = new Cesium.Color(0, 0, 0, 0)
+			// window.viewer.scene.globe.depthTestAgainstTerrain = false;
+			// window.viewer.scene.highDynamicRange = false;
+			window.viewer.scene.screenSpaceCameraController.minimumZoomDistance = -10 // 相机的高度的最小值
+			// window.viewer.scene.pickPositionSupported=true;
+			window.viewer.camera.near = 0.0001
+			window.viewer.scene.screenSpaceCameraController._zoomFactor = 1 // 默认5，缩放速度
+		}
+
+		///////////////////////////////////
+		viewer.goto(112.7244906, 35.6668855, 5000);
 
 		// var heading = Cesium.Math.toRadians(180)
 		// var pitch = Cesium.Math.toRadians(0)
@@ -72,7 +149,7 @@
 		// 	}
 		// });
 
-		var start = CTMap.JulianDate.fromDate(new Date(2015, 2, 25, 16));
+		var start = CTMap.JulianDate.fromDate(new Date());
 		var stop = CTMap.JulianDate.addSeconds(start, 120, new CTMap.JulianDate());
 
 		//Make sure viewer is at the desired time.
@@ -80,121 +157,280 @@
 		viewer.clock.stopTime = stop.clone();
 		viewer.clock.currentTime = start.clone();
 		viewer.clock.clockRange = CTMap.ClockRange.LOOP_STOP; //Loop at the end
-		viewer.clock.multiplier = 1;
+		viewer.clock.multiplier = 7;
 		viewer.clock.shouldAnimate = true;
 
 
-		// var viewModel = {
-		// 	emissionRate: 30.0,
-		// 	gravity: 0.0,
-		// 	minimumParticleLife: 1,
-		// 	maximumParticleLife: 3,
-		// 	minimumSpeed: 1.0,
-		// 	maximumSpeed: 4.0,
-		// 	startScale: 1.0,
-		// 	endScale: 5.0,
-		// 	particleSize: 25.0
-		// };
+		// // var viewModel = {
+		// // 	emissionRate: 30.0,
+		// // 	gravity: 0.0,
+		// // 	minimumParticleLife: 1,
+		// // 	maximumParticleLife: 3,
+		// // 	minimumSpeed: 1.0,
+		// // 	maximumSpeed: 4.0,
+		// // 	startScale: 1.0,
+		// // 	endScale: 5.0,
+		// // 	particleSize: 25.0
+		// // };
 
+		// // var emitterModelMatrix = new CTMap.Matrix4();
+		// // var translation = new CTMap.Cartesian3();
+		// // var rotation = new CTMap.Quaternion();
+		// // var hpr = new CTMap.HeadingPitchRoll();
+		// // var trs = new CTMap.TranslationRotationScale();
+
+		// // function computeEmitterModelMatrix() {
+		// // 	hpr = CTMap.HeadingPitchRoll.fromDegrees(0.0, 0.0, 0.0, hpr);
+		// // 	trs.translation = CTMap.Cartesian3.fromElements(0.0, 0.0, 1.4, translation);
+		// // 	trs.rotation = CTMap.Quaternion.fromHeadingPitchRoll(hpr, rotation);
+
+		// // 	return CTMap.Matrix4.fromTranslationRotationScale(trs, emitterModelMatrix);
+		// // }
+		// // function computeModelMatrix(entity, time) {
+		// // 	//获取位置
+		// // 	var position = Cesium.Property.getValueOrUndefined(entity.position, time, new Cesium.Cartesian3());
+		// // 	if (!Cesium.defined(position)) {
+		// // 		return undefined;
+		// // 	}
+		// // 	//获取方向
+		// // 	var orientation = Cesium.Property.getValueOrUndefined(entity.orientation, time, new Cesium.Quaternion());
+		// // 	if (!Cesium.defined(orientation)) {
+		// // 		var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(position, undefined, new Cesium.Matrix4());
+		// // 	} else {
+		// // 		modelMatrix = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromQuaternion(orientation, new Cesium.Matrix3()), position, new Cesium.Matrix4());
+		// // 	}
+		// // 	return modelMatrix;
+		// // }
+
+		// // var particleSystem = viewer.scene.primitives.add(new CTMap.ParticleSystem({
+		// // 	image: '/sampleData/image/smoke.png',
+		// // 	startColor: Cesium.Color.RED.withAlpha(0.7),
+		// // 	endColor: Cesium.Color.YELLOW.withAlpha(0.3),
+		// // 	startScale: 1.0,
+		// // 	endScale: 5.0,
+		// // 	minimumParticleLife: 1.2,
+		// // 	maximumParticleLife: 1.2,
+		// // 	minimumSpeed: 1.0,
+		// // 	maximumSpeed: 4.0,
+		// // 	emissionRate: 40,
+		// // 	lifetime: 16,
+		// // 	imageSize: new Cesium.Cartesian2(10, 10),
+		// // 	emitter: new Cesium.CircleEmitter(2.0),
+		// // 	modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(longitude, latitude, 20))
+		// // }));
+
+		// // var scene = viewer.scene;
+		// // var particleSystem = scene.primitives.add(new CTMap.ParticleSystem({
+		// // 	image: '/sampleData/image/smoke.png',
+
+		// // 	startColor : Cesium.Color.RED.withAlpha(0.7),
+		// //     endColor : Cesium.Color.YELLOW.withAlpha(0.4),
+
+		// // 	startScale: viewModel.startScale,
+		// // 	endScale: viewModel.endScale,
+
+		// // 	minimumParticleLife: viewModel.minimumParticleLife,
+		// // 	maximumParticleLife: viewModel.maximumParticleLife,
+
+		// // 	minimumSpeed: viewModel.minimumSpeed,
+		// // 	maximumSpeed: viewModel.maximumSpeed,
+
+		// // 	imageSize: new CTMap.Cartesian2(viewModel.particleSize, viewModel.particleSize),
+
+		// // 	emissionRate: viewModel.emissionRate,
+
+		// // 	bursts: [
+		// // 		// these burst will occasionally sync to create a multicolored effect
+		// // 		new CTMap.ParticleBurst({
+		// // 			time: 5.0,
+		// // 			minimum: 10,
+		// // 			maximum: 100
+		// // 		}),
+		// // 		new CTMap.ParticleBurst({
+		// // 			time: 10.0,
+		// // 			minimum: 50,
+		// // 			maximum: 100
+		// // 		}),
+		// // 		new CTMap.ParticleBurst({
+		// // 			time: 15.0,
+		// // 			minimum: 200,
+		// // 			maximum: 300
+		// // 		})
+		// // 	],
+
+		// // 	lifetime: 16.0,
+		// // 	modelMatrix: computeModelMatrix(entity, Cesium.JulianDate.now()),
+		// // 	emitter: new CTMap.CircleEmitter(2.0),
+
+		// // 	emitterModelMatrix: computeEmitterModelMatrix(),
+
+		// // 	// updateCallback: applyGravity
+		// // }));
+
+		// // 使用一个entity来作为粒子载体，比如示例中的小车
+		// var entity = viewer.entities.add({
+		// 	position: Cesium.Cartesian3.fromDegrees(longitude, latitude + 0.0004, 1)
+		// });
+
+		// // 计算载体位置
+		// function computeModelMatrix(entity, time) {
+		// 	return entity.computeModelMatrix(time, new Cesium.Matrix4());
+		// }
 		// var emitterModelMatrix = new CTMap.Matrix4();
 		// var translation = new CTMap.Cartesian3();
 		// var rotation = new CTMap.Quaternion();
 		// var hpr = new CTMap.HeadingPitchRoll();
 		// var trs = new CTMap.TranslationRotationScale();
-
 		// function computeEmitterModelMatrix() {
-		// 	hpr = CTMap.HeadingPitchRoll.fromDegrees(0.0, 0.0, 0.0, hpr);
-		// 	trs.translation = CTMap.Cartesian3.fromElements(0.0, 0.0, 1.4, translation);
+		// 	var a2 = Cesium.Cartesian3.fromDegrees(longitude, latitude, 20)
+		// 	var a1 = Cesium.Cartesian3.fromDegrees(longitude, latitude + 0.0004, 1)
+		// 	var t3 = Cesium.Cartesian3.subtract(a1, a2, new Cesium.Cartesian3())
+
+
+		// 	Cesium.Cartesian3.multiplyByScalar(t3, 1, t3)
+		// 	hpr = CTMap.HeadingPitchRoll.fromDegrees(t3.x, t3.y, t3.z, hpr);
+
+		// 	// hpr = CTMap.HeadingPitchRoll.fromDegrees(-100.0, 30.0, 0.0, hpr);
+		// 	trs.translation = CTMap.Cartesian3.fromElements(0.0, 0.0, 0, translation);
 		// 	trs.rotation = CTMap.Quaternion.fromHeadingPitchRoll(hpr, rotation);
 
 		// 	return CTMap.Matrix4.fromTranslationRotationScale(trs, emitterModelMatrix);
 		// }
-		// function computeModelMatrix(entity, time) {
-		// 	//获取位置
-		// 	var position = Cesium.Property.getValueOrUndefined(entity.position, time, new Cesium.Cartesian3());
-		// 	if (!Cesium.defined(position)) {
-		// 		return undefined;
-		// 	}
-		// 	//获取方向
-		// 	var orientation = Cesium.Property.getValueOrUndefined(entity.orientation, time, new Cesium.Quaternion());
-		// 	if (!Cesium.defined(orientation)) {
-		// 		var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(position, undefined, new Cesium.Matrix4());
-		// 	} else {
-		// 		modelMatrix = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromQuaternion(orientation, new Cesium.Matrix3()), position, new Cesium.Matrix4());
-		// 	}
-		// 	return modelMatrix;
+		// var gravityScratch = new CTMap.Cartesian3();
+		// function applyGravity(p, dt) {
+		// 	var position = p.position;
+		// 	Cesium.Cartesian3.normalize(position, gravityScratch);
+		// 	Cesium.Cartesian3.multiplyByScalar(gravityScratch, -4 * dt, gravityScratch);
+		// 	p.velocity = Cesium.Cartesian3.add(p.velocity, gravityScratch, p.velocity);
 		// }
 
-		var particleSystem = viewer.scene.primitives.add(new CTMap.ParticleSystem({
-			image: '/sampleData/image/smoke.png',
-			startColor: Cesium.Color.RED.withAlpha(0.7),
-			endColor: Cesium.Color.YELLOW.withAlpha(0.3),
-			startScale: 1.0,
-			endScale: 5.0,
-			minimumParticleLife: 1.2,
-			maximumParticleLife: 1.2,
-			minimumSpeed: 1.0,
-			maximumSpeed: 4.0,
-			emissionRate: 40,
-			lifetime: 16,
-			imageSize: new Cesium.Cartesian2(10, 10),
-			emitter: new Cesium.CircleEmitter(2.0),
-			modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(longitude, latitude, 20))
-		}));
-
-		// var scene = viewer.scene;
-		// var particleSystem = scene.primitives.add(new CTMap.ParticleSystem({
-		// 	image: '/sampleData/image/smoke.png',
-
-		// 	startColor : Cesium.Color.RED.withAlpha(0.7),
-		//     endColor : Cesium.Color.YELLOW.withAlpha(0.4),
-
-		// 	startScale: viewModel.startScale,
-		// 	endScale: viewModel.endScale,
-
-		// 	minimumParticleLife: viewModel.minimumParticleLife,
-		// 	maximumParticleLife: viewModel.maximumParticleLife,
-
-		// 	minimumSpeed: viewModel.minimumSpeed,
-		// 	maximumSpeed: viewModel.maximumSpeed,
-
-		// 	imageSize: new CTMap.Cartesian2(viewModel.particleSize, viewModel.particleSize),
-
-		// 	emissionRate: viewModel.emissionRate,
-
-		// 	bursts: [
-		// 		// these burst will occasionally sync to create a multicolored effect
-		// 		new CTMap.ParticleBurst({
-		// 			time: 5.0,
-		// 			minimum: 10,
-		// 			maximum: 100
-		// 		}),
-		// 		new CTMap.ParticleBurst({
-		// 			time: 10.0,
-		// 			minimum: 50,
-		// 			maximum: 100
-		// 		}),
-		// 		new CTMap.ParticleBurst({
-		// 			time: 15.0,
-		// 			minimum: 200,
-		// 			maximum: 300
-		// 		})
-		// 	],
-
+		// var waterParticlePrimitive = viewer.scene.primitives.add(new Cesium.ParticleSystem({
+		// 	image: '/sampleData/image/fountain.png',
+		// 	startColor: new Cesium.Color(1, 1, 1, 0.6),
+		// 	endColor: new Cesium.Color(0.80, 0.86, 1, 0.4),
+		// 	startScale: 1,
+		// 	endScale: 7,
+		// 	minimumParticleLife: 6,
+		// 	maximumParticleLife: 7,
+		// 	minimumSpeed: 26,
+		// 	maximumSpeed: 26,
+		// 	imageSize: new Cesium.Cartesian2(10, 10),
+		// 	emissionRate: 180,
 		// 	lifetime: 16.0,
-		// 	modelMatrix: computeModelMatrix(entity, Cesium.JulianDate.now()),
-		// 	emitter: new CTMap.CircleEmitter(2.0),
-
+		// 	emitter: new Cesium.CircleEmitter(0.2),
 		// 	emitterModelMatrix: computeEmitterModelMatrix(),
-
-		// 	// updateCallback: applyGravity
+		// 	updateCallback: applyGravity
 		// }));
+		// // 实时计算位置
+		// function update(scene, time) {
+		// 	waterParticlePrimitive.modelMatrix = computeModelMatrix(entity, time);
+		// 	// waterParticlePrimitive.emitterModelMatrix = computeEmitterModelMatrix();
+		// }
+		// viewer.scene.preUpdate.addEventListener(update);
+		// function playAnimation() {
+		// 	const i = setInterval(function () {
+		// 		if (particleSystem.emissionRate == 0) {
+		// 			viewer.scene.primitives.remove(particleSystem);
+		// 			clearInterval(i);
+		// 			const j = setInterval(function () {
+		// 				if (waterParticlePrimitive.emissionRate == 0) {
+		// 					viewer.scene.primitives.remove(waterParticlePrimitive);
+		// 					viewer.entities.remove(entity);
+		// 					viewer.scene.preUpdate.addEventListener(update);
+		// 					clearInterval(j);
+		// 				} else {
+		// 					waterParticlePrimitive.emissionRate -= 10;
+		// 				}
+		// 			}, 100)
+		// 		} else {
+		// 			particleSystem.emissionRate -= 0.5;
+		// 		}
+		// 	}, 100);
+		// }
+		//////////////////////////////////////////////////////////////////////////
+		var viewshad = viewer.analysis.visibilityAnalyze;
+		var modelEntity, pathentity, lineentity;
+		var distance = 150;
+		var pointList = null;
+		Cesium.Resource.fetchJson('data/line.json').then(function (jsonData) {
+			pointList = jsonData
+		})
+		function loadTaskRout() {
+			var start = CTMap.JulianDate.fromDate(new Date())
+			var keyPos = new CTMap.SampledPositionProperty()
+			keyPos.backwardExtrapolationDuration = 2
+			keyPos.backwardExtrapolationType = CTMap.ExtrapolationType.HOLD
+			keyPos.forwardExtrapolationType = CTMap.ExtrapolationType.HOLD
+			var orientation = new CTMap.VelocityOrientationProperty(keyPos)
+			var points = []
+			for (var j = 0; j < pointList.length; j++) {
+				var ctime = CTMap.JulianDate.addSeconds(start, 8 + j * 6, new CTMap.JulianDate())
 
-		// 使用一个entity来作为粒子载体，比如示例中的小车
-		var entity = viewer.entities.add({
-			position: Cesium.Cartesian3.fromDegrees(longitude, latitude + 0.0004, 1)
-		});
+				var position = Cesium.Cartesian3.fromDegrees(pointList[j].longitude, pointList[j].latitude, pointList[j].height)
+				points.push(position)
+				keyPos.addSample(ctime, position)
+			}
 
+			modelEntity = viewer.entities.add({
+				position: keyPos,
+				orientation: orientation,
+				model: {
+					uri: "/SampleData/model_gltf/消防车.gltf",
+					minimumPixelSize: 16
+				}
+			});
+
+			lineentity = viewer.entities.add({
+				position: points,
+				//show: false,
+				orientation: orientation,
+				polyline: {
+					positions: points,
+					width: 4.0,
+					material: CTMap.Color.fromCssColorString("#FF0000").withAlpha(0.8),
+					// clampToGround:true,
+					zIndex: 10
+					// material: new CTMap.StripeMaterialProperty({
+					// 	evenColor: CTMap.Color.fromCssColorString("#FF0000").withAlpha(0.9),
+					// 	oddColor: CTMap.Color.fromCssColorString("#9FEE00").withAlpha(0.9),
+					// 	repeat: 40
+					// })
+				}
+
+			});
+
+			var times = keyPos._property._times
+			pathentity = viewer.entities.add({
+				availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({
+					start: start,
+					stop: times[times.length - 1]
+				})]),
+				position: keyPos,
+				orientation: orientation,
+				polyline: {
+					width: 6.0,
+					material: CTMap.Color.fromCssColorString("#9FEE00").withAlpha(1),
+					clampToGround: true,
+					zIndex: 11
+				}
+				// path: {
+				// 	// resolution: resolution,
+				// 	eyeOffset: new Cesium.Cartesian3(0, 0, -100),
+				// 	material: new Cesium.PolylineGlowMaterialProperty({ //线的材质
+				// 		glowPower: 0.5,
+				// 		color: Cesium.Color.GREEN
+				// 	}),
+				// 	width: 5,
+				// 	leadTime: 0,
+				// 	trailTime: 14,
+				// }
+			});
+
+			// setClock();
+			viewer.trackedEntity = modelEntity
+
+		}
+		var waterParticlePrimitive;
 		// 计算载体位置
 		function computeModelMatrix(entity, time) {
 			return entity.computeModelMatrix(time, new Cesium.Matrix4());
@@ -204,11 +440,10 @@
 		var rotation = new CTMap.Quaternion();
 		var hpr = new CTMap.HeadingPitchRoll();
 		var trs = new CTMap.TranslationRotationScale();
-		function computeEmitterModelMatrix() {
-			var a2 = Cesium.Cartesian3.fromDegrees(longitude, latitude, 20)
-			var a1 = Cesium.Cartesian3.fromDegrees(longitude, latitude + 0.0004, 1)
+		function computeEmitterModelMatrix(endpoint) {
+			var a1 = Cesium.Cartesian3.fromDegrees(pointList[pointList.length-1].longitude, pointList[pointList.length-1].latitude, pointList[pointList.length-1].height);
+			var a2 = Cesium.Cartesian3.fromDegrees(endpoint.longitude, endpoint.latitude, endpoint.height)
 			var t3 = Cesium.Cartesian3.subtract(a1, a2, new Cesium.Cartesian3())
-
 
 			Cesium.Cartesian3.multiplyByScalar(t3, 1, t3)
 			hpr = CTMap.HeadingPitchRoll.fromDegrees(t3.x, t3.y, t3.z, hpr);
@@ -223,33 +458,47 @@
 		function applyGravity(p, dt) {
 			var position = p.position;
 			Cesium.Cartesian3.normalize(position, gravityScratch);
-			Cesium.Cartesian3.multiplyByScalar(gravityScratch, -4 * dt, gravityScratch);
+			Cesium.Cartesian3.multiplyByScalar(gravityScratch, -1 * dt, gravityScratch);
 			p.velocity = Cesium.Cartesian3.add(p.velocity, gravityScratch, p.velocity);
 		}
-
-		var waterParticlePrimitive = viewer.scene.primitives.add(new Cesium.ParticleSystem({
-			image: '/sampleData/image/fountain.png',
-			startColor: new Cesium.Color(1, 1, 1, 0.6),
-			endColor: new Cesium.Color(0.80, 0.86, 1, 0.4),
-			startScale: 1,
-			endScale: 7,
-			minimumParticleLife: 6,
-			maximumParticleLife: 7,
-			minimumSpeed: 26,
-			maximumSpeed: 26,
-			imageSize: new Cesium.Cartesian2(10, 10),
-			emissionRate: 180,
-			lifetime: 16.0,
-			emitter: new Cesium.CircleEmitter(0.2),
-			emitterModelMatrix: computeEmitterModelMatrix(),
-			updateCallback: applyGravity
-		}));
+		// 喷水
+		function water(endpoint) {
+			waterParticlePrimitive = viewer.scene.primitives.add(new Cesium.ParticleSystem({
+				image: '/sampleData/image/fountain.png',
+				startColor: new Cesium.Color(1, 1, 1, 0.6),
+				endColor: new Cesium.Color(0.80, 0.86, 1, 0.4),
+				startScale: 1,
+				endScale: 7,
+				minimumParticleLife: 6,
+				maximumParticleLife: 7,
+				minimumSpeed: 3,
+				maximumSpeed: 6,
+				imageSize: new Cesium.Cartesian2(10, 10),
+				emissionRate: 180,
+				lifetime: 16.0,
+				emitter: new Cesium.CircleEmitter(0.2),
+				emitterModelMatrix: computeEmitterModelMatrix(endpoint),
+				updateCallback: applyGravity
+			}));
+			viewer.scene.preUpdate.addEventListener(update);
+			playAnimation();
+		}
 		// 实时计算位置
 		function update(scene, time) {
-			waterParticlePrimitive.modelMatrix = computeModelMatrix(entity, time);
-			// waterParticlePrimitive.emitterModelMatrix = computeEmitterModelMatrix();
+			waterParticlePrimitive.modelMatrix = computeModelMatrix(modelEntity, time);
 		}
-		viewer.scene.preUpdate.addEventListener(update);
+		function setClock() {
+			var times = modelEntity.position._property._times
+			var start = times[0]
+			var end = times[times.length - 1]
+			viewer.clock.startTime = start
+			viewer.clock.stopTime = end
+			viewer.clock.currentTime = start
+			viewer.clock.clockRange = CTMap.ClockRange.UNBOUNDED
+			// viewer.clock.multiplier = viewer.clock.multiplier * 7 //viewer.clock.multiplier / 2
+			// viewer.flyTo(window.cesiumvariate.animation)
+			viewer.clock.shouldAnimate = true
+		}
 		function playAnimation() {
 			const i = setInterval(function () {
 				if (particleSystem.emissionRate == 0) {
@@ -258,7 +507,8 @@
 					const j = setInterval(function () {
 						if (waterParticlePrimitive.emissionRate == 0) {
 							viewer.scene.primitives.remove(waterParticlePrimitive);
-							viewer.entities.remove(entity);
+							viewer.entities.remove(lineentity);
+							viewer.entities.remove(pathentity);
 							viewer.scene.preUpdate.addEventListener(update);
 							clearInterval(j);
 						} else {
@@ -269,6 +519,54 @@
 					particleSystem.emissionRate -= 0.5;
 				}
 			}, 100);
+		}
+		var particleSystem = null;
+		// 火灾
+		function fiteshow(endpoint) {
+			particleSystem = viewer.scene.primitives.add(new CTMap.ParticleSystem({
+				image: '/sampleData/image/smoke.png',
+				startColor: Cesium.Color.RED.withAlpha(0.7),
+				endColor: Cesium.Color.YELLOW.withAlpha(0.3),
+				startScale: 1.0,
+				endScale: 5.0,
+				minimumParticleLife: 1.2,
+				maximumParticleLife: 1.2,
+				minimumSpeed: 1.0,
+				maximumSpeed: 4.0,
+				emissionRate: 40,
+				lifetime: 16,
+				imageSize: new Cesium.Cartesian2(10, 10),
+				emitter: new Cesium.CircleEmitter(2.0),
+				modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(endpoint.longitude, endpoint.latitude, endpoint.height))
+			}));
+		}
+		function stoptimefun() {
+			var position = pathentity.position.getValue(viewer.clock.currentTime);
+			viewer.clock.onStop.removeEventListener(stoptimefun);
+		}
+		var tickpoint = true;
+		function ticktimefun(clock) {
+			var position = pathentity.position.getValue(viewer.clock.currentTime);
+			if (viewer.clock.currentTime.secondsOfDay >= viewer.clock.stopTime.secondsOfDay && tickpoint) {
+				tickpoint = false
+				water(endpoint);
+			}
+			var tick = null
+		}
+
+
+		var endpoint = { longitude: 112.72213746079736, latitude: 35.66448468028815, height: -35 }
+		function start1() {
+			viewer.goto(endpoint.longitude, endpoint.latitude, -1);
+			fiteshow(endpoint);
+			setTimeout(() => {
+				// var xf = pointList[0]
+				// viewer.goto(0);
+				loadTaskRout();
+				setClock();
+				viewer.clock.onStop.addEventListener(stoptimefun)
+				viewer.clock.onTick.addEventListener(ticktimefun)
+			}, 5000);
 		}
 	</script>
 </body>
