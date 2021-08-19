@@ -51,7 +51,7 @@
                     geometryInstances: new Cesium.GeometryInstance({
                         geometry: geometry
                     }),
-                    classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
+                    // classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
                     appearance: appearance,
                     asynchronous: false
                 }));
@@ -59,12 +59,19 @@
         }
         //_degreesArrayHeights是一个组成多边形顶点数组[lon,lat,alt]
         function CreateGeometry(_degreesArrayHeights, startH, _extrudedHeight) {
+			if(_extrudedHeight || startH){
             return new Cesium.PolygonGeometry({
                 polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArrayHeights(_degreesArrayHeights)),
-                height: startH,
-                extrudedHeight: _extrudedHeight ? _extrudedHeight : 0,
+                 height: startH || 0,
+                 extrudedHeight: _extrudedHeight ? _extrudedHeight : 0,
                 perPositionHeight: true
             });
+			}else{
+            return new Cesium.PolygonGeometry({
+                polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArrayHeights(_degreesArrayHeights)),
+                perPositionHeight: true
+            });
+			}
         }
 
         function CreateAppearence(fs, url) {
