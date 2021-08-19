@@ -75,11 +75,11 @@
          this.mousePosition = document.createElement('div');
          this.mousePosition.style.height = '26px';
          this.mousePosition.style.lineHeight = '26px';
-         this.mousePosition.style.width = '850px';
+         this.mousePosition.style.width = '800px';
          this.mousePosition.style.position = 'absolute';
-         this.mousePosition.style.right = '60px';
+         this.mousePosition.style.left = '10px';
          this.mousePosition.style.color = '#e9e9e9';
-         this.mousePosition.style.textAlign = 'right';
+         this.mousePosition.style.textAlign = 'left';
          this.mousePosition.style.fontSize = '13px';
          this.mousePosition.style.fontFamily = '微软雅黑';
          this.mousePosition.style.textShadow = '2px 2px 2px #000;';
