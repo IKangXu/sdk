@@ -12,36 +12,57 @@
             normalMapUrl = options.normalMapUrl;
             if (options.DegreesArrayHeights && options.DegreesArrayHeights.length >= 3) {
                 degreesArrayHeights = options.DegreesArrayHeights;
-                
+
             } else {
                 degreesArrayHeights = [116.04437, 30.10932, -100,
-                         116.04537, 30.10932, -120,
-                         116.04537, 30.11032, -100,
-                         116.04437, 30.11032, -120,
-                         116.04437, 30.10932, -100];
-            }      
-            if (options.extrudedHeight) {
-                geometry = CreateGeometry(degreesArrayHeights, options.extrudedHeight);
-            } else {
-                geometry = CreateGeometry(degreesArrayHeights);
+                    116.04537, 30.10932, -120,
+                    116.04537, 30.11032, -100,
+                    116.04437, 30.11032, -120,
+                    116.04437, 30.10932, -100];
             }
-            
+            if (options.extrudedHeight) {
+                geometry = CreateGeometry(degreesArrayHeights, options.startH || 0, options.extrudedHeight);
+            } else {
+                geometry = CreateGeometry(degreesArrayHeights, options.startH || 0);
+            }
+
             appearance = CreateAppearence(fragmentShader, normalMapUrl);
 
-            this.primitive = viewer.scene.primitives.add(new Cesium.Primitive({
-                allowPicking: false,
-                geometryInstances: new Cesium.GeometryInstance({
-                    geometry: geometry
-                }),
-                appearance: appearance,
-                asynchronous: false
-            }));
+            if (options.ClassificationPrimitive) {
+                this.primitive = viewer.scene.primitives.add(new Cesium.Primitive(
+                    new Cesium.ClassificationPrimitive({
+                        allowPicking: false,
+                        geometryInstances: new Cesium.GeometryInstance({
+                            geometry: geometry,
+                            attributes: {
+                                color: Cesium.ColorGeometryInstanceAttribute.fromColor(options
+                                    .fillcolor || Cesium.Color.WHITE.withAlpha(1)),
+                                show: new Cesium.ShowGeometryInstanceAttribute(true)
+                            },
+                        }),
+
+                        classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
+                        appearance: appearance,
+                        asynchronous: false
+                    })));
+            } else {
+                this.primitive = viewer.scene.primitives.add(new Cesium.Primitive({
+                    allowPicking: false,
+                    geometryInstances: new Cesium.GeometryInstance({
+                        geometry: geometry
+                    }),
+                    classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
+                    appearance: appearance,
+                    asynchronous: false
+                }));
+            }
         }
         //_degreesArrayHeights是一个组成多边形顶点数组[lon,lat,alt]
-        function CreateGeometry(_degreesArrayHeights, _extrudedHeight) {
+        function CreateGeometry(_degreesArrayHeights, startH, _extrudedHeight) {
             return new Cesium.PolygonGeometry({
                 polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArrayHeights(_degreesArrayHeights)),
-                extrudedHeight: _extrudedHeight?_extrudedHeight:0,
+                height: startH,
+                extrudedHeight: _extrudedHeight ? _extrudedHeight : 0,
                 perPositionHeight: true
             });
         }
@@ -62,35 +83,35 @@
                 fragmentShaderSource: fs
             });
         }
-         
+
         function FSWaterFace() {
-            return 'varying vec3 v_positionMC;\n\
-varying vec3 v_positionEC;\n\
-varying vec2 v_st;\n\
-\n\
-void main()\n\
-{\n\
-    czm_materialInput materialInput;\n\
-    vec3 normalEC = normalize(czm_normal3D * czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0)));\n\
-#ifdef FACE_FORWARD\n\
-    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);\n\
-#endif\n\
-    materialInput.s = v_st.s;\n\
-    materialInput.st = v_st;\n\
-    materialInput.str = vec3(v_st, 0.0);\n\
-    materialInput.normalEC = normalEC;\n\
-    materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, materialInput.normalEC);\n\
-    vec3 positionToEyeEC = -v_positionEC;\n\
-    materialInput.positionToEyeEC = positionToEyeEC;\n\
-    czm_material material = czm_getMaterial(materialInput);\n\
-#ifdef FLAT\n\
-    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);\n\
-#else\n\
-    gl_FragColor = czm_phong(normalize(positionToEyeEC), material);\n\
-    gl_FragColor.a = 0.5;\n\
-#endif\n\
-}\n\
-';
+            return `
+            varying vec3 v_positionMC;
+            varying vec3 v_positionEC;
+            varying vec2 v_st;
+            void main()
+            {
+                czm_materialInput materialInput;
+                vec3 normalEC = normalize(czm_normal3D * czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0)));
+                #ifdef FACE_FORWARD
+                    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);
+                #endif
+                materialInput.s = v_st.s;
+                materialInput.st = v_st;
+                materialInput.str = vec3(v_st, 0.0);
+                materialInput.normalEC = normalEC;
+                materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, materialInput.normalEC);
+                vec3 positionToEyeEC = -v_positionEC;
+                materialInput.positionToEyeEC = positionToEyeEC;
+                czm_material material = czm_getMaterial(materialInput);
+                #ifdef FLAT
+                    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);
+                #else
+                    gl_FragColor = czm_phong(normalize(positionToEyeEC), material, czm_lightDirectionEC);
+                #endif
+                gl_FragColor.a=0.7;
+            }
+`;
         }
 
         _.prototype.remove = function () {
@@ -103,8 +124,8 @@ void main()\n\
             if (this.primitive != null) {
                 viewer.scene.primitives.remove(this.primitive);
                 if (_degreesArrayHeights && _degreesArrayHeights.length < 3) { return; }
-                geometry = CreateGeometry(_degreesArrayHeights, _extrudedHeight?_extrudedHeight:0);
-               
+                geometry = CreateGeometry(_degreesArrayHeights, _extrudedHeight ? _extrudedHeight : 0);
+
                 this.primitive = viewer.scene.primitives.add(new Cesium.Primitive({
                     allowPicking: false,
                     geometryInstances: new Cesium.GeometryInstance({

@@ -106,6 +106,10 @@
 
 	var _Measure2 = _interopRequireDefault(_Measure);
 
+	var _tooltip = __webpack_require__(107);
+
+	var _tooltip2 = _interopRequireDefault(_tooltip);
+
 	var _ViewshedAnalyze = __webpack_require__(86);
 
 	var _ViewshedAnalyze2 = _interopRequireDefault(_ViewshedAnalyze);
@@ -118,7 +122,7 @@
 
 	var _EnvEffects2 = _interopRequireDefault(_EnvEffects);
 
-	var _transformEditor = __webpack_require__(107);
+	var _transformEditor = __webpack_require__(108);
 
 	var _transformEditor2 = _interopRequireDefault(_transformEditor);
 
@@ -130,11 +134,11 @@
 
 	var _LayerStyle2 = _interopRequireDefault(_LayerStyle);
 
-	var _gltfWraper = __webpack_require__(108);
+	var _gltfWraper = __webpack_require__(109);
 
 	var _gltfWraper2 = _interopRequireDefault(_gltfWraper);
 
-	var _Cesium3dTilesetExt = __webpack_require__(109);
+	var _Cesium3dTilesetExt = __webpack_require__(110);
 
 	var _Cesium3dTilesetExt2 = _interopRequireDefault(_Cesium3dTilesetExt);
 
@@ -142,19 +146,19 @@
 
 	var _TerrainLayerList2 = _interopRequireDefault(_TerrainLayerList);
 
-	var _BaiDuImageryProvider = __webpack_require__(111);
+	var _BaiDuImageryProvider = __webpack_require__(112);
 
 	var _BaiDuImageryProvider2 = _interopRequireDefault(_BaiDuImageryProvider);
 
-	var _KeyboardNavigation = __webpack_require__(112);
+	var _KeyboardNavigation = __webpack_require__(113);
 
 	var _KeyboardNavigation2 = _interopRequireDefault(_KeyboardNavigation);
 
-	var _HeatMapLayer = __webpack_require__(113);
+	var _HeatMapLayer = __webpack_require__(114);
 
-	var _MapVLayer = __webpack_require__(116);
+	var _MapVLayer = __webpack_require__(117);
 
-	var _Clusterpoint = __webpack_require__(120);
+	var _Clusterpoint = __webpack_require__(121);
 
 	var _Clusterpoint2 = _interopRequireDefault(_Clusterpoint);
 
@@ -162,15 +166,15 @@
 
 	var _LicManager2 = _interopRequireDefault(_LicManager);
 
-	var _WelcomAPI = __webpack_require__(121);
+	var _WelcomAPI = __webpack_require__(122);
 
 	var _WelcomAPI2 = _interopRequireDefault(_WelcomAPI);
 
-	var _LatLonGridLayer = __webpack_require__(122);
+	var _LatLonGridLayer = __webpack_require__(123);
 
 	var _LatLonGridLayer2 = _interopRequireDefault(_LatLonGridLayer);
 
-	var _WaterFacePrimitive = __webpack_require__(123);
+	var _WaterFacePrimitive = __webpack_require__(124);
 
 	var _WaterFacePrimitive2 = _interopRequireDefault(_WaterFacePrimitive);
 
@@ -209,6 +213,8 @@
 	CTMap['HeatMapOpt'] = _HeatMapLayer.HeatMapOpt;
 	CTMap['LatLonGridLayer'] = _LatLonGridLayer2.default;
 	CTMap['WaterFacePrimitive'] = _WaterFacePrimitive2.default;
+
+	CTMap['tooltip'] = _tooltip2.default;
 
 	try {
 	  CTMap = _LicManager2.default.checkLicense() ? CTMap : {};
@@ -20218,6 +20224,7 @@
 	                },
 	                //绘制完成后
 	                showDrawEnd: function showDrawEnd(entity) {
+	                    debugger;
 	                    var positions = measureCtrl.drawControl.getPositions(entity);
 	                    var count = this.arrLables.length - positions.length;
 	                    if (count >= 0) {
@@ -23391,6 +23398,117 @@
 
 /***/ }),
 /* 107 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	// 信息框
+	var tooltip = function () {
+	    function tooltip(viewer, className) {
+	        _classCallCheck(this, tooltip);
+
+	        this.viewer = viewer;
+	        this.className = className || 'popupdialog';
+	        this.id = 0;
+	        this.ctnList = {};
+	    }
+
+	    _createClass(tooltip, [{
+	        key: 'add',
+	        value: function add(conf) {
+	            var _this = this;
+	            var geometry = conf.geometry; // 弹窗挂载的位置
+	            var id = 'popup_' + ((1 + Math.random()) * 0x10000 | 0).toString(16) + _this.id++;
+	            var ctn = document.createElement('div');
+	            ctn.className = 'bx-popup-ctn' + (this.className ? ' ' + this.className : '');
+	            ctn.id = id;
+	            document.getElementById(_this.viewer.container.id).appendChild(ctn);
+	            // 测试弹窗内容
+	            var testConfig = conf.content;
+	            ctn.innerHTML = _this.createHtml(testConfig.header, testConfig.content, testConfig.isclose);
+	            _this.ctnList[id] = [geometry, ctn];
+	            _this.render();
+	            if (!_this.eventListener) {
+	                _this.eventListener = function (clock) {
+	                    _this.render();
+	                };
+	                _this.viewer.clock.onTick.addEventListener(_this.eventListener);
+	            }
+
+	            if (conf.isclose === false) {} else {
+	                if (ctn.getElementsByClassName('bx-popup-close') && ctn.getElementsByClassName('bx-popup-close').length > 0) {
+	                    ctn.getElementsByClassName('bx-popup-close')[0].onclick = function () {
+	                        _this.close(ctn);
+	                    };
+	                }
+	            }
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var _this = this;
+	            for (var c in _this.ctnList) {
+	                var position = Cesium.SceneTransforms.wgs84ToWindowCoordinates(_this.viewer.scene, _this.ctnList[c][0]);
+	                if (position && position.x && position.y) {
+	                    if (Math.abs(position.x) > window.innerWidth * 2 || Math.abs(position.y) > window.innerHeight * 2) {
+	                        _this.ctnList[c][1].style.display = 'none';
+	                    } else {
+	                        _this.ctnList[c][1].style.display = '';
+	                        _this.ctnList[c][1].style.left = position.x + 'px';
+	                        _this.ctnList[c][1].style.top = position.y + 'px';
+	                    }
+	                }
+	            }
+	        }
+	    }, {
+	        key: 'createHtml',
+	        value: function createHtml(header, content, isclose) {
+	            if (this.html) {
+	                return this.html(header, content);
+	            } else {
+	                var html = '\n      ' + (isclose === false ? '' : '<div class="bx-popup-close"><i class="iconfont icon-guanbi"></i></div>') + '\n            <div class="divpoint-wrap">\n            <div class="divpoint-border">\n            <div class="divpoint-center">\n            <div class="bx-popup-header-ctn">\n            ' + header + '\n            </div>\n            <div class="bx-popup-content-ctn" >\n            <div class="bx-popup-content" >\n            ' + content + '\n            </div>\n            </div>\n            </div>\n            </div>\n            </div>\n            <div class="directional"></div>\n            ';
+	                return html;
+	            }
+	        }
+	    }, {
+	        key: 'close',
+	        value: function close(e) {
+	            e.remove();
+	            delete this.ctnList[e.id];
+	            if (Object.keys(this.ctnList).length === 0) {
+	                this.viewer.clock.onTick.removeEventListener(this.eventListener);
+	                this.eventListener = null;
+	            }
+	        }
+	    }, {
+	        key: 'closeAll',
+	        value: function closeAll(e) {
+	            for (var o in this.ctnList) {
+	                this.ctnList[o][1].remove();
+	            }
+	            this.ctnList = {};
+	            if (this.eventListener) {
+	                this.viewer.clock.onTick.removeEventListener(this.eventListener);
+	            }
+	            this.eventListener = null;
+	        }
+	    }]);
+
+	    return tooltip;
+	}();
+
+	exports.default = tooltip;
+
+/***/ }),
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -23661,7 +23779,7 @@
 	exports.default = transformEditor;
 
 /***/ }),
-/* 108 */
+/* 109 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -23739,14 +23857,14 @@
 	};
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _matrixEditor = __webpack_require__(110);
+	var _matrixEditor = __webpack_require__(111);
 
 	var _matrixEditor2 = _interopRequireDefault(_matrixEditor);
 
@@ -24121,7 +24239,7 @@
 	});
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -24274,7 +24392,7 @@
 	exports.default = matrixEditor;
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -24432,7 +24550,7 @@
 	exports.default = BaiDuImageryProvider;
 
 /***/ }),
-/* 112 */
+/* 113 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -24740,7 +24858,7 @@
 	exports.default = KeyboardNavigation;
 
 /***/ }),
-/* 113 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -24752,7 +24870,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _HeatMapImageryProvider = __webpack_require__(114);
+	var _HeatMapImageryProvider = __webpack_require__(115);
 
 	var _HeatMapImageryProvider2 = _interopRequireDefault(_HeatMapImageryProvider);
 
@@ -24976,7 +25094,7 @@
 	};
 
 /***/ }),
-/* 114 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -24987,7 +25105,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _BaseHeatMap = __webpack_require__(115);
+	var _BaseHeatMap = __webpack_require__(116);
 
 	var _BaseHeatMap2 = _interopRequireDefault(_BaseHeatMap);
 
@@ -25549,7 +25667,7 @@
 	exports.default = HeatmapImageryProvider;
 
 /***/ }),
-/* 115 */
+/* 116 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -26233,7 +26351,7 @@
 	exports.default = heatmapFactory;
 
 /***/ }),
-/* 116 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26245,7 +26363,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _CombineMapV = __webpack_require__(117);
+	var _CombineMapV = __webpack_require__(118);
 
 	var _CombineMapV2 = _interopRequireDefault(_CombineMapV);
 
@@ -26253,7 +26371,7 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var GeoMapV = __webpack_require__(118);
+	var GeoMapV = __webpack_require__(119);
 	/**
 	 * 需要用户创建的类</br>
 	 *  MapV复合可视化，搭建了球和MapV之间的桥梁，具体MapV应用请参见MapV官网（https://mapv.baidu.com/）</br>
@@ -26540,7 +26658,7 @@
 	};
 
 /***/ }),
-/* 117 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -26559,7 +26677,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var MapV = __webpack_require__(118);
+	var MapV = __webpack_require__(119);
 	var baiduMapLayer = MapV ? MapV.baiduMapLayer : null;
 	var BaseLayer = baiduMapLayer ? baiduMapLayer.__proto__ : Function;
 	var backAngle = Cesium.Math.toRadians(95);
@@ -26969,7 +27087,7 @@
 	exports.default = MapVLayer;
 
 /***/ }),
-/* 118 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process) {"use strict";
@@ -29064,10 +29182,10 @@
 	    }, n;
 	  }, t.utilDataRangeIntensity = D, t.utilDataRangeCategory = ut, t.utilDataRangeChoropleth = ct, t.Map = pt, t.baiduMapCanvasLayer = dt, t.baiduMapAnimationLayer = Kt, t.baiduMapLayer = ie, t.googleMapCanvasLayer = ae, t.googleMapLayer = se, t.MaptalksLayer = ge, t.AMapLayer = fe, t.OpenlayersLayer = ye, t.leafletMapLayer = Le, t.cesiumMapLayer = Re, t.DataSet = T, t.geojson = Ae, t.csv = Oe, Object.defineProperty(t, "__esModule", { value: !0 });
 	});
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(119)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(120)))
 
 /***/ }),
-/* 119 */
+/* 120 */
 /***/ (function(module, exports) {
 
 	// shim for using process in browser
@@ -29257,7 +29375,7 @@
 
 
 /***/ }),
-/* 120 */
+/* 121 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -29419,7 +29537,7 @@
 	exports.default = Clusterpoint;
 
 /***/ }),
-/* 121 */
+/* 122 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -29464,7 +29582,7 @@
 	exports.default = WelcomAPI;
 
 /***/ }),
-/* 122 */
+/* 123 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -29771,7 +29889,7 @@
 	exports.default = LatLonGridLayer;
 
 /***/ }),
-/* 123 */
+/* 124 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -29796,26 +29914,45 @@
 	            degreesArrayHeights = [116.04437, 30.10932, -100, 116.04537, 30.10932, -120, 116.04537, 30.11032, -100, 116.04437, 30.11032, -120, 116.04437, 30.10932, -100];
 	        }
 	        if (options.extrudedHeight) {
-	            geometry = CreateGeometry(degreesArrayHeights, options.extrudedHeight);
+	            geometry = CreateGeometry(degreesArrayHeights, options.startH || 0, options.extrudedHeight);
 	        } else {
-	            geometry = CreateGeometry(degreesArrayHeights);
+	            geometry = CreateGeometry(degreesArrayHeights, options.startH || 0);
 	        }
 
 	        appearance = CreateAppearence(fragmentShader, normalMapUrl);
 
-	        this.primitive = viewer.scene.primitives.add(new Cesium.Primitive({
-	            allowPicking: false,
-	            geometryInstances: new Cesium.GeometryInstance({
-	                geometry: geometry
-	            }),
-	            appearance: appearance,
-	            asynchronous: false
-	        }));
+	        if (options.ClassificationPrimitive) {
+	            this.primitive = viewer.scene.primitives.add(new Cesium.Primitive(new Cesium.ClassificationPrimitive({
+	                allowPicking: false,
+	                geometryInstances: new Cesium.GeometryInstance({
+	                    geometry: geometry,
+	                    attributes: {
+	                        color: Cesium.ColorGeometryInstanceAttribute.fromColor(options.fillcolor || Cesium.Color.WHITE.withAlpha(1)),
+	                        show: new Cesium.ShowGeometryInstanceAttribute(true)
+	                    }
+	                }),
+
+	                classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
+	                appearance: appearance,
+	                asynchronous: false
+	            })));
+	        } else {
+	            this.primitive = viewer.scene.primitives.add(new Cesium.Primitive({
+	                allowPicking: false,
+	                geometryInstances: new Cesium.GeometryInstance({
+	                    geometry: geometry
+	                }),
+	                classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
+	                appearance: appearance,
+	                asynchronous: false
+	            }));
+	        }
 	    }
 	    //_degreesArrayHeights是一个组成多边形顶点数组[lon,lat,alt]
-	    function CreateGeometry(_degreesArrayHeights, _extrudedHeight) {
+	    function CreateGeometry(_degreesArrayHeights, startH, _extrudedHeight) {
 	        return new Cesium.PolygonGeometry({
 	            polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArrayHeights(_degreesArrayHeights)),
+	            height: startH,
 	            extrudedHeight: _extrudedHeight ? _extrudedHeight : 0,
 	            perPositionHeight: true
 	        });
@@ -29839,33 +29976,7 @@
 	    }
 
 	    function FSWaterFace() {
-	        return 'varying vec3 v_positionMC;\n\
-	varying vec3 v_positionEC;\n\
-	varying vec2 v_st;\n\
-	\n\
-	void main()\n\
-	{\n\
-	    czm_materialInput materialInput;\n\
-	    vec3 normalEC = normalize(czm_normal3D * czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0)));\n\
-	#ifdef FACE_FORWARD\n\
-	    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);\n\
-	#endif\n\
-	    materialInput.s = v_st.s;\n\
-	    materialInput.st = v_st;\n\
-	    materialInput.str = vec3(v_st, 0.0);\n\
-	    materialInput.normalEC = normalEC;\n\
-	    materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, materialInput.normalEC);\n\
-	    vec3 positionToEyeEC = -v_positionEC;\n\
-	    materialInput.positionToEyeEC = positionToEyeEC;\n\
-	    czm_material material = czm_getMaterial(materialInput);\n\
-	#ifdef FLAT\n\
-	    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);\n\
-	#else\n\
-	    gl_FragColor = czm_phong(normalize(positionToEyeEC), material);\n\
-	    gl_FragColor.a = 0.5;\n\
-	#endif\n\
-	}\n\
-	';
+	        return '\n            varying vec3 v_positionMC;\n            varying vec3 v_positionEC;\n            varying vec2 v_st;\n            void main()\n            {\n                czm_materialInput materialInput;\n                vec3 normalEC = normalize(czm_normal3D * czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0)));\n                #ifdef FACE_FORWARD\n                    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);\n                #endif\n                materialInput.s = v_st.s;\n                materialInput.st = v_st;\n                materialInput.str = vec3(v_st, 0.0);\n                materialInput.normalEC = normalEC;\n                materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, materialInput.normalEC);\n                vec3 positionToEyeEC = -v_positionEC;\n                materialInput.positionToEyeEC = positionToEyeEC;\n                czm_material material = czm_getMaterial(materialInput);\n                #ifdef FLAT\n                    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);\n                #else\n                    gl_FragColor = czm_phong(normalize(positionToEyeEC), material, czm_lightDirectionEC);\n                #endif\n                gl_FragColor.a=0.7;\n            }\n';
 	    }
 
 	    _.prototype.remove = function () {
