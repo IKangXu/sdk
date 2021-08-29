@@ -213,13 +213,13 @@
                  var positions = measureCtrl.drawControl.getPositions(entity);
                  var count = this.arrLables.length - positions.length;
                  if (count >= 0) {
+                    this.totalLable.position= positions[positions.length - 1]
+                    this.totalLable.label.text = "全长:" + this.arrLables[this.arrLables.length-1].label.text;
                      for (var i = this.arrLables.length - 1; i >= positions.length - 1; i--) {
                          dataSource.entities.remove(this.arrLables[i]);
                      }
                      this.arrLables.splice(positions.length - 1, count + 1);
                  }
-                 this.totalLable.position= positions[positions.length - 1]
-                 this.totalLable.label.text = "全长:" + this.arrLables[this.arrLables.length-1].label.text;
                  entity._totalLable = this.totalLable;
                  entity._arrLables = this.arrLables;
 
@@ -425,10 +425,13 @@
                      }
                  });
 
+                 
                  measureCtrl.drawControl.startDraw({
-                     type: "polygon",
-                     style: {
+                    type: "polygon",
+                    // edittype: "extrudedPolygon",
+                    style: {
                          color: "#ffff00",
+                        //  extrudedHeight:0.0001,
                          outline: true,
                          outlineColor: "#ffff00",
                          outlineWidth: 4,
@@ -436,6 +439,17 @@
                          perPositionHeight: true //贴地
                      }
                  });
+                //  measureCtrl.drawControl.startDraw({
+                //      type: "polygon",
+                //      style: {
+                //          color: "#ffff00",
+                //          outline: true,
+                //          outlineColor: "#ffff00",
+                //          outlineWidth: 4,
+                //          opacity: 0.4,
+                //          perPositionHeight: true //贴地
+                //      }
+                //  });
              },
              //绘制增加一个点后，显示该分段的长度
              showAddPointLength: function (entity) {
