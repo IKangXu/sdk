@@ -218,6 +218,8 @@
                      }
                      this.arrLables.splice(positions.length - 1, count + 1);
                  }
+                 this.totalLable.position= positions[positions.length - 1]
+                 this.totalLable.label.text = "全长:" + this.arrLables[this.arrLables.length-1].label.text;
                  entity._totalLable = this.totalLable;
                  entity._arrLables = this.arrLables;
 
@@ -431,7 +433,7 @@
                          outlineColor: "#ffff00",
                          outlineWidth: 4,
                          opacity: 0.4,
-                         perPositionHeight: false //贴地
+                         perPositionHeight: true //贴地
                      }
                  });
              },
@@ -470,6 +472,13 @@
              showDrawEnd: function (entity) {
                  if (entity.polygon == null) return;
 
+                 var positions = measureCtrl.drawControl.getPositions(entity);
+                 if (positions.length < 3) return;
+                 var area = Util.getArea(positions);
+                 var areastr = measureCtrl.formatArea(area, this.options.unit);
+                 if (this.totalLable) {
+                 this.totalLable.label.text = "面积:" + areastr;
+                 }
                  var polyPositions = entity.polygon.hierarchy.getValue();
                  polyPositions.map(item => {
                      item.z = item.z + 1;

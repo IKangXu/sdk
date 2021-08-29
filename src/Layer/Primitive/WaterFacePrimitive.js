@@ -4,7 +4,7 @@
         var fragmentShader;
         var normalMapUrl;
         var geometry;
-        var appearance;
+        var appearance=null;
         var viewer;
         function _(options) {
             viewer = options.viewer;
@@ -26,12 +26,13 @@
                 geometry = CreateGeometry(degreesArrayHeights, options.startH || 0);
             }
 
-            appearance = CreateAppearence(fragmentShader, normalMapUrl);
-
+            if (!options.fillcolor) {
+            appearance = CreateAppearence(fragmentShader, normalMapUrl,options);
+            }
             if (options.ClassificationPrimitive) {
-                this.primitive = viewer.scene.primitives.add(new Cesium.Primitive(
-                    new Cesium.ClassificationPrimitive({
-                        allowPicking: false,
+                // this.primitive = viewer.scene.primitives.add(new Cesium.Primitive(
+                    var cfp= new Cesium.ClassificationPrimitive({
+                        // allowPicking: false,
                         geometryInstances: new Cesium.GeometryInstance({
                             geometry: geometry,
                             attributes: {
@@ -42,9 +43,18 @@
                         }),
 
                         classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
-                        appearance: appearance,
-                        asynchronous: false
-                    })));
+                          appearance: appearance,
+                        // asynchronous: false
+                    })
+                    if(!appearance){
+                        console.log(appearance)
+                    this.primitive = new Cesium.PrimitiveCollection();
+		viewer.scene.primitives.add(this.primitive);
+        this.primitive.add(cfp)
+    }else{
+        this.primitive = viewer.scene.primitives.add(new Cesium.Primitive(cfp))
+    }
+                    // ));
             } else {
                 this.primitive = viewer.scene.primitives.add(new Cesium.Primitive({
                     allowPicking: false,
@@ -64,7 +74,7 @@
                 polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArrayHeights(_degreesArrayHeights)),
                  height: startH || 0,
                  extrudedHeight: _extrudedHeight ? _extrudedHeight : 0,
-                perPositionHeight: true
+                // perPositionHeight: true
             });
 			}else{
             return new Cesium.PolygonGeometry({
@@ -74,16 +84,21 @@
 			}
         }
 
-        function CreateAppearence(fs, url) {
+        function CreateAppearence(fs, url, opts) {
             return new Cesium.EllipsoidSurfaceAppearance({
                 material: new Cesium.Material({
                     fabric: {
                         type: 'Water',
                         uniforms: {
-                            normalMap: url,
-                            frequency: 1000.0,
-                            animationSpeed: 0.05,
-                            amplitude: 10.0
+							baseWaterColor: new Cesium.Color.fromCssColorString(opts.waterColor || "#006ab4").withAlpha(0.5),// 颜色对象水的基色。
+// blendColor：从水混合到非水区域时使用的 rgba 颜色对象。
+// specularMap：用于指示水域区域的单通道纹理。
+// specularIntensity：控制镜面反射强度的数字。
+
+							normalMap: url,//水法线扰动的法线贴图。
+							frequency: 400.0, //控制波数的数字。
+							animationSpeed: 0.02,//控制水的动画速度的数字。
+                            amplitude: 5.0//控制水波幅度的数字。
                         }
                     }
                 }),

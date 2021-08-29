@@ -20,21 +20,32 @@ LatLon.formatPositon = function (position) {
  */
 LatLon.getCurrentMousePosition= function (scene, position) {
     var cartesian;
+
     //在模型上提取坐标
     var pickobject = scene.pick(position); //取模型
     if (scene.pickPositionSupported && Cesium.defined(pickobject)) {   //!scene.pickPositionSupported : 不支持深度拾取,无法进行鼠标交互绘制
         cartesian = scene.pickPosition(position);
-        if (cartesian) {
-            var pgeo = scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-            if (pgeo.height > 0)
-                return cartesian;
+        // if (cartesian) {
+            if (Cesium.defined(cartesian)) {
+                // var pgeo = scene.globe.ellipsoid.cartesianToCartographic(cartesian);
+                var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+                var height = cartographic.height; //模型高度
+                if (height >= 0) return cartesian;
+
+                //不是entity时，支持3dtiles地下
+                if (!Cesium.defined(pickobject.id) && height >= -2000)
+                    return cartesian;
         }
     }
 
     //提取鼠标点的地理坐标
+if (scene.mode === Cesium.SceneMode.SCENE3D) {
     var pickRay = scene.camera.getPickRay(position);
     cartesian = scene.globe.pick(pickRay, scene);
-    return cartesian;
+} else {
+    cartesian = scene.camera.pickEllipsoid(position, scene.globe.ellipsoid);
+}
+return cartesian;
 }
 
 LatLon.getCenter = function (viewer, isToWgs) {

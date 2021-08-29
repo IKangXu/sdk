@@ -67,8 +67,8 @@ export default class DrawUtils {
     static getMaxHeightForPositions(positions, defaultVal) {
         if (defaultVal == null) defaultVal = 0;
 
-        var maxHeight = defaultVal;
-        if (positions == null || positions.length == 0) return maxHeight;
+        var maxHeight = -30000;
+        if (positions == null || positions.length == 0) return defaultVal;
 
         var extrudedPosition = positions[0];
         for (var i = 0; i < positions.length; i++) {

@@ -15071,15 +15071,25 @@
 	            if (scene.pickPositionSupported && Cesium.defined(pickobject)) {
 	                //!scene.pickPositionSupported : 不支持深度拾取,无法进行鼠标交互绘制
 	                cartesian = scene.pickPosition(position);
-	                if (cartesian) {
-	                    var pgeo = scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-	                    if (pgeo.height > 0) return cartesian;
+	                // if (cartesian) {
+	                if (Cesium.defined(cartesian)) {
+	                    // var pgeo = scene.globe.ellipsoid.cartesianToCartographic(cartesian);
+	                    var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+	                    var height = cartographic.height; //模型高度
+	                    if (height >= 0) return cartesian;
+
+	                    //不是entity时，支持3dtiles地下
+	                    if (!Cesium.defined(pickobject.id) && height >= -2000) return cartesian;
 	                }
 	            }
 
 	            //提取鼠标点的地理坐标
-	            var pickRay = scene.camera.getPickRay(position);
-	            cartesian = scene.globe.pick(pickRay, scene);
+	            if (scene.mode === Cesium.SceneMode.SCENE3D) {
+	                var pickRay = scene.camera.getPickRay(position);
+	                cartesian = scene.globe.pick(pickRay, scene);
+	            } else {
+	                cartesian = scene.camera.pickEllipsoid(position, scene.globe.ellipsoid);
+	            }
 	            return cartesian;
 	        }
 
@@ -16606,11 +16616,11 @@
 	            this.mousePosition = document.createElement('div');
 	            this.mousePosition.style.height = '26px';
 	            this.mousePosition.style.lineHeight = '26px';
-	            this.mousePosition.style.width = '850px';
+	            this.mousePosition.style.width = '800px';
 	            this.mousePosition.style.position = 'absolute';
-	            this.mousePosition.style.right = '60px';
+	            this.mousePosition.style.left = '10px';
 	            this.mousePosition.style.color = '#e9e9e9';
-	            this.mousePosition.style.textAlign = 'right';
+	            this.mousePosition.style.textAlign = 'left';
 	            this.mousePosition.style.fontSize = '13px';
 	            this.mousePosition.style.fontFamily = '微软雅黑';
 	            this.mousePosition.style.textShadow = '2px 2px 2px #000;';
@@ -29892,7 +29902,7 @@
 /* 124 */
 /***/ (function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -29902,7 +29912,7 @@
 	    var fragmentShader;
 	    var normalMapUrl;
 	    var geometry;
-	    var appearance;
+	    var appearance = null;
 	    var viewer;
 	    function _(options) {
 	        viewer = options.viewer;
@@ -29919,11 +29929,13 @@
 	            geometry = CreateGeometry(degreesArrayHeights, options.startH || 0);
 	        }
 
-	        appearance = CreateAppearence(fragmentShader, normalMapUrl);
-
+	        if (!options.fillcolor) {
+	            appearance = CreateAppearence(fragmentShader, normalMapUrl, options);
+	        }
 	        if (options.ClassificationPrimitive) {
-	            this.primitive = viewer.scene.primitives.add(new Cesium.Primitive(new Cesium.ClassificationPrimitive({
-	                allowPicking: false,
+	            // this.primitive = viewer.scene.primitives.add(new Cesium.Primitive(
+	            var cfp = new Cesium.ClassificationPrimitive({
+	                // allowPicking: false,
 	                geometryInstances: new Cesium.GeometryInstance({
 	                    geometry: geometry,
 	                    attributes: {
@@ -29933,16 +29945,25 @@
 	                }),
 
 	                classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
-	                appearance: appearance,
-	                asynchronous: false
-	            })));
+	                appearance: appearance
+	                // asynchronous: false
+	            });
+	            if (!appearance) {
+	                console.log(appearance);
+	                this.primitive = new Cesium.PrimitiveCollection();
+	                viewer.scene.primitives.add(this.primitive);
+	                this.primitive.add(cfp);
+	            } else {
+	                this.primitive = viewer.scene.primitives.add(new Cesium.Primitive(cfp));
+	            }
+	            // ));
 	        } else {
 	            this.primitive = viewer.scene.primitives.add(new Cesium.Primitive({
 	                allowPicking: false,
 	                geometryInstances: new Cesium.GeometryInstance({
 	                    geometry: geometry
 	                }),
-	                classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
+	                // classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
 	                appearance: appearance,
 	                asynchronous: false
 	            }));
@@ -29950,24 +29971,36 @@
 	    }
 	    //_degreesArrayHeights是一个组成多边形顶点数组[lon,lat,alt]
 	    function CreateGeometry(_degreesArrayHeights, startH, _extrudedHeight) {
-	        return new Cesium.PolygonGeometry({
-	            polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArrayHeights(_degreesArrayHeights)),
-	            height: startH,
-	            extrudedHeight: _extrudedHeight ? _extrudedHeight : 0,
-	            perPositionHeight: true
-	        });
+	        if (_extrudedHeight || startH) {
+	            return new Cesium.PolygonGeometry({
+	                polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArrayHeights(_degreesArrayHeights)),
+	                height: startH || 0,
+	                extrudedHeight: _extrudedHeight ? _extrudedHeight : 0
+	                // perPositionHeight: true
+	            });
+	        } else {
+	            return new Cesium.PolygonGeometry({
+	                polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArrayHeights(_degreesArrayHeights)),
+	                perPositionHeight: true
+	            });
+	        }
 	    }
 
-	    function CreateAppearence(fs, url) {
+	    function CreateAppearence(fs, url, opts) {
 	        return new Cesium.EllipsoidSurfaceAppearance({
 	            material: new Cesium.Material({
 	                fabric: {
 	                    type: 'Water',
 	                    uniforms: {
-	                        normalMap: url,
-	                        frequency: 1000.0,
-	                        animationSpeed: 0.05,
-	                        amplitude: 10.0
+	                        baseWaterColor: new Cesium.Color.fromCssColorString(opts.waterColor || "#006ab4").withAlpha(0.5), // 颜色对象水的基色。
+	                        // blendColor：从水混合到非水区域时使用的 rgba 颜色对象。
+	                        // specularMap：用于指示水域区域的单通道纹理。
+	                        // specularIntensity：控制镜面反射强度的数字。
+
+	                        normalMap: url, //水法线扰动的法线贴图。
+	                        frequency: 400.0, //控制波数的数字。
+	                        animationSpeed: 0.02, //控制水的动画速度的数字。
+	                        amplitude: 5.0 //控制水波幅度的数字。
 	                    }
 	                }
 	            }),
@@ -29976,7 +30009,7 @@
 	    }
 
 	    function FSWaterFace() {
-	        return '\n            varying vec3 v_positionMC;\n            varying vec3 v_positionEC;\n            varying vec2 v_st;\n            void main()\n            {\n                czm_materialInput materialInput;\n                vec3 normalEC = normalize(czm_normal3D * czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0)));\n                #ifdef FACE_FORWARD\n                    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);\n                #endif\n                materialInput.s = v_st.s;\n                materialInput.st = v_st;\n                materialInput.str = vec3(v_st, 0.0);\n                materialInput.normalEC = normalEC;\n                materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, materialInput.normalEC);\n                vec3 positionToEyeEC = -v_positionEC;\n                materialInput.positionToEyeEC = positionToEyeEC;\n                czm_material material = czm_getMaterial(materialInput);\n                #ifdef FLAT\n                    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);\n                #else\n                    gl_FragColor = czm_phong(normalize(positionToEyeEC), material, czm_lightDirectionEC);\n                #endif\n                gl_FragColor.a=0.7;\n            }\n';
+	        return "\n            varying vec3 v_positionMC;\n            varying vec3 v_positionEC;\n            varying vec2 v_st;\n            void main()\n            {\n                czm_materialInput materialInput;\n                vec3 normalEC = normalize(czm_normal3D * czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0)));\n                #ifdef FACE_FORWARD\n                    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);\n                #endif\n                materialInput.s = v_st.s;\n                materialInput.st = v_st;\n                materialInput.str = vec3(v_st, 0.0);\n                materialInput.normalEC = normalEC;\n                materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, materialInput.normalEC);\n                vec3 positionToEyeEC = -v_positionEC;\n                materialInput.positionToEyeEC = positionToEyeEC;\n                czm_material material = czm_getMaterial(materialInput);\n                #ifdef FLAT\n                    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);\n                #else\n                    gl_FragColor = czm_phong(normalize(positionToEyeEC), material, czm_lightDirectionEC);\n                #endif\n                gl_FragColor.a=0.7;\n            }\n";
 	    }
 
 	    _.prototype.remove = function () {
