@@ -134,20 +134,21 @@ let f = {
      }
 
      moveForward(e) {
-         var t = this.viewer.camera,
-             i = t.direction,
-             r = Cesium.Cartesian3.normalize(t.position, new Cesium.Cartesian3),
-             n = Cesium.Cartesian3.cross(i, r, new Cesium.Cartesian3);
-         i = Cesium.Cartesian3.cross(r, n, new Cesium.Cartesian3),
-             i = Cesium.Cartesian3.normalize(i, i),
-             i = Cesium.Cartesian3.multiplyByScalar(i, e, i),
-             t.position = Cesium.Cartesian3.add(t.position, i, t.position)
+        //  var t = this.viewer.camera,
+        //      i = t.direction,
+        //      r = Cesium.Cartesian3.normalize(t.position, new Cesium.Cartesian3),
+        //      n = Cesium.Cartesian3.cross(i, r, new Cesium.Cartesian3);
+        //  i = Cesium.Cartesian3.cross(r, n, new Cesium.Cartesian3),
+        //      i = Cesium.Cartesian3.normalize(i, i),
+        //      i = Cesium.Cartesian3.multiplyByScalar(i, e, i),
+        //      t.position = Cesium.Cartesian3.add(t.position, i, t.position)
+        this.viewer.camera.moveForward(e)
      }
 
      cameraFunc(e) {
          var t = this.viewer.camera,
              i = this.viewer.scene.globe.ellipsoid.cartesianToCartographic(t.position).height,
-             r = i / this.l;
+             r =Math.abs(i / this.l);
          this.flags.moveForward && this.moveForward(r),
              this.flags.moveBackward && this.moveForward(-r),
              this.flags.moveUp && t.moveUp(r),

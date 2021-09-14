@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>demo</title>
+	<script src="../thirdParty/Cesium/Cesium.js"></script>
+	<script src="../dist/CTMapb.js"></script>
+	<style>
+		@import url(../thirdParty/Cesium/Widgets/widgets.css);
+
+    html,
+    body,
+    #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    li {
+      list-style: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+		Cesium.Ion.defaultAccessToken =
+			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4ZmJiMTQzMC0xYjFlLTRlZDktYjI5ZS1mOGIxMzY2ZDQ1NTciLCJpZCI6ODYwOCwic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU1MjM3OTcyN30.MSLoEjzlm83XTm1qRlt521SlgoU2jsthi566S6-9m_w'
+
+		//初始化地球
+		var viewer = new CTMap.Viewer('cesiumContainer', {
+			// globe: false,
+			animation: false,
+			baseLayerPicker: false,
+			baselayervis: true,
+			fullscreenButton: true,
+			geocoder: true,
+			homeButton: false,
+			imageryProvider: undefined,
+			infoBox: false,
+			// navigation:false,
+			navigationHelpButton: false,
+			navigationInstructionsInitiallyVisible: false,
+			sceneModePicker: false,
+			selectionIndicator: false,
+			shouldAnimate: false,
+			timeline: false,
+			vrButton: false,
+		})
+
+
+      var dataSource = new Cesium.CustomDataSource("tooltipname");
+      viewer.dataSources.add(dataSource);
+
+
+     var width = 400;
+     var height = 300;
+     var canvas = document.createElement("canvas");
+     canvas.width = width;
+     canvas.height = height;
+     var ctx = canvas.getContext('2d');
+    // 创建渐变
+    // var grd = ctx.createLinearGradient(0, 0, 200, 0);
+    // grd.addColorStop(0, "#f0f0f0");
+    // grd.addColorStop(1, "white");
+
+    // // 填充渐变
+    // ctx.fillStyle = grd;
+    // ctx.fillRect(0, 0, 700, 500);
+    // drawRoundRect(ctx, 0, 0, 700, 500, 20);
+    darwRoundRect(ctx, 0, 0, width, height - 10, 20);
+    ctx.strokeStyle = "#ffffff00";
+    // canvasTextAutoLine('涉非法尼斯的封建时代开发及地方是当年俯瞰i上帝就发蒂凡尼单反', ctx, 10, 10, 26)
+    ctx.stroke();
+    var entity = {
+      position: Cesium.Cartesian3.fromDegrees(116.466139, 31.257341, 0),
+      
+      billboard: {
+        image: canvas,
+        horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+      },
+    };
+    var ety = dataSource.entities.add(entity);
+    viewer.zoomTo(ety);
+
+    /**
+     * 绘制圆角矩形
+     * @param {*} x 起始点x坐标
+     * @param {*} y 起始点y坐标
+     * @param {*} w 矩形宽
+     * @param {*} h 矩形高
+     * @param {*} r 圆角半径
+     * @param {*} ctx 画板上下文
+     */
+    function darwRoundRect(ctx, x, y, w, h, r) {
+      ctx.save()
+      ctx.beginPath()
+
+      // 左上弧线
+      ctx.arc(x + r, y + r, r, 1 * Math.PI, 1.5 * Math.PI)
+      // 左直线
+      ctx.moveTo(x, y + r)
+      ctx.lineTo(x, y + h - r)
+      // 左下弧线
+      ctx.arc(x + r, y + h - r, r, 0.5 * Math.PI, 1 * Math.PI)
+      // 下直线
+      ctx.lineTo(x + r, y + h)
+      ctx.lineTo(x + w * 0.5 - 10, y + h)
+      ctx.lineTo(x + w * 0.5, y + h + 10)
+      ctx.lineTo(x + w * 0.5 + 10, y + h)
+      ctx.lineTo(x + w - r, y + h)
+      // 右下弧线
+      ctx.arc(x + w - r, y + h - r, r, 0 * Math.PI, 0.5 * Math.PI)
+      // 右直线
+      ctx.lineTo(x + w, y + h - r)
+      ctx.lineTo(x + w, y + r)
+      // 右上弧线
+      ctx.arc(x + w - r, y + r, r, 1.5 * Math.PI, 2 * Math.PI)
+      // 上直线
+      ctx.lineTo(x + w - r, y)
+      ctx.lineTo(x + r, y)
+      ctx.fillStyle = "#568abd88";
+      // ctx.setFillStyle('white')
+      ctx.fill()
+    }
+    /*
+str:要绘制的字符串
+ctx:canvas对象
+initX:绘制字符串起始x坐标
+initY:绘制字符串起始y坐标
+lineHeight:字行高，自己定义个值即可
+*/
+    function canvasTextAutoLine(str, ctx, initX, initY, lineHeight) {
+      var lineWidth = 0;
+      var canvasWidth = width;
+      var lastSubStrIndex = 0;
+      for (let i = 0; str.length; i++) {
+        lineWidth += ctx.measureText(str[i]).width;
+        if (lineWidth > canvasWidth - initX) { //减去initX,防止边界出现的问题
+          ctx.fillText(str.substring(lastSubStrIndex, i), initX, initY);
+          initY += lineHeight;
+          lineWidth = 0;
+          lastSubStrIndex = i;
+        }
+        if (i == str.length - 1) {
+          ctx.fillText(str.substring(lastSubStrIndex, i + 1), initX, initY);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
