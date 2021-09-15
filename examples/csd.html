@@ -57,12 +57,12 @@
       viewer.dataSources.add(dataSource);
 
 
-     var width = 400;
-     var height = 300;
-     var canvas = document.createElement("canvas");
-     canvas.width = width;
-     canvas.height = height;
-     var ctx = canvas.getContext('2d');
+      var width = 400;
+    var height = 300;
+    var canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext('2d');
     // 创建渐变
     // var grd = ctx.createLinearGradient(0, 0, 200, 0);
     // grd.addColorStop(0, "#f0f0f0");
@@ -74,11 +74,41 @@
     // drawRoundRect(ctx, 0, 0, 700, 500, 20);
     darwRoundRect(ctx, 0, 0, width, height - 10, 20);
     ctx.strokeStyle = "#ffffff00";
-    // canvasTextAutoLine('涉非法尼斯的封建时代开发及地方是当年俯瞰i上帝就发蒂凡尼单反', ctx, 10, 10, 26)
+    ctx.font = "15px heiti";
+
+    var txtarr = [{
+      titcolor: "#f0f0ff",
+      color: "#ffffff",
+      title: "名称",
+      value: "飞鸟格符",
+      titlewidth: 80
+    }, {
+      titcolor: "#f0f0ff",
+      color: "#ffffff",
+      title: "黑功能",
+      value: "这道理这到底是个什么你也不知道吗那有谁是知道的",
+      titlewidth: 80
+    }, {
+      titcolor: "#f0f0ff",
+      color: "#ffffff",
+      title: "工作空间",
+      value: "肥牛饭飞鸟格符",
+      titlewidth: 80
+    }];
+
+    var startx=20,starty=25;var lineHeight=26;
+    for(var s=0;s<txtarr.length;s++){
+    ctx.fillStyle =txtarr[s].titcolor || "#ffffff"
+    var w=txtarr[s].titlewidth || 80
+    canvasTextAutoLine(txtarr[s].title, ctx, startx, starty, lineHeight,w)
+    ctx.fillStyle =txtarr[s].color || "#ffffff"
+    var hang=canvasTextAutoLine(txtarr[s].value, ctx, startx+w+5, starty, lineHeight,width-10)
+    starty+=hang*lineHeight
+  }
     ctx.stroke();
+    
     var entity = {
       position: Cesium.Cartesian3.fromDegrees(116.466139, 31.257341, 0),
-      
       billboard: {
         image: canvas,
         horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
@@ -134,23 +164,28 @@ ctx:canvas对象
 initX:绘制字符串起始x坐标
 initY:绘制字符串起始y坐标
 lineHeight:字行高，自己定义个值即可
+w:最大宽度
 */
-    function canvasTextAutoLine(str, ctx, initX, initY, lineHeight) {
+    function canvasTextAutoLine(str, ctx, initX, initY, lineHeight,w) {
+      var Hnum=0
       var lineWidth = 0;
-      var canvasWidth = width;
+      var canvasWidth = w;
       var lastSubStrIndex = 0;
-      for (let i = 0; str.length; i++) {
+      for (var i = 0; i < str.length; i++) {
         lineWidth += ctx.measureText(str[i]).width;
         if (lineWidth > canvasWidth - initX) { //减去initX,防止边界出现的问题
           ctx.fillText(str.substring(lastSubStrIndex, i), initX, initY);
+          Hnum++
           initY += lineHeight;
           lineWidth = 0;
           lastSubStrIndex = i;
         }
         if (i == str.length - 1) {
           ctx.fillText(str.substring(lastSubStrIndex, i + 1), initX, initY);
+          Hnum++
         }
       }
+      return Hnum
     }
   </script>
 </body>
