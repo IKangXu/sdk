@@ -4,10 +4,10 @@
 <head>
   <meta charset="utf-8" />
   <title>demo</title>
-	<script src="../thirdParty/Cesium/Cesium.js"></script>
-	<script src="../dist/CTMapb.js"></script>
-	<style>
-		@import url(../thirdParty/Cesium/Widgets/widgets.css);
+  <script src="../thirdParty/Cesium/Cesium.js"></script>
+  <script src="../dist/CTMapb.js"></script>
+  <style>
+    @import url(../thirdParty/Cesium/Widgets/widgets.css);
 
     html,
     body,
@@ -27,138 +27,135 @@
 
 <body>
   <div id="cesiumContainer"></div>
+  <img id="tulip" src="images/marker/对话框.png" />
   <script>
-		Cesium.Ion.defaultAccessToken =
-			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4ZmJiMTQzMC0xYjFlLTRlZDktYjI5ZS1mOGIxMzY2ZDQ1NTciLCJpZCI6ODYwOCwic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU1MjM3OTcyN30.MSLoEjzlm83XTm1qRlt521SlgoU2jsthi566S6-9m_w'
+    Cesium.Ion.defaultAccessToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4ZmJiMTQzMC0xYjFlLTRlZDktYjI5ZS1mOGIxMzY2ZDQ1NTciLCJpZCI6ODYwOCwic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU1MjM3OTcyN30.MSLoEjzlm83XTm1qRlt521SlgoU2jsthi566S6-9m_w'
 
-		//初始化地球
-		var viewer = new CTMap.Viewer('cesiumContainer', {
-			// globe: false,
-			animation: false,
-			baseLayerPicker: false,
-			baselayervis: true,
-			fullscreenButton: true,
-			geocoder: true,
-			homeButton: false,
-			imageryProvider: undefined,
-			infoBox: false,
-			// navigation:false,
-			navigationHelpButton: false,
-			navigationInstructionsInitiallyVisible: false,
-			sceneModePicker: false,
-			selectionIndicator: false,
-			shouldAnimate: false,
-			timeline: false,
-			vrButton: false,
-		})
-
-
-      var dataSource = new Cesium.CustomDataSource("tooltipname");
-      viewer.dataSources.add(dataSource);
+    //初始化地球
+    var viewer = new CTMap.Viewer('cesiumContainer', {
+      // globe: false,
+      animation: false,
+      baseLayerPicker: false,
+      baselayervis: true,
+      fullscreenButton: true,
+      geocoder: true,
+      homeButton: false,
+      imageryProvider: undefined,
+      infoBox: false,
+      // navigation:false,
+      navigationHelpButton: false,
+      navigationInstructionsInitiallyVisible: false,
+      sceneModePicker: false,
+      selectionIndicator: false,
+      shouldAnimate: false,
+      timeline: false,
+      vrButton: false,
+    })
 
 
-      var width = 400;
-    var height = 300;
-    var canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    var ctx = canvas.getContext('2d');
-    // 创建渐变
-    // var grd = ctx.createLinearGradient(0, 0, 200, 0);
-    // grd.addColorStop(0, "#f0f0f0");
-    // grd.addColorStop(1, "white");
+    class tipinfo {
+      constructor(viewer, opts) {
+        this.viewer = viewer;
+        this.options = {
+          width: 400,
+          height: 300,
+          font: "15px heiti",
+          strokeStyle: "#ffffff00",
+          startx: 20,
+          starty: 25,
+          lineHeight: 26,
+          titlewidth: 80,
+          bgColor:"#568abd88"
+        }
+        this.options = Object.assign(this.options, opts);
+        this.dataSource = new Cesium.CustomDataSource("tooltipname");
+        this.viewer.dataSources.add(this.dataSource);
+      }
+      createEntity(textinfo) {
+        var width = this.options.width
+        var height = this.options.height
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext('2d');
 
-    // // 填充渐变
-    // ctx.fillStyle = grd;
-    // ctx.fillRect(0, 0, 700, 500);
-    // drawRoundRect(ctx, 0, 0, 700, 500, 20);
-    darwRoundRect(ctx, 0, 0, width, height - 10, 20);
-    ctx.strokeStyle = "#ffffff00";
-    ctx.font = "15px heiti";
+        this.darwRoundRect(ctx, 0, 0, width, height - 10, 20);
+        ctx.strokeStyle = this.options.strokeStyle;
+        if (this.options.image && this.options.image.imagedom) {
+          ctx.drawImage(this.options.image.imagedom, this.options.image.x || 5, this.options.image.y || 5, this
+            .options.image.width || (width - 10), this.options.image.height || (height - 20));
+        }
 
-    var txtarr = [{
-      titcolor: "#f0f0ff",
-      color: "#ffffff",
-      title: "名称",
-      value: "飞鸟格符",
-      titlewidth: 80
-    }, {
-      titcolor: "#f0f0ff",
-      color: "#ffffff",
-      title: "黑功能",
-      value: "这道理这到底是个什么你也不知道吗那有谁是知道的",
-      titlewidth: 80
-    }, {
-      titcolor: "#f0f0ff",
-      color: "#ffffff",
-      title: "工作空间",
-      value: "肥牛饭飞鸟格符",
-      titlewidth: 80
-    }];
+        ctx.font = this.options.font;
+        var txtarr = textinfo.prop
 
-    var startx=20,starty=25;var lineHeight=26;
-    for(var s=0;s<txtarr.length;s++){
-    ctx.fillStyle =txtarr[s].titcolor || "#ffffff"
-    var w=txtarr[s].titlewidth || 80
-    canvasTextAutoLine(txtarr[s].title, ctx, startx, starty, lineHeight,w)
-    ctx.fillStyle =txtarr[s].color || "#ffffff"
-    var hang=canvasTextAutoLine(txtarr[s].value, ctx, startx+w+5, starty, lineHeight,width-10)
-    starty+=hang*lineHeight
-  }
-    ctx.stroke();
-    
-    var entity = {
-      position: Cesium.Cartesian3.fromDegrees(116.466139, 31.257341, 0),
-      billboard: {
-        image: canvas,
-        horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM
-      },
-    };
-    var ety = dataSource.entities.add(entity);
-    viewer.zoomTo(ety);
+        var startx = this.options.startx,
+          starty = this.options.starty;
+        var lineHeight = this.options.lineHeight;
+        for (var s = 0; s < txtarr.length; s++) {
+          ctx.fillStyle = txtarr[s].titcolor || "#ffffff"
+          var w = txtarr[s].titlewidth || this.options.titlewidth
+          this.canvasTextAutoLine(txtarr[s].title, ctx, startx, starty, lineHeight, w)
+          ctx.fillStyle = txtarr[s].color || "#ffffff"
+          var hang = this.canvasTextAutoLine(txtarr[s].value, ctx, startx + w + 5, starty, lineHeight, width - 10)
+          starty += hang * lineHeight
+        }
+        ctx.stroke();
 
-    /**
-     * 绘制圆角矩形
-     * @param {*} x 起始点x坐标
-     * @param {*} y 起始点y坐标
-     * @param {*} w 矩形宽
-     * @param {*} h 矩形高
-     * @param {*} r 圆角半径
-     * @param {*} ctx 画板上下文
-     */
-    function darwRoundRect(ctx, x, y, w, h, r) {
-      ctx.save()
-      ctx.beginPath()
+        var entity = {
+          position: textinfo.position,
+          billboard: {
+            image: canvas,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, 10.0)
+          }
+        };
+        var ety = this.dataSource.entities.add(entity);
 
-      // 左上弧线
-      ctx.arc(x + r, y + r, r, 1 * Math.PI, 1.5 * Math.PI)
-      // 左直线
-      ctx.moveTo(x, y + r)
-      ctx.lineTo(x, y + h - r)
-      // 左下弧线
-      ctx.arc(x + r, y + h - r, r, 0.5 * Math.PI, 1 * Math.PI)
-      // 下直线
-      ctx.lineTo(x + r, y + h)
-      ctx.lineTo(x + w * 0.5 - 10, y + h)
-      ctx.lineTo(x + w * 0.5, y + h + 10)
-      ctx.lineTo(x + w * 0.5 + 10, y + h)
-      ctx.lineTo(x + w - r, y + h)
-      // 右下弧线
-      ctx.arc(x + w - r, y + h - r, r, 0 * Math.PI, 0.5 * Math.PI)
-      // 右直线
-      ctx.lineTo(x + w, y + h - r)
-      ctx.lineTo(x + w, y + r)
-      // 右上弧线
-      ctx.arc(x + w - r, y + r, r, 1.5 * Math.PI, 2 * Math.PI)
-      // 上直线
-      ctx.lineTo(x + w - r, y)
-      ctx.lineTo(x + r, y)
-      ctx.fillStyle = "#568abd88";
-      // ctx.setFillStyle('white')
-      ctx.fill()
-    }
-    /*
+      }
+      /**
+       * 绘制圆角矩形
+       * @param {*} x 起始点x坐标
+       * @param {*} y 起始点y坐标
+       * @param {*} w 矩形宽
+       * @param {*} h 矩形高
+       * @param {*} r 圆角半径
+       * @param {*} ctx 画板上下文
+       */
+      darwRoundRect(ctx, x, y, w, h, r) {
+        ctx.save()
+        ctx.beginPath()
+
+        // 左上弧线
+        ctx.arc(x + r, y + r, r, 1 * Math.PI, 1.5 * Math.PI)
+        // 左直线
+        ctx.moveTo(x, y + r)
+        ctx.lineTo(x, y + h - r)
+        // 左下弧线
+        ctx.arc(x + r, y + h - r, r, 0.5 * Math.PI, 1 * Math.PI)
+        // 下直线
+        ctx.lineTo(x + r, y + h)
+        ctx.lineTo(x + w * 0.5 - 10, y + h)
+        ctx.lineTo(x + w * 0.5, y + h + 10)
+        ctx.lineTo(x + w * 0.5 + 10, y + h)
+        ctx.lineTo(x + w - r, y + h)
+        // 右下弧线
+        ctx.arc(x + w - r, y + h - r, r, 0 * Math.PI, 0.5 * Math.PI)
+        // 右直线
+        ctx.lineTo(x + w, y + h - r)
+        ctx.lineTo(x + w, y + r)
+        // 右上弧线
+        ctx.arc(x + w - r, y + r, r, 1.5 * Math.PI, 2 * Math.PI)
+        // 上直线
+        ctx.lineTo(x + w - r, y)
+        ctx.lineTo(x + r, y)
+        ctx.fillStyle = this.options.bgColor;
+        // ctx.setFillStyle('white')
+        ctx.fill()
+      }
+      /*
 str:要绘制的字符串
 ctx:canvas对象
 initX:绘制字符串起始x坐标
@@ -166,26 +163,81 @@ initY:绘制字符串起始y坐标
 lineHeight:字行高，自己定义个值即可
 w:最大宽度
 */
-    function canvasTextAutoLine(str, ctx, initX, initY, lineHeight,w) {
-      var Hnum=0
-      var lineWidth = 0;
-      var canvasWidth = w;
-      var lastSubStrIndex = 0;
-      for (var i = 0; i < str.length; i++) {
-        lineWidth += ctx.measureText(str[i]).width;
-        if (lineWidth > canvasWidth - initX) { //减去initX,防止边界出现的问题
-          ctx.fillText(str.substring(lastSubStrIndex, i), initX, initY);
-          Hnum++
-          initY += lineHeight;
-          lineWidth = 0;
-          lastSubStrIndex = i;
+      canvasTextAutoLine(str, ctx, initX, initY, lineHeight, w) {
+        var Hnum = 0
+        var lineWidth = 0;
+        var canvasWidth = w;
+        var lastSubStrIndex = 0;
+        for (var i = 0; i < str.length; i++) {
+          lineWidth += ctx.measureText(str[i]).width;
+          if (lineWidth > canvasWidth - initX) { //减去initX,防止边界出现的问题
+            ctx.fillText(str.substring(lastSubStrIndex, i), initX, initY);
+            Hnum++
+            initY += lineHeight;
+            lineWidth = 0;
+            lastSubStrIndex = i;
+          }
+          if (i == str.length - 1) {
+            ctx.fillText(str.substring(lastSubStrIndex, i + 1), initX, initY);
+            Hnum++
+          }
         }
-        if (i == str.length - 1) {
-          ctx.fillText(str.substring(lastSubStrIndex, i + 1), initX, initY);
-          Hnum++
-        }
+        return Hnum
       }
-      return Hnum
+
+    }
+
+    var tip = new tipinfo(viewer, {
+      image: {
+        imagedom: document.getElementById("tulip"),
+        x: 2,
+        y: 2,
+        width: 395,
+        height: 280
+      },
+      bgColor:"#00000000"
+    })
+
+
+    var xmin = 115.5, xmax = 116.5, ymin = 35.5, ymax = 36.5;
+    for (var i = 0; i < 100; i++) {
+      var point = {
+        x: (Math.random() * (xmax - xmin) + xmin),
+        y: (Math.random() * (ymax - ymin) + ymin)
+      }
+      var positions = Cesium.Cartesian3.fromDegrees(point.x, point.y);
+
+      viewer.entities.add({
+        position: positions,
+        billboard: {
+          image: "images/marker/mark2.png",
+          scale: 0.5 //设置图片大小
+        }
+      });
+
+      var txtarr = [{
+        titcolor: "#f0f0ff",
+        color: "#ffffff",
+        title: "名称",
+        value: "飞鸟格符",
+        titlewidth: 80
+      }, {
+        titcolor: "#f0f0ff",
+        color: "#ffffff",
+        title: "黑功能",
+        value: "这道理这到底是个什么你也不知道吗那有谁是知道的",
+        titlewidth: 80
+      }, {
+        titcolor: "#f0f0ff",
+        color: "#ffffff",
+        title: "工作空间",
+        value: "肥牛饭飞鸟格符",
+        titlewidth: 80
+      }];
+      tip.createEntity({
+        "prop": txtarr,
+        "position": positions
+      })
     }
   </script>
 </body>
