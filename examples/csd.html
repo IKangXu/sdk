@@ -66,13 +66,32 @@
           starty: 25,
           lineHeight: 26,
           titlewidth: 80,
-          bgColor:"#568abd88"
+          bgColor: "#568abd88"
         }
         this.options = Object.assign(this.options, opts);
         this.dataSource = new Cesium.CustomDataSource("tooltipname");
         this.viewer.dataSources.add(this.dataSource);
       }
       createEntity(textinfo) {
+        var canvas = this.getCanvas(textinfo.prop)
+        var entity = {
+          position: textinfo.position,
+          billboard: {
+            image: canvas,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, 10.0)
+          }
+        };
+        var ety = this.dataSource.entities.add(entity);
+
+      }
+      updateImage(ent, text) {
+        var canvas = this.getCanvas(text)
+        ent.billboard.image = canvas
+      }
+      getCanvas(text) {
+
         var width = this.options.width
         var height = this.options.height
         var canvas = document.createElement("canvas");
@@ -88,7 +107,7 @@
         }
 
         ctx.font = this.options.font;
-        var txtarr = textinfo.prop
+        var txtarr = text
 
         var startx = this.options.startx,
           starty = this.options.starty;
@@ -102,18 +121,7 @@
           starty += hang * lineHeight
         }
         ctx.stroke();
-
-        var entity = {
-          position: textinfo.position,
-          billboard: {
-            image: canvas,
-            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, 10.0)
-          }
-        };
-        var ety = this.dataSource.entities.add(entity);
-
+        return canvas
       }
       /**
        * 绘制圆角矩形
@@ -195,7 +203,7 @@ w:最大宽度
         width: 395,
         height: 280
       },
-      bgColor:"#00000000"
+      bgColor: "#00000000"
     })
 
 
@@ -239,6 +247,32 @@ w:最大宽度
         "position": positions
       })
     }
+    var sss = 1;
+    setInterval(() => {
+      sss++;
+      var elist = tip.dataSource.entities._entities._array
+      for (var v = 0; v < elist.length; v++) {
+        tip.updateImage(elist[v], [{
+          titcolor: "#f0f0ff",
+          color: "#ffffff",
+          title: "名称",
+          value: "飞鸟格符" +(sss+ v),
+          titlewidth: 80
+        }, {
+          titcolor: "#f0f0ff",
+          color: "#ffffff",
+          title: "黑功能",
+          value: "这道理这到底是个什么你也不知道吗那有谁是知道的" + (sss+ v),
+          titlewidth: 80
+        }, {
+          titcolor: "#f0f0ff",
+          color: "#ffffff",
+          title: "工作空间",
+          value: "肥牛饭飞鸟格符" + (sss+ v),
+          titlewidth: 80
+        }])
+      }
+    }, 10000);
   </script>
 </body>
 
